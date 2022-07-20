@@ -1,0 +1,193 @@
+---
+title: "Processing the Norwegian Food Composition Database"
+author: "Segovia de la Revilla, Lucia"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+ 
+## Norwegian Food Composition Database
+
+### INTRO
+
+The Norwegian Food Composition Database (NO21) was accessed online and provided a wealth of information for raw fish as well as fish preparations (n=232). We also identified that the scientific name is provided in the [online version](www.matvaretabellen.no/?language=e) under the "classification". The scientific name is provided below the food entry name, the fish entry in our case. In addition, LanguaL codes are provided to classify the food entry, there we could obtain information, such as edible portion (i.e., skeletal meat part, without bones, without skin), whether it is drained or not.
+
+### Getting the data
+
+The Norwegian FCDB and the ASFIS list dataset are publicly available and can be accessed here:
+
+[NO21](www.matportalen.no/verktoy/the_norwegian_food_composition_table/) 
+
+[ASFIS](www.fao.org/fishery/en/collection/asfis/en): It contains information on the ISSCAAP, taxonomic and 3-alpha codes, and the scientific names of the fish and shellfish. 
+
+The dataset containing information about fishery product ICS codes was shared internally by the FAO for this project and hence shall remain private. Similarly, the Scientific names of the fish included in the Norwegian FCDB were shared internally through personal communication with the data owners. The dataset contained the fish id., fish description, scientific name and reference for most of the fish products in the NO21.
+
+### 2. Tidying the data
+
+Before renaming the variables in the Norwegian FCDB,a detailed characterisation of the food components of interest was needed for allocating the correct Tagnames. 
+
+#### 2.1. The identification of food components
+
+Information on the food components and their description can be found [here](www.matportalen.no/verktoy/the_norwegian_food_composition_table/about_the_table_values).
+
+1) edible_part (Edible_factor_in_FCT): Edible portion expressed as percentage.  Normally as described in the food name. I.e., if the meat without skin is written then the edible part is assumed to be meat, bones and connective tissue (excluding only the skin). 
+
+2) kilojules (ENERCkJ) and kilocalories (ENERCkcal): Energy reported in both kcal and kj. The conversion factors used are the same as the recommended by the FAO. 
+
+4) water (WATERg): 
+
+5) fat (FAT_g): It is defined as the sum of fatty acids and other components, however no information regarding the method used to calculate that component values was provided.
+
+6) carbo (CHOAVLg): carbohydrates calculated as the sum of starch and sugars; available carbohydrates. Some borrowed may be calculated by difference (CHOAVLDF(g)). Those calculated by difference were not identified in the FCDB and it seemed that were imputed from the original source instead of calculated, as it is advised by the FAO guidelines for FC compilation (FAO/INFOODS, 2012)). The total of starch, glycogen and all types of sugar (glucose, fructose, lactose, sucrose and maltose). Note that this component is not particularly important in fish and fishery products, beside the for processed foods, such as fish gratin, patties, etc.
+
+7) dietary_fibre (FIBTGg): From 2015, the Norwegian analytical values for dietary fibre are based on the AOAC 2009.01 method. Analytical values from 2014 and earlier are analysed by using the method AOAC 985.29 (Prosky method) (from 1985) and AOAC 991,43 (from 1991).
+
+8) protein (PROCNTg): is calculated from the analysed nitrogen content. 
+
+
+Information was provided for vitamins that was used to identify the correct Tagname as follow:
+
+ - vitamin_a (VITA_RAEg): described as Retinol Activity Equivalents (retinol + 1/12 beta-carotene).
+ - vitamin_d (VITDmcg) which is the sum of D3 (occurring in animals) and D2 (occurring in plant). But it was not properly defined. Maybe because it is a mix of results.
+ - vitamin_e (VITEmg): expressed in alpha-tocopherol eq.
+ - niacin (NIAmg): expressed as "Nicotinic acid + nicotinamide", hence we assumed that it is niacin, preformed as per [tagname comment](www.fao.org/fileadmin/templates/food_composition/documents/upload/PART3.TXT). 
+ - vitamin_b6 (VITB6_mg): described as Pyridoxine + pyridoxal + pyridoxamine however no information on the actual method used is reported.
+ - vitamin_b12 (VITB12mcg): Cobalamin, no more information provided.
+
+For most of the mineral no information was provided. Only for Iodine for which values were compiled explicitly for the Norwegian FCDB from 2018. And salt was reported instead of sodium (1 g salt contains about 0.4 g sodium (i.e. 0.393 g)).
+
+
+Variables that need to be calculated:
+
+ - SOP: sum of proximate - Not included.
+ - Energy (see below)
+
+#### Renaming variables
+
+For ISSCAAP dataset, we only renamed one variable 3A_CODE to alpha_code because R does not allow variable names that start with a numeric character.
+
+For the NO21, we renamed the variables following the same procedure at was done for the other FCDBs and according to the information obtained from the identification of the food components (see section above).
+
+#### Transforming variables
+
+We converted edible portion from percentage to a faction. Also, missing values in the edible portion (coded as "M") were converted into `NA`.
+
+### Generating the fish composition database
+
+We filtered out all the other foods reported in the Norwegian FCDB, as we were only interested in fishery products. 
+
+#### Fish name and description in the Norwegian FCDB
+
+For identification of the fish, we merged the information on the scientific name of the fish for the correct identification of each fish. To do so, we used the dataset containing the scientific name of the fish reported in the Norwegian FCDBs (`sci_no21`). 
+
+We received the scientific names of most of the fish from the Norwegian FCDB compilers. Before using the Scientific names of the Norwegian FCDBs (`sci_no21`), some tidying was necessary as the scientific names and their references were not separated into two columns. 
+
+The scientific file has 230 fishery products (two less that the fish found in NFCD), and has 76 entries without Scientific Name. Hence, we "manually" allocated a scientific name to some of the fish entries without scientific names as follow:
+
+There were some fish species that were reported in several forms or presentations: E.g., "cod, raw", "cod, canned", "cod, fillet, pan-fried". Hence, when one of the preparation was missing the scientific name, it was completed using the same as in their "raw" counterpart. 
+
+Similarly, when dealing with preparations (i.e., caviar, casseroles, etc.) if the fish specie was specified, the scientific name of the fish was allocated. 
+
+Additionally, fish names were identified using the FAO fisheries database and some scientific names were added (E.g., "capelin"). 
+
+Finally, we identified ["Stockfish"](https://en.wikipedia.org/wiki/Stockfish)  as cod fish. 
+
+### Fishery products matching
+
+---Load flow diagram---
+
+We need to match each fishery product in the NO21 to one of the 95 ICS FAOSTAT fishery products’ categories. To do so, two qualities were used to help with the matching: 1) the fishery product identification based on ISSCAAP code and, 2) the processing or state of the product (E.g., fresh, raw, fried, salted, etc.).
+
+#### Fish name and description
+
+###### Identifying fishery products by ISSCAAP codes
+
+The ISSCAAP codes will be allocated using the scientific name of the fishery products, when possible. We used the scientific names merged into the dataset in the previous step to allocate the ISSCAAP code, and the dataset that FAO team provided to allocate the ISSCAAP codes, which can also be downloaded from the FAO fisheries division [website](LINK). 
+
+After merging the two datasets, there were 144 of 232 fish-related entries with ISSCAAP code. We investigated the fishery products without ISSCAAP codes. 
+
+From the list of fishery products, we have 78 entries without a Scientific name and 10 entries with a scientific name but that did not correspond to any of the official scientific names used in the FAO - ISSCAAPS codes file. We will start by solving the latter (FIVE unique Scientific names), as YU pointed that synonyms should be found.
+
+*Fixing by scientific name*: Most of the issues were solved by using the genus in the scientific name (i.e., the first word of the scientific name) and then double checking with the "ISSCAAP VS ICS FAOSTAT" data. For one fish, we used the information provided in the [Wikipedia](es.wikipedia.org/wiki/Scophthalmus_maxima) and checked with the FAO description of turbot. 
+
+*Fixing by fish name*: Similarly, we checked the fish name description with out scientific names and using information on the FAO fisheries division [website] (LINK), we identified three fishery products and assigned a ISSCAAP code. This apprach was used when no scientific name was available, however a clear ISSCAAP could be allocated, for example:
+          - Crabs = 42
+          - King prawn = 45
+          - Shrimps = 45
+
+Finally, we saved it and exported into a csv file and manually checked. We also shared it with the Norwegian FCDB team and the FAO team, so we could quality check that the ISSCAAP codes were correctly assigned to the fishery products. 
+
+**This step is an iterative process as follow (Diagram)**
+
+Step 1: Allocating ISSCAAP codes to scientific names >>> Step 2: Reviewing ISSCAAP codes >>> Step 3: Fixing some inconsistencies in scientific names and/or ISSCAAP >>> Step 2: Reviewing ISSCAAP codes
+
+
+#### Fish processing
+
+We identified nine fish processing categories and we assigned one number to identify each category as per table 1. The classification it did not include four of the 95 ICS FAOSTAT categories: "Aquatic mammals, meat", "Aquatic mammals, oils", "Aquatic plants" and, "Aquatic plants, dried". Hence, if fisheries with the ISSCAAP code (61, 62, 63, 64, 91, 92, 93, 94), should be manually allocated to one of the four ICS FAOSTAT categories mentioned before. In addition, molluscs has no "preparations" (group 7), hence this group also needs manual checks.
+
+Table 1. Fish categories regarding their processing according to FAO fish description and the processing id. allocated
+
+Fish processing category|Description| Processing Id.|
+|-|-|-|
+|Fresh| Fresh raw whole fish including bones, skin, head etc. The inedible part of the whole fish is 20-50%.|1|
+|Frozen, whole| Frozen raw gutted whole fish including bones, skin, head etc. The inedible part of the whole fish is 20-50%.|2|
+|Fresh fillets| Fresh raw fillets (all edible)|3|
+Frozen fillet|Frozen raw fillets (all edible)|4|
+|Cured| Salted, dried, smoked fillets or whole fish. The inedible part of the whole fish is 20-50%.|5|
+|Canned| Headed, gutted, or filleted in airtight containers, in brine, oil or other medium (all edible)|6|
+|Preparation, nei| Fresh or frozen fillets or whole fish and then cooked, fermented or marinated (inedible part is 0-5% for fillets and 20-50% for whole fish). Includes fish roes and if part of a multi-ingredient foods (all edible).|7|
+|Body oils| Oils extracted from the fish body (excluding of liver)|8|
+|Liver oils| Liver oils (excludes fish body oil)|9|
+
+
+#### Allocating fishery products in NO21 to one of the processing group
+
+We classified each fish-related entry according to the type of processing (table 1) (i.e., fresh fish = 1, frozen fish =2, etc.). Since there was no information in regarding fresh/frozen, we used 1=2 and 3=4, following the protocol used in the previous version of the Fishery Global NCT. 
+
+Then, we check that the allocations were done correctly with special attention to the aquatic mammals, aquatic animals, aquatic plants and molluscs. 
+
+*Fixing special groups*: There was no fishery products belonging to the ISSCAAP codes of aquatic mammals, aquatic animals, or aquatic plants in the NO21. Two molluscs were misclassified as "preparations" (group 7) that were corrected. 
+
+**This step is an iterative process where as follow (Diagram)**
+
+Step 1: Indetifing the "processing" in each fishery product  >>> Step 2: Allocating each fish into one of the nine groups (as per above) >>> Step 3: Reviewing processing codes (product_type) >>> Step 4: Fixing some inconsistencies in the group allocation >>> Step 3: eviewing processing codes (product_type)
+
+
+#### Matching fishery products in NO21 to one of ICS FAO codes 
+
+To match each fishery product to its correct ICS FAO current and future code we used the combined information from the processing group (product_type) and the ISSCAAP codes. This step was quite straight forward as many reviewing and fixing steps were taking to add the correct information regarding the ISSCAAP code and the processing group. 
+
+Beside that, for some fish entries an ISSCAAP code could not be clearly allocated, and hence, it could not be semi-automated the ICS code. However, we reviewed those fishery products and a manual ICS FAO code was identified for some items. For instance:
+
+ - Crabsticks/ Surimi = Demersal Fish prep. Acc. to YU they considered to be made typically from pollack. If considered as miscellaneous demersal fish = 34 and if it was considered as pollack should be = 32. However, the final ICS would still be the same 1520. 
+ - Fish ball, burgers, etc. should be the same as above (1520), according to "Definitions of FAOSTAT fish food commodities Appendix 2", see Demersal Fish, Preparations).
+ - [Lutefisk](en.wikipedia.org/wiki/Lutefisk) - defined as dried and salted cod, or sometimes ling or burbot. Cod and ling are from the same fish group; hence it was assigned to ICS FAO code 1518.
+ - Snails, canned was allocated to molluscs, canned
+
+Some other fish entries needed further clarification:
+ * 04.101 - Roe paste, canned - NA
+ * Excluded are: Sushi 
+
+#### Quality Assessment
+
+Then, given that the names and description provided allowed an straight forward matching, we have assigned the corresponding quality score of A2.
+
+### Limitations
+
+1) Some fish items have no scientific name and/or they use local names to define fishes. This could be reviewed in the future, if time allows.
+
+2) Some fishery products are not included in any of the FAO ICS code descriptions, such as salmon sushi.
+
+### Recommendations for future improvements:
+
+Calculating SOP and Energy: Because macronutrients were not included in this piece of work, those values were not calculated. 
+
+
+
