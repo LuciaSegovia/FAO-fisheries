@@ -117,6 +117,12 @@ fao_fish_fct %>%
   filter(ics_faostat_sua_english_description == "Other pelagic fish, cured") %>% 
   select(source_fct, fdc_id, food_desc, WATERg, NIAmg_std)
 
+#Checking skipjack values for different preparations
+fao_fish_fct %>% 
+  filter(str_detect(food_desc, "skipjack ")) %>% 
+  select(source_fct, fdc_id, food_desc, WATERg, NIAmg_std)
+
+
 #Checking high end values
 fao_fish_fct %>% filter(as.numeric(NIAmg_std) >20) %>% 
   select(source_fct, fdc_id, food_desc, WATERg, NIAmg)
@@ -182,10 +188,22 @@ x1 <- fao_fish_fct %>%
             sd_cu = sd(as.numeric(CUmg), na.rm = T)) %>% 
   arrange(desc(mean_cu))
 
-#Checking values with the highest mean  
+#Checking values with the highest mean 
+#Cephalopods, cured
+#Crustaceans, cured
 fao_fish_fct %>% 
-  filter(ics_faostat_sua_english_description == "Crustaceans, cured") %>% 
+  filter(ics_faostat_sua_english_description == "Cephalopods, cured") %>% 
   select(source_fct, fdc_id, food_desc, WATERg, CUmg)
+
+#Checking firefly squid values for different preparations
+fao_fish_fct %>% 
+  filter(str_detect(food_desc, "firefly squid")) %>% 
+  select(source_fct, fdc_id, food_desc, WATERg, NIAmg_std)
+
+#Checking values for similar items 
+fao_fish_fct %>% filter(str_detect(food_desc, "Oyster|oyster")) %>% 
+  select(source_fct, fdc_id, food_desc, WATERg, CUmg ) %>% 
+  arrange(desc(as.numeric(CUmg)))
 
 
 #Checking high end values
@@ -196,10 +214,6 @@ fao_fish_fct %>% filter(as.numeric(CUmg)> outlier_value) %>%
   select(source_fct, fdc_id, food_desc, WATERg, CUmg ) %>% 
   arrange(desc(as.numeric(CUmg)))
 
-#Checking values for similar items 
-fao_fish_fct %>% filter(str_detect(food_desc, "Oyster|oyster")) %>% 
-  select(source_fct, fdc_id, food_desc, WATERg, CUmg ) %>% 
-  arrange(desc(as.numeric(CUmg)))
 
 #Calculating mean concentration by ics w/o "extreme values"
 x2 <- fao_fish_fct %>% 
@@ -282,37 +296,35 @@ fao_fish_fct %>% ggplot(aes(as.numeric(VITB6_mg_standardised), fish_prep)) +
 x1 <- fao_fish_fct %>% 
   group_by(ics_faostat_sua_english_description) %>% 
   summarise(mean_water = mean(as.numeric(WATERg), na.rm = T),
-            mean_cu = mean(as.numeric(CUmg), na.rm = T),
-            sd_cu = sd(as.numeric(CUmg), na.rm = T)) %>% 
-  arrange(desc(mean_cu))
+            mean = mean(as.numeric(VITB6_mg_standardised), na.rm = T),
+            sd = sd(as.numeric(VITB6_mg_standardised), na.rm = T)) %>% 
+  arrange(desc(mean))
 
-#Checking values with the highest mean  
+#Checking values with the highest mean 
+#Other pelagic fish, canned
+
 fao_fish_fct %>% 
-  filter(ics_faostat_sua_english_description == "Crustaceans, cured") %>% 
-  select(source_fct, fdc_id, food_desc, WATERg, CUmg)
+  filter(ics_faostat_sua_english_description == "Other pelagic fish, canned") %>% 
+  select(source_fct, fdc_id, food_desc, WATERg, VITB6_mg_standardised)
 
 
 #Checking high end values
 
-outlier_value <- 2.5
+outlier_value <- 0.75
 
-fao_fish_fct %>% filter(as.numeric(CUmg)> outlier_value) %>% 
-  select(source_fct, fdc_id, food_desc, WATERg, CUmg ) %>% 
-  arrange(desc(as.numeric(CUmg)))
+fao_fish_fct %>% filter(as.numeric(VITB6_mg_standardised)> outlier_value) %>% 
+  select(source_fct, fdc_id, food_desc, WATERg, VITB6_mg_standardised ) %>% 
+  arrange(desc(as.numeric(VITB6_mg_standardised)))
 
-#Checking values for similar items 
-fao_fish_fct %>% filter(str_detect(food_desc, "Oyster|oyster")) %>% 
-  select(source_fct, fdc_id, food_desc, WATERg, CUmg ) %>% 
-  arrange(desc(as.numeric(CUmg)))
 
 #Calculating mean concentration by ics w/o "extreme values"
 x2 <- fao_fish_fct %>% 
-  filter(as.numeric(CUmg)<5) %>% 
+  filter(as.numeric(VITB6_mg_standardised)< outlier_value) %>% 
   group_by(ics_faostat_sua_english_description) %>% 
   summarise(mean_water = mean(as.numeric(WATERg), na.rm = T),
-            mean_cu = mean(as.numeric(CUmg), na.rm = T),
-            sd_cu = sd(as.numeric(CUmg), na.rm = T)) %>% 
-  arrange(desc(mean_cu))
+            mean = mean(as.numeric(VITB6_mg_standardised), na.rm = T),
+            sd = sd(as.numeric(VITB6_mg_standardised), na.rm = T)) %>% 
+  arrange(desc(mean))
 
 
 #Checking data w/ and w/o outliers
@@ -365,9 +377,11 @@ x1 <- fao_fish_fct %>%
 #Checking values with the highest mean 
 #Molluscs, excluding cephalopods, frozen
 #Molluscs, excluding cephalopods, fresh
+#Molluscs, excluding cephalopods, canned
 #Cephalopods, preparations nei
+#Aquatic plants, preparations nei
 
-test <- "Molluscs, excluding cephalopods, fresh"
+test <- "Molluscs, excluding cephalopods, frozen"
 
 fao_fish_fct %>% 
   filter(ics_faostat_sua_english_description %in% test) %>% 
@@ -651,7 +665,8 @@ fao_fish_fct %>% filter(str_detect(food_desc, "Tuna|tuna")) %>%
   arrange(desc(as.numeric(SEmcg)))
 
 #Checking variability in the values
-#By FCT
+#By FCT - Note that if WA19 is showing 1 values is due to
+#Added values (see missing.R)
 fao_fish_fct %>% ggplot(aes(as.numeric(SEmcg), source_fct)) +
   geom_boxplot()
 
@@ -682,14 +697,23 @@ x1 <- fao_fish_fct %>%
   arrange(desc(mean))
 
 #Checking values with the highest mean
+#Other pelagic fish, cured
+#Aquatic animals nei, cured
 #Aquatic mammals, preparations nei
 #Aquatic mammals, meat
 #Cephalopods, preparations nei
-#Other pelagic fish, canned
+
+test <- "Other pelagic fish, cured"
+
 fao_fish_fct %>% 
-  filter(ics_faostat_sua_english_description == "Other pelagic fish, canned") %>% 
+  filter(ics_faostat_sua_english_description %in% test) %>% 
   select(source_fct, fdc_id, food_desc, WATERg, SEmcg)
 
+fao_fish_fct %>% filter(str_detect(food_desc, "mackerel"), 
+                        source_fct == "JA15"
+                        ) %>% 
+  select(source_fct, fdc_id, food_desc, WATERg, SEmcg ) %>% 
+  arrange(desc(as.numeric(SEmcg)))
 
 #Checking high end values
 

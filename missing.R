@@ -7,6 +7,10 @@ source("merging_all.R")
 # 1) Niacin ----
 
 # 7) SEmcg ---- 
+
+
+#Fixing ""Other pelagic fish, cured"
+70*(100-14.6)/(100-62.1) = 157.7309
   
   #Running Table: Data available (count) per fish category and nutrient in 
   #"example_visuals.R"

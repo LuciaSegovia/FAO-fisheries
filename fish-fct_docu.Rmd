@@ -1,6 +1,6 @@
 ---
 title: "Documentation of the extension of the fisheries composition dataset"
-author: "Segovia D L Revilla, Lucia"
+authors: "Lucia Segovia D L Revilla, Thomas Codd, Louise Ander"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   pdf_document: default
@@ -18,49 +18,61 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```
 
+
 ## SUMMARY
 
-**insert image**
 
-Flowchart:
+**insert image (flowchart)**
 
-1)  Identifying the data:
-    QC1: Evaluate the quality of the dataset and the documentation
-    accompanying the dataset.
+
+1.  Identifying the data:
+
+QC1: Evaluate the quality of the dataset and the documentation accompanying the dataset.
     
-2) Importing the data into R:
-    This step is going to depend on the original (raw) format
-    QC2: We will ensure that all the data has been imported and done correctly. E.g., check that total number of observations and variables are correctly imported.
+2. Importing the data into R:This step is going to depend on the original (raw) format.   
+
+QC2: We will ensure that all the data has been imported and done correctly. E.g., check that total number of observations and variables are correctly imported.
     
-3) Tidying the data:
+3. Tidying the data:
     This means we will convert from the original (raw) format to a standardised (harmonised) format, by performing all or some of the following operations:
-        a. Variable names: Components will be name using Tagnames (upper case) and the standard unit (lower case) (e.g., PROTg).
-        b. Diving combined variables into two (or more) columns. E.g., CARTEB or [CARTEBEQ] into CARTEB, CARTBEQ. 
-        c. *Removing brackets* or other special characters ("[]", "()", "\*"). E.g., extracting the numeric value from inside the bracket  from "low quality"/alternative methods. --> How can we record/ account for it within the data?
-        d. *Removing summary stat from the table* --> How can we keep/use that data?
-        e. Food name/ description standardisation: FAO ICP codes will be assigned to fishery products.
-        f. Food groups variable (row to column)
-    QC3: Check that observations and variables are still the same as the original dataset. 
+    
+a. Variable names: Components will be name using Tagnames (upper case) and the standard unit (lower case) (e.g., PROTg).
 
-4) Data transformation: 
-    Some variables will be recalculated, for example, energy will be recalculated. Summary statistics will be calculated for each FAO ICP codes. 
-        a. Changing characters into numeric. For example, trace ("tr") or below detection limit will be converted into zero (0). 
-        b. Changing variable units. For example from mg to g, according to the standard reporting units (FAO/INFOODS, 2013).
-        c. Re-calculating variables: For example, energy needs to be calculated from other components (macronutrients).
+b. Dividing combined variables into two (or more) columns. E.g., `CARTEB or [CARTEBEQ]` into `CARTEBmg`, `CARTBEQmg`. 
 
-5) Visualising the data: missing values and outliers will be plotted and identified. 
+c. *Removing brackets* or other special characters ("[]", "()", "\*"). E.g., extracting the numeric value from inside the bracket  from "low quality"/alternative methods. --> How can we record/ account for it within the data?
 
-6)  Exporting data and metadata
+d. *Removing summary stat from the table* --> How can we keep/use that data?
+
+e. Food name/ description standardisation: FAO ICP codes will be assigned to fishery products.
+
+f. Food groups variable (row to column)
+
+QC3: Check that observations and variables are still the same as the original dataset, or in line with the previous operations performend, for instance, if we have divided a column into to, our dataset should have the same number of variables plus one.
+
+4. Data transformation: Some variables will be recalculated, for example, energy will be recalculated. Summary statistics will be calculated for each FAO ICP codes.
+
+a. Changing characters into numeric. For example, trace ("tr") or below detection limit ("<LOD") will be converted into zero (0). 
+
+b. Changing variable units. For example from mg to g, according to the standard reporting units (FAO/INFOODS, 2013).
+
+c. Re-calculating variables: For example, energy needs to be calculated from other components.
+
+5. Visualising the data: missing values and outliers will be plotted and identified. 
+6.  Exporting data and metadata
+
 
 ## Background
 
+
 **complete this w/ info from the contract and report**
 
-### 1) Preparation steps: Identifying the data
 
-#### 1. 1) Reviewing previous work by FAO team on the current version of the Fisheries Global NCT.
+### 1. Preparation steps: Identifying the data
 
-a)  Identifying datasets and data availability:
+
+#### 1. 1. Reviewing previous work by FAO team on the current version of the Fisheries Global NCT.
+
 
 Of the 13 FCTs included in the Global Table of Nutrient Values, for the Fisheries Global NCT, 2022 (FISHERIES-GlobalNCT_ForSharing_Feb2022.xls), uPulses FCTs was
 excluded because only reported pulses. Then, three FCTs were not
@@ -72,46 +84,41 @@ in the 12 FCTs, and we identified some data gaps, hence we identified other
 possible sources of nutrient values (e.g. The Norwegian FCDB, 2021) to
 be reviewed and approved by the FAO team.
 
-b)  Checking quality assessment of the NVs:
-
 Because most of the FCTs/FCDBs included were previously reviewed by the
-FAO team, there was no need of checking the quality of the data.
+FAO team, there was no need of checking the overall quality of the FCTs.
 
 #### 1. 2) Identifying new potential sources of NVs 
 
-We reviewed some FCTs that could provide information on fish and fishery products for the pre-defined nutrients of interest. Some potential candidates were FCTs of countries or region with potentially high consumption of fish: Ciqual FCDB, 2019, Norway FCDB, 2021, ASEAN FCDB, 2014. 
+We reviewed some FCTs that could provide information on fish and fishery products for the pre-defined nutrients of interest. Some potential candidates were FCTs of countries or region with potentially high consumption of fish: Ciqual FCDB (France), 2019, Norway FCDB, 2021, ASEAN FCDB, 2014. 
 
-a)  Assessing quality and availability of data: We used the FAO/INFOODS
-    framework (screening questions) but adapted for fish to identify
-    potential source of nutrient values. This led to the inclusion of
-    the Norwegian FCDB, 2021. Because, it was the only new FCDB included
-    which was not previously reviewed by the FAO team, we checked the
-    original values of the Norwegian FCDB, 2021 (NO21) in depth, which
-    is discussed in the **Section 2.1** of the protocol of the NO21
-    (NO21_docu.Rmd).
+Assessing quality and availability of data: We used the FAO/INFOODS
+framework (screening questions) to identify potential source of nutrient values. This led to the inclusion of the Norwegian FCDB, 2021. Because, it was the only new FCDB included which was not previously reviewed by the FAO team, we checked the
+original values of the Norwegian FCDB, 2021 (NO21) in depth, which
+is discussed in the **Section 2.1** of the protocol of the NO21
+(NO21_docu.Rmd).
 
 In table 1, we can find information on the final list of FCDBs included.
 
 #### Table 1. 
 
-| BiblioID | Reference | Link to access original data | Access | Format | Reviewer |
-|------------|------------|------------|------------|------------|------------|
-| US19     | US Department of Agriculture (USDA), Agricultural Research Service, Nutrient Data Laboratory. USDA National Nutrient                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Database for Standard Reference, Legacy. Version Current: April 2019.                       | <http://www.ars.usda.gov/nutrientdata>                                                       | Publicly available | Access    | FAO|
-| AU19     | Food Standards Australia New Zealand (FSANZ). 2019. The Australian Food Composition Database, release 1 [online].                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Canberra.                                                                                   | <http://www.foodstandards.gov.au>                                                            | Internal           | excel     | FAO|
-| NZ18     | New Zealand Food Composition Database. 2019. New Zealand FOODfilesTM 2018 Manual. The New Zealand Institute for                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Plant and Food Research Limited and Ministry of Health.                                     | www.foodcomposition.co.nz/foodfiles                                                          | Publicly available | excel     | FAO|
-| UK21     | Food Standards Agency. 2021. McCance and Widdowson's The Composition of Foods Integrated Dataset (CoFID) 2021.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | London, Institute of Food Research, Public Health England.                                  | <https://www.gov.uk/government/publications/composition-of-foods-integrated-dataset-cofid>). | publicly available | excel     | FAO|
-| DK19     | Frida, DTU Foods public food database, version 4, 2019, National Food Institute, Technical University of Denmark.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | <https://frida.fooddata.dk>                                                                 | Publicly available                                                                           | excel              | FAO       |
-| WA19     | Vincent, A., Grande, F., Compaoré, E., Amponsah Annor, G., Addy, P.A., Aburime, L.C., Ahmed, D., Bih Loh, A.M., Dahdouh Cabia, S., Deflache, N., Dembélé, F.M., Dieudonné, B., Edwige, O.B., Ene-Obong, H.N., Fanou Fogny, N., Ferreira, M., Omaghomi Jemide, J., Kouebou, P.C., Muller, C., Nájera Espinosa, S., Ouattara, F., Rittenschober, D., Schönfeldt, H., Stadlmayr, B., van Deventer, M., Razikou Yiagnigni, A. & Charrondière, U.R. 2020. FAO/INFOODS Food Composition Table for Western Africa (2019) User Guide & Condensed Food Composition Table / Table de composition des aliments FAO/INFOODS pour l'Afrique de l'Ouest (2019) Guide d'utilisation & table de composition des aliments condensée. Rome, FAO. |                                                                                             | Publicly avaliable                                                                           | excel              | FAO       |
-| KE18     | FAO & Government of Kenya. 2018. Kenya Food Composition Tables [online]. Nairobi.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | <http://www.kilimo.go.ke/wp-content/uploads/2018/10/KENYA-FOOD-COMPOSITION-TABLES-2018.pdf> | Publicly available                                                                           | excel              | FAO       |
-| IN17     | Longvah, T., Ananthan, R., Bhaskarachary, K. & Venkaiah, K. 2017. Indian Food Composition Tables. Hyderabad, India, National Institute of Nutrition.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | <http://www.ifct2017.com/frame.php?page=home>).                                             | Internal                                                                                     | excel              | FAO       |
-| JA15     | MEXT. (2015).The Standard Tables of Food Composition in Japan 2015 (SeventhRevised Edition). Official Gazette Co-operation of Japan. Japan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | <http://www.mext.go.jp/a_menu/syokuhinseibun/1365451.htm/>                                  | Publicly available                                                                           | excel              | FAO       |
-| BA13     | Shaheen N., Rahim A.T.M.A., Mohiduzzaman Md., Banu C.P., Bari Md. L., Tukun A.B., Mannan M.A., Bhattacharjee L., Stadlmayr B. 2013. Food Composition Table for Bangladesh. Institute of Nutrition and Food Science, Centre for Advanced Research in Sciences, University of Dhaka.                                                                                                                                                                                                                                                                                                                                                                                                                                             |                                                                                             | Publicly available                                                                           | excel              | FAO       |
-| BR11     | Nucleo de Estudos e pesquisas em Alimentacao (NEPA). Brazilian Food Composition Table (TACO), 4th ed., 2011.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | <https://www.nepa.unicamp.br/taco/tabela.php?ativo=tabela>                                  | Internal                                                                                     | excel              | FAO       |
-| UF16     | FAO. 2016. FAO/INFOODS Global Food Composition Database for Fish and Shellfish. Version 1.0 -- uFiSh1.0. Rome.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | <http://www.fao.org/infoods/infoods/tables-and-databases/faoinfoods-databases/en/>).        | Publicly available                                                                           | excel              | FAO       |
-| UP17     | FAO. 2017. FAO/INFOODS Global Food Composition Database for Pulses. Version 1.0 -- uPulses 1.0. Rome.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | <http://www.fao.org/infoods/infoods/tables-and-databases/faoinfoods-databases/en/>).        | Publicly available                                                                           | excel              | FAO       |
-| NO21     | Norwegian Food Composition Database 2021. Norwegian Food Safety Authority.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | <https://www.matportalen.no/verktoy/the_norwegian_food_composition_table/>                  | Publicly available                                                                           | excel              | UoN       |
+| BiblioID   | Reference  | Link to access original data | Access | Format | Reviewer |
+|------------|------------|------------|------------|:----------:|------------|
+| US19     | US Department of Agriculture (USDA), Agricultural Research Service, Nutrient Data Laboratory. USDA National Nutrient Database for Standard Reference, Legacy. Version Current: April 2019. | <http://www.ars.usda.gov/nutrientdata> | Publicly available | Access    | FAO|
+| AU19     | Food Standards Australia New Zealand (FSANZ). 2019. The Australian Food Composition Database, release 1 \\[online\\]. Canberra.| <http://www.foodstandards.gov.au>    | Internal           | excel     | FAO|
+| NZ18     | New Zealand Food Composition Database. 2019. New Zealand FOODfilesTM 2018 Manual. The New Zealand Institute for Plant and Food Research Limited and Ministry of Health. | <http://www.foodcomposition.co.nz/foodfiles> | Publicly available | excel     | FAO|
+| UK21     | Food Standards Agency. 2021. McCance and Widdowson's The Composition of Foods Integrated Dataset (CoFID) 2021. London, Institute of Food Research, Public Health England.|                                | <https://www.gov.uk/government/publications/composition-of-foods-integrated-dataset-cofid> | publicly available | excel     | FAO|
+| DK19     | Frida, DTU Foods public food database, version 4, 2019, National Food Institute, Technical University of Denmark.  | <https://frida.fooddata.dk> | Publicly available | excel              | FAO       |
+| WA19     | Vincent, A., Grande, F., Compaoré, E., Amponsah Annor, G., Addy, P.A., Aburime, L.C., Ahmed, D., Bih Loh, A.M., Dahdouh Cabia, S., Deflache, N., Dembélé, F.M., Dieudonné, B., Edwige, O.B., Ene-Obong, H.N., Fanou Fogny, N., Ferreira, M., Omaghomi Jemide, J., Kouebou, P.C., Muller, C., Nájera Espinosa, S., Ouattara, F., Rittenschober, D., Schönfeldt, H., Stadlmayr, B., van Deventer, M., Razikou Yiagnigni, A. & Charrondière, U.R. 2020. FAO/INFOODS Food Composition Table for Western Africa (2019) User Guide & Condensed Food Composition Table / Table de composition des aliments FAO/INFOODS pour l'Afrique de l'Ouest (2019) Guide d'utilisation & table de composition des aliments condensée. Rome, FAO. |<https://www.fao.org/fileadmin/user_upload/faoweb/2020/WAFCT_2019.xlsx>  | Publicly available   | excel              | FAO       |
+| KE18     | FAO & Government of Kenya. 2018. Kenya Food Composition Tables [online]. Nairobi.| <http://www.kilimo.go.ke/wp-content/uploads/2018/10/KENYA-FOOD-COMPOSITION-TABLES-2018.pdf> | Publicly available | excel | FAO       |
+| IN17     | Longvah, T., Ananthan, R., Bhaskarachary, K. & Venkaiah, K. 2017. Indian Food Composition Tables. Hyderabad, India, National Institute of Nutrition.  | <http://www.ifct2017.com/frame.php?page=home> | Internal  | excel | FAO |
+| JA15| MEXT. (2015).The Standard Tables of Food Composition in Japan 2015 (Seventh Revised Edition). Official Gazette Co-operation of Japan. Japan | <http://www.mext.go.jp/a_menu/syokuhinseibun/1365451.htm/> | Publicly available | excel  | FAO       |
+| BA13     | Shaheen N., Rahim A.T.M.A., Mohiduzzaman Md., Banu C.P., Bari Md. L., Tukun A.B., Mannan M.A., Bhattacharjee L., Stadlmayr B. 2013. Food Composition Table for Bangladesh. Institute of Nutrition and Food Science, Centre for Advanced Research in Sciences, University of Dhaka. | <https://www.fao.org/fileadmin/templates/food_composition/documents/FCDB_7_4_14.xlsx> | Publicly available  | excel              | FAO       |
+| BR11     | Nucleo de Estudos e pesquisas em Alimentacao (NEPA). Brazilian Food Composition Table (TACO), 4th ed., 2011.| <https://www.nepa.unicamp.br/taco/tabela.php?ativo=tabela> | Internal | excel | FAO       |
+| UF16  | FAO. 2016. FAO/INFOODS Global Food Composition Database for Fish and Shellfish. Version 1.0 -- uFiSh1.0. Rome.| <http://www.fao.org/infoods/infoods/tables-and-databases/faoinfoods-databases/en/>).        | Publicly available | excel              | FAO       |
+| UP17[1]     | FAO. 2017. FAO/INFOODS Global Food Composition Database for Pulses. Version 1.0 -- uPulses 1.0. Rome. | <http://www.fao.org/infoods/infoods/tables-and-databases/faoinfoods-databases/en/>).        | Publicly available                                                                           | excel              | FAO       |
+| NO21     | Norwegian Food Composition Database 2021. Norwegian Food Safety Authority.  | <https://www.matportalen.no/verktoy/the_norwegian_food_composition_table/>   | Publicly available | excel | UoN       |
 
-Note: UP17 was not process because we were only interested in fish.
+[1]Note: UP17 was not process because we were only interested in fish.
 
 ## Harmonisation of the food composition tables and databases (method)
 
@@ -553,7 +560,9 @@ Niacin (`NIAmg`) was reported in all FCDBs but in WA19, in which niacin equivale
 
 We check for "extreme values", and after plotting the values comparing the values, overall all values seemed plausible. 
 
-Note that for "Other pelagic fish, cured", one of the high values is having a great influence in the final mean value. For instance, if we remove values that higher than 40, the mean of that category is 15mg/100g instead of 30mg/100g. The rest of the categories remained more or less the same. This could be solved by including more entries (more values) for that fish category, as currently there are only two entries for that category. 
+Note that for "Other pelagic fish, cured", one of the high values is having a great influence in the final mean value. For instance, if we remove values that higher than 40, the mean of that category is 15mg/100g instead of 30mg/100g (15-45). However, the high value is plausible as it is smoke-dried and fermented, when compared with the same version of the "fresh" item, the niacin quantity is in line with the fresh one. 
+
+The rest of the categories remained more or less the same. This could be solved by including more entries (more values) for that fish category, as currently there are only two entries for that category. 
 
 ###### 2) Copper
 
@@ -563,7 +572,7 @@ Octopus from IN17 (fdc_id = R003) looks very high compared with other octopus va
 
 Oyster from UF16 (fdc_id = 093013) also seems high compared with other oyster but seems plausible given the type of food. Double-check the value.
 
-In addition, there is one item that is driving the very high mean for the category "Cephalopods, cured", again, more values should be sought for that category.
+In addition, there is one item that is driving the very high mean for the category "Cephalopods, cured", again, we checked and it is due to the low water concentration, hence the value is still plausible. In order to minimise the influence of this type of items, more values should be sought for that category.
 
 
 ###### 3) Vitamin B6
@@ -579,8 +588,6 @@ Then, as reported in section 4.4., VITB6Cmg, VITB6Amg, and VITB6C_mg were combin
 Vitamin B12 was reported in nine FCTs. JA15 seemed to report higher values than the other FCTs, including most of the high-end values. 
 
 We found that "Molluscs, excluding cephalopods, frozen", "Molluscs, excluding cephalopods, fresh", and "Molluscs, excluding cephalopods, canned" had the highest Vit. B12 values. We found that clams from JA15 had the highest values for the "Molluscs, excluding cephalopods, frozen". However, when we plotted the data it seemed to have a normal distribution, and hence we are not considering them as outliers.  
-
-Then, we realised that most of the values for that category were missing values. More values are needed as similar (and even higher) concentration of Vit.B12 have been previously reported in literature(Watanabe et al., 2014, 10.3390/nu6051861). Since, the water content is very low as well the value seemed plausible.
 
 The category "Cephalopods, preparations nei" have very high variability, it seemed that octopus had higher Vit.B12 than other cephalopods in the category, also most of the high values were sourced from UF16, while the highest was from US19. It maybe that the UF16 values were imputed from US19. 
 
@@ -607,16 +614,21 @@ Results of the EPA checks were very similar to those for DHA.
 
 ###### 7) Selenium
 
-#**CHECK BC VITB12 wasn't loading in JAPAN**
-
 When we checked the values one value, "Tuna, raw" (04.043) from the NO21, seemed very high compared with other tuna values. There were other high values but they seemed to be still within plausible ranges. 
 
-When we plotted the results by FCT, and by fish type we could see that NO21 reported overall the highest Se median value with "extreme values", coming consitently from that FCT, followed by NZ18, and US19. 
+When we plotted the results by FCT, and by fish type we could see that JA15 reported overall the highest Se median value with "extreme values", coming consistently from that FCT, followed by NZ18. 
 
 Some values to be checked from NZ18 was "Lobster, cooked" (T39), and from the NO21 ("04.043", "04.333", "04.107", "04.055")). 
 
-When we checked by SUA category, we identified the "Aquatic mammals, preparations nei" having the highest mean value. It only reported information for five entries of which only two had a `SEmcg` value. We could imputed (35055) with (35164), by water-adjusting and assuming the oil has no contribution to `Semcg`. Although, due to the low water content and overall high content in Se of the category, it would only increase the mean. Again from the "Aquatic mammals, meat", we only have 3 values out of 15 values, which makes the mean quite high, although we can assess if that mean is high or is in line with the overall category mean due to the lack of data availability. 
+`subset(fao_fish_fct, fdc_id %in% c("04.043", "04.333", "04.107", "04.055"), select = c(food_desc, WATERg, SEmcg))`
 
+When we checked by SUA category, we identified the "Other pelagic fish, cured" which had the highest mean value,only two fish entries and only one Se value. Similarly, "Aquatic mammals, preparations nei" only reported information for three entries of which only two had a `SEmcg` value. 
+
+We could impute some values in order to improve the ovearall mean of this SUA catergories, for instance:
+
+Mean mackerel fresh to (10157)
+
+(35055) with (35164), by water-adjusting and assuming the oil has no contribution to `Semcg`. Although, due to the low water content and overall high content in Se of the category, it would only increase the mean. Again from the "Aquatic mammals, meat", we only have 3 values out of 15 values, which makes the mean quite high, although we can assess if that mean is high or is in line with the overall category mean due to the lack of data availability. 
 
 
 #Data avaibility per each ICS FAOSTAT fish category
