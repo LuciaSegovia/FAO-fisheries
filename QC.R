@@ -198,7 +198,7 @@ fao_fish_fct %>%
 #Checking firefly squid values for different preparations
 fao_fish_fct %>% 
   filter(str_detect(food_desc, "firefly squid")) %>% 
-  select(source_fct, fdc_id, food_desc, WATERg, NIAmg_std)
+  select(source_fct, fdc_id, food_desc, WATERg, CUmg)
 
 #Checking values for similar items 
 fao_fish_fct %>% filter(str_detect(food_desc, "Oyster|oyster")) %>% 
