@@ -10,7 +10,7 @@ source("merging_all.R")
 
 
 #Fixing ""Other pelagic fish, cured"
-70*(100-14.6)/(100-62.1) = 157.7309
+#70*(100-14.6)/(100-62.1) 
   
   #Running Table: Data available (count) per fish category and nutrient in 
   #"example_visuals.R"

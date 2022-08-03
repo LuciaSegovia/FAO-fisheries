@@ -1,6 +1,10 @@
 ---
 title: "Documentation of the extension of the fisheries composition dataset"
-authors: "Lucia Segovia D L Revilla, Thomas Codd, Louise Ander"
+author:
+- "Lucia Segovia D L Revilla"
+- "Thomas Codd"
+- "Louise Ander"
+
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   pdf_document: default
@@ -29,12 +33,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 QC1: Evaluate the quality of the dataset and the documentation accompanying the dataset.
     
-2. Importing the data into R:This step is going to depend on the original (raw) format.   
+2. Importing the data into R: This step is going to depend on the original (raw) format.   
 
 QC2: We will ensure that all the data has been imported and done correctly. E.g., check that total number of observations and variables are correctly imported.
     
-3. Tidying the data:
-    This means we will convert from the original (raw) format to a standardised (harmonised) format, by performing all or some of the following operations:
+3. Tidying the data: This means we will convert from the original (raw) format to a standardised (harmonised) format, by performing all or some of the following operations:
     
 a. Variable names: Components will be name using Tagnames (upper case) and the standard unit (lower case) (e.g., PROTg).
 
@@ -44,21 +47,22 @@ c. *Removing brackets* or other special characters ("[]", "()", "\*"). E.g., ext
 
 d. *Removing summary stat from the table* --> How can we keep/use that data?
 
-e. Food name/ description standardisation: FAO ICP codes will be assigned to fishery products.
+e. Food name/ description standardisation: For instance, for fisheries [ASFIS codes](https://www.fao.org/fishery/en/collection/asfis/en) will be assigned according to their species and fishery products.
 
-f. Food groups variable (row to column)
+f. Food groups variable (row to column).
 
-QC3: Check that observations and variables are still the same as the original dataset, or in line with the previous operations performend, for instance, if we have divided a column into to, our dataset should have the same number of variables plus one.
+QC3: Check that observations and variables are still the same as the original dataset, or in line with the previous operations performed, for instance, if we have divided a column into two, our dataset should have the same number of variables plus one.
 
-4. Data transformation: Some variables will be recalculated, for example, energy will be recalculated. Summary statistics will be calculated for each FAO ICP codes.
+4. Data transformation: Changes to the original data values will be performed and documented. 
 
 a. Changing characters into numeric. For example, trace ("tr") or below detection limit ("<LOD") will be converted into zero (0). 
 
 b. Changing variable units. For example from mg to g, according to the standard reporting units (FAO/INFOODS, 2013).
 
-c. Re-calculating variables: For example, energy needs to be calculated from other components.
+c. Combining or Re-calculating variables: Summary statistics will be calculated for each FAO ICP codes. For example, energy needs to be calculated from other components.
 
 5. Visualising the data: missing values and outliers will be plotted and identified. 
+
 6.  Exporting data and metadata
 
 
@@ -67,35 +71,43 @@ c. Re-calculating variables: For example, energy needs to be calculated from oth
 
 **complete this w/ info from the contract and report**
 
+ 
+
+##### Components that we need to collect information for:
+
+   1. Iodine - excluded
+   2. Se - included
+   3. Cu - included
+   4. Na? - excluded 
+   5. Niacin (Vit. B3) - included, if we are calculating NIATRP, we need TRP too. 
+   6. Vit. B6 - included, VITB6A = from analysis, VITB6C = calculated, and VITB6-.
+   7. Vit. B12 - included
+   8. Vit. D - excluded (including D3, D2 and hidroxi forms).
+   9. PUFA - DHA (22:6 (n-3)) - included  
+   10. PUFA - EPA (20:5 (n-3)) - included 
+
+
 
 ### 1. Preparation steps: Identifying the data
 
 
-#### 1. 1. Reviewing previous work by FAO team on the current version of the Fisheries Global NCT.
+#### 1. 1. Reviewing FCTs of the current version of the Fisheries Global NCT<br>
 
 
-Of the 13 FCTs included in the Global Table of Nutrient Values, for the Fisheries Global NCT, 2022 (FISHERIES-GlobalNCT_ForSharing_Feb2022.xls), uPulses FCTs was
-excluded because only reported pulses. Then, three FCTs were not
-available and, we requested access to the FAO Team, this was covered by the
-data sharing agreement.
+Of the 13 FCTs included in the Global Table of Nutrient Values, for the Fisheries Global NCT, 2022 (FISHERIES-GlobalNCT_ForSharing_Feb2022.xls), uPulses FCTs was excluded because data was not relevant for fisheries, i.e., only reported pulses. Then, three FCTs were not publicly available and, we requested access to the FAO Team. Access was granted and was covered by the data sharing agreement.
 
-Then, we reviewed the availability of ten pre-selected food components
-in the 12 FCTs, and we identified some data gaps, hence we identified other
-possible sources of nutrient values (e.g. The Norwegian FCDB, 2021) to
-be reviewed and approved by the FAO team.
+Then, we reviewed the availability of ten pre-selected food components (Copper, (Cu), Iodine (I), Selenium (Se), Vitamin B6 (Vit. B6), Vitamin B12 (Vit. B12), Vitamin D (Vit. D), Niacin, (DHA), (EPA)) in the 12 FCTs. Some data gaps were found for those components in the previously reviewed FCTs, hence we reviewed other possible sources of nutrient values (e.g. The Norwegian FCDB, 2021).
 
-Because most of the FCTs/FCDBs included were previously reviewed by the
-FAO team, there was no need of checking the overall quality of the FCTs.
+Because most of the FCTs included were previously reviewed by the FAO team, there was no need of checking the overall quality of the other FCTs. 
 
-#### 1. 2) Identifying new potential sources of NVs 
+#### 1. 2. Identifying new potential sources of NVs <br>
 
 We reviewed some FCTs that could provide information on fish and fishery products for the pre-defined nutrients of interest. Some potential candidates were FCTs of countries or region with potentially high consumption of fish: Ciqual FCDB (France), 2019, Norway FCDB, 2021, ASEAN FCDB, 2014. 
 
-Assessing quality and availability of data: We used the FAO/INFOODS
-framework (screening questions) to identify potential source of nutrient values. This led to the inclusion of the Norwegian FCDB, 2021. Because, it was the only new FCDB included which was not previously reviewed by the FAO team, we checked the
-original values of the Norwegian FCDB, 2021 (NO21) in depth, which
-is discussed in the **Section 2.1** of the protocol of the NO21
+When assessing quality and availability of data, we used the FAO/INFOODS
+framework (screening questions) to identify potential source of nutrient values. This led to the inclusion of the Norwegian FCDB, 2021. Because, it was the only new FCDB included which was not previously reviewed by the FAO team, we checked the original values of the Norwegian FCDB, 2021 (NO21) in depth, which is discussed in the **Section 2.1** of the protocol of the NO21
 (NO21_docu.Rmd).
+
 
 In table 1, we can find information on the final list of FCDBs included.
 
@@ -126,49 +138,45 @@ The harmonisation required two main steps: importing (loading) databases
 into R and cleaning and standardising the databases.
 
 
-### 1. Importing the data:
+### 1. Importing the data
 
 Datasets were found in a variety of formats that needed to be
 imported and cleaned into a tabular format. E.g. one row per food entry
 and one column per variable (food entry attribute).
 
-The steps and scripts for importing each FCDB are stored together with the original FCDB (raw files) in individual folders named with the BiblioID (See table 1) which is stored in the variable `source_fct`.
+The steps and scripts for importing each FCDB are stored together with the original FCT (raw files) in individual folders named with the BiblioID (See table 1) which is stored in the variable `source_fct` (See table 2).
 
-### 2. Tidying the data
+### 2. Tidying the data <br>
 
-In order to merge all data from various FCDBs we needed to harmonise the
+In order to merge all data from various FCTs we needed to harmonise the
 information in each dataset. The steps that were taken are
-explained below and annotated scripts for each FCDBs can be found in
+explained below and annotated scripts for each FCTs can be found in
 this repository in each corresponding folder.
 
-#### 2.1. Renaming variable names
+#### 2.1. Renaming variable names <br>
 
-Each food composition database (FCDB) has its own variable names,
-including the nutrient values. Some FCDB included information related
-to the [Tagnames](<https://www.fao.org/infoods/infoods/standards-guidelines/food-component-identifiers-tagnames/en/>) while other did not. In order to merge all data from various FCDBs we need to harmonise the names of all the variables and particularly the food components of interest. To do so, we evaluated and renamed it according to the Tagnames, while for other variables, we standardised
-them by, for instance, recalculating them (e.g., Edible portion).
+Each FCT has its own variable names, including for nutrient values. Some FCTs included information related to the FAO/ INFOODS food components identifiers
+[(Tagnames)](<https://www.fao.org/infoods/infoods/standards-guidelines/food-component-identifiers-tagnames/en/>) 
 
-Other common variables (e.g., food id, food name or food description)
-were renamed to a common variable name, for instance, fdc_id, food_desc,
+while other did not. In order to merge all data from various FCDBs we need to harmonise the names of all the variables and particularly the food components of interest. To do so, we evaluated and renamed them with the most appropriate Tagname. Other variables (e.g., food id, food name or food description)
+were renamed to a common variable name, for instance, `fdc_id`, `food_desc`,
 following the variable names used in the Fisheries Global NCT file.
 
 ###### The identification of food components
 
 Information on the food components and their description should be
-sought in each FCT included. We are reviewing the FAO/ INFOODS food
-components identifiers  (Tagnames) used in the previous version for
+sought in each FCT included. We are reviewing the Tagnames used in the previous version for
 generating the same structure and format in our output table. Some minor
 changes in the variables names were introduced to be compliant with R conventions.
-I.e., removing spaces in variables names, changing µg to mcg,
-standardising the "standardised" name formatting, from using underscores and/or parenthesis to using only underscores. Also, changing
-dashes (-) to underscores (-). We also assumed that all the standardised
-variables are recalculated. Note that normally Tagnames uses the dash to denote that the method for obtaining that (component) value is unknown. This is important for the quality
-assessment of both, the (fish) items and the overall FCDB quality.
+E.g., removing spaces in variables names, changing symbols to characteres (e.g., µg to mcg), or standardising the name formatting from using underscores and/or parenthesis to using only underscores. Also, changing
+dashes (-) to underscores (-). Note that within the Tagnames, the dash is used to denote that the method for obtaining that (component) value is unknown. This is important for the quality assessment of the data.
+
+Also, we also assumed that all the variables labelled as "standardised" were combined or recalculated variables
 
 Table 2 provides a list of all the variables including components used in the previous version of the Fisheries Global NCT. 
 
 
-**Table 2.**: List of variables names (Tagnames), description and reference for the Tagnames and description.
+**Table 2.**: List of variables names (including Tagnames), description and reference for the Tagnames.
 
 |Variable name| Description| Reference|
 |-|-|-|
@@ -186,7 +194,7 @@ Table 2 provides a list of all the variables including components used in the pr
 |ENERCkJ | Energy in kJ/ 100g of EP as reported in the original FCT |-|
 |ENERCkcal | Energy in kcal/ 100g EP as reported in the original FCT |-|
 |WATERg | Water/ moisture content in g per 100g of EP|-|
-|PROCNTg | protein in g per 100g of EP, as reported in the original FCT and assumed to be calculated from NT content| FAO/INFOODS, 2012|
+|PROCNTg | protein in g per 100g of EP, as reported in the original FCT and assumed to be calculated from nitrogen (NTg) content| FAO/INFOODS, 2012|
 |NTg | Nitrogen, total|FAO/INFOODS, 2012|
 |XN | Nitrogen conversion factor|FAO/INFOODS, 2012|
 |FATg | total fat content in g per 100g of EP. Sum of triglycerides, phospholipids, sterols and related compounds obtained by a mixed solvent extraction |FAO/INFOODS, 2012|
@@ -262,24 +270,8 @@ Table 2 provides a list of all the variables including components used in the pr
 |SEmcg | selenium in mcg per 100g of EP | Tagnames, 2007 (accessed on 2022-06-08)|
 |IDmcg | iodine in mcg per 100g of EP | Tagnames, 2007 (accessed on 2022-06-08)|
 
-We extracted information on all the nutrients available in each FCDB,
-however more attention have been given to the following list of
-nutrients: DHA, EPA, Vitamin B6, Vitamin B12, Vitamin D, Niacin, Iodine, Selenium, Copper, and Sodium.   
 
-##### Components that we need to collect information for:
-
-   1. Iodine - excluded
-   2. Se - included
-   3. Cu - included
-   4. Na? - excluded 
-   5. Niacin (Vit. B3) - included, if we are calculating NIATRP, we need TRP too. 
-   6. Vit. B6 - included, VITB6A = from analysis, VITB6C = calculated, and VITB6-.
-   7. Vit. B12 - included
-   8. Vit. D - excluded (including D3, D2 and hidroxi forms).
-   9. PUFA - DHA (22:6 (n-3)) - included  
-   10. PUFA - EPA (20:5 (n-3)) - included 
-
-#### 2.2. Other tidying operations
+#### 2.2. Other tidying operations <br>
 
 
 **a. Diving combined variables into two (or more) columns.** For example, when two components (Tagnames) were reported in the same column and identified using brackets ([]) around the component values. (`CARTEB or [CARTEBEQ]`) were separated into two independent columns and bracket removed (`CARTEBmg`, `CARTBEQmg`). 
@@ -288,10 +280,10 @@ nutrients: DHA, EPA, Vitamin B6, Vitamin B12, Vitamin D, Niacin, Iodine, Seleniu
 **b. Removing brackets or other special characters ("[]", "()", "\*")**. Similarly, special character were used to denote "low quality values" and/or alternative (determination) methods. For those cases, the numeric value was extracted and the special character removed. For future development, a way of keeping that information should be found (e.g, how can we record and account for those low quality values within the dataset?, can we generate a score with the number of "low quality" values per food item?).
 
 
-**c. Removing summary statistics from the table.** Because summary statistics will not be used were removed from the datasets. For future development, a way to account for variability (e.g., using the summary stats) could be studied (How can we keep/use that data?, could we use them to account for uncertainty in the final results?). 
+**c. Removing summary statistics from the table.** Because summary statistics will not be used, data were removed. For future development, a way to account for variability (e.g., using the summary stats) could be studied (How can we keep/use that data?, could we use them to account for uncertainty in the final results?). 
 
 
-**d. Food name/ description standardisation.** The ASFIS list was used for identification of the fish and fishery products. The ISSCAAP and the 3-alpha codes were assigned to fishery products for identification and name standardisation. The ISSCAAP codes were also used for assigning the FAO ICP code. The FAO ICP code were extracted from previous work reported in Fisheries Global NCT, 2022, except for NO21 which is reported in (`NO21_docu.Rmd`)
+**d. Food name/ description standardisation.** The ASFIS list was used for identification of the fish and fishery products. The ISSCAAP and the 3-alpha codes were assigned to fishery products for identification and name standardisation. The ISSCAAP codes were also used for assigning the FAO ICP code. The FAO ICP code were extracted from previous work reported in Fisheries Global NCT, 2022, except for NO21 which was done semi-manually using R scripts (`NO21/NO21.R`) and it is reported in (`NO21/NO21_docu.Rmd`).
 
 
 **e. Food groups variable.** Some food composition tables reported food groups that were placed as the first row of each category. Those rows were extracted and allocated as a new attribute of each food/fish entry (i.e., from row to new column (`food_group`)).
@@ -302,17 +294,18 @@ nutrients: DHA, EPA, Vitamin B6, Vitamin B12, Vitamin D, Niacin, Iodine, Seleniu
 
 Some variables needed more than just renaming to allow comparison.
 
-#### 3.1. Changing characters into numeric
+#### 3.1. Changing characters into numeric <br>
 
 To perform mathematical operations, characters needed to be converted into numeric operator. For instance, values that were reported to be trace ("tr") or below the detection limit ("<LOD") were converted to zero (0).
 
-#### 3.2.  Changing variable units
+#### 3.2.  Changing variable units <br>
 
-To standardise and merge the different FCT, components needs to be reported in the same units. For example, some nutrients needed to be convert from mg to g, or from percentage (100%) to a fraction (1) in edible portion. For all the unit conversion we followed the FAO/INFOODS Guidelines for Converting Units, Denominators and Expression (FAO/INFOODS, 2012b), and the suggested standard reporting units.
+To standardise and merge the different FCTs, components needs to be reported in the same units. For example, some nutrients needed to be convert from mg to g, or from percentage (100%) to a fraction (1). For all the unit conversion we followed the FAO/INFOODS Guidelines for Converting Units, Denominators and Expression (FAO/INFOODS, 2012b), and the suggested standard reporting units.
 
 Eg. Converting alcohol from weight in volumen (w/v) to weight in mass. 
 
-**Eq.1** ALC (g/100mL) / density (g/mL) = ALC (g/100 EP)
+**Eq.1** ALC (g/100mL) / density (g/mL) = ALC (g/100 EP) 
+
 
 Eg. amino acids (AA) reported per g in 100g of PROT to mg in 100g of EP:
 
@@ -323,7 +316,7 @@ Eg. amino acids (AA) reported per g in 100g of PROT to mg in 100g of EP:
  **Eq.2.3** AA mg/100g EP = AA g/100g prot  \* prot g/100g EP /10
 
 
-#### 3.3.  Re-calculating variables
+#### 3.3.  Re-calculating variables <br>
 
 For example Energy needs to be calculated from other components or edible portion from refuse.
  
@@ -332,144 +325,152 @@ For example Energy needs to be calculated from other components or edible portio
  **Eq.3.2** Edible = 1-Refuse
  
  
-#### 3.4. Combining Tagnames
+#### 3.4. Combining Tagnames <br>
 
-Some components could be reported using more than one Tagnames (as described in the renaming section). Of the fish-relevant nutrients selected for review some could be expressed using different Tagnames, depending on: the fraction
+Some components could be reported using more than one Tagnames (as described in the renaming section and table 2). Of the fish-relevant nutrients selected for review some could be expressed using different Tagnames, depending on: the fraction
 analysed (e.g., Vitamin D3, Vitamin D2), or the method of analysis (e.g., VITB6A, VITB6C). When possible, they were standardised by combining values from similar Tagnames such as Vitamin B6 into a `_standardised` variable.
 
 
-##### Generating functions for data transformation
+##### Generating functions for data transformation <br>
 
 **Special values**: We generated a function (`no_brackets_tr`) to be called to change trace and below the detection limit values to zero, and to remove brackets (see functions.R).
 
-**Combining variables**: VITB6_mg_standardised and FAT_g_standardised variables were generated by using a function. 
+**Combining variables**: `VITB6_mg_standardised` and `FAT_g_standardised` variables were generated by using a function. 
 
 
 ## Updating the Global Fish NCT
 
-Once the FCTs/FCDBs were loaded and harmonised, we combined them into
+Once the FCTs were loaded and harmonised, we combined them into
 a single data file, filter the fish entries and merged with the
 information already provided by the FAO team regarding each fish entry
 ISSCAAP, ICS FAOSTAT and alpha-three codes.
 
-For this particular case the steps 4.4 and 4.5 were performed after merging all the datasets together.
+For this particular case the steps 3.4 and 3.4 were performed after merging all the datasets together.
 
 All the steps are done and documented in the `merging_all.R` script. 
+
+#### Checking Tagnames for completeness <br>
+
+#### Checking quality of the values <br>
 
 
 # Results
 
+
 ### 1. Importing FCTs
+
+
+We extracted information on all the components available in the 13 FCTs,
+however more attention have been given to the following: Cu, I, Se, Vit. B6, Vit. B12, Vit. D, Niacin, DHA, EPA.
+
 
 ### 2. Tidying the data
 
-#### 2.1. Renaming variables
+#### 2.1. Renaming variables <br>
 
 Checking food component names and renaming them with Tagnames
 
-Some FCDBs reported the Tagnames which could be found in different
-formats.
+Some FCTs reported the Tagnames which were extracted and used to rename the variables. The Tagnames were found in different formats.
 
--   In the Australia FCDB, 2019, it was expressed as part of the
-    variable name. Moisture (water) (WATER) (g), being the Tagname "WATERg".
+-   In the AU19, it was expressed as part of the
+    variable name. "Moisture (water) (WATER) (g)", being the Tagname `WATERg`.
 
--   Similarly, in the Indian FCDB, 2017 (IN17) which was obtained from
+-   Similarly, in the IN17 which was obtained from
     the sharing agreement with the FAO team, the Tagnames were available
-    in the FCDB and complemented with the FCDB documentation [REF]. Note
+    in the FCT and complemented with the FCT documentation [REF]. Note
     that a great number of organic acids were reported (Table 9, from
     column 123), of which very few Tagnames were available.
 
--   In the Japan FCDB, 2015, Tagnames were also self-contained in
+-   In the JA15, Tagnames were also self-contained in
     original FCT file. However, manual renaming of some components,
-    as it was done for the IN17, was needed. For instance, Protein,
-    calculated from reference nitrogen_g to "PROCNTg", Lipid_g to
-    "FATg", and Carbohydrate, total, calculated by difference_g to
-    "CHOAVLDFg".
+    as it was done for the IN17, was needed. For instance, "Protein, calculated from reference nitrogen_g" to `PROCNTg`, "Lipid_g" to
+    `FATg`, and "Carbohydrate, total, calculated by difference_g" to
+    `CHOAVLDFg`.
     
--   In Kenya FCDB, 2018, Tagnames were also self-contained in the original database and also have been previously reviewed for the MAPS project. Only small fixes were needed to be adapted for this project (i.e., adding the units along the Tagnames or filtering columns that were mostly empty (FA)).
+-   In KE18, Tagnames were also self-contained in the original database and also have been previously reviewed for the MAPS project. Only small fixes were needed to be adapted for this project (i.e., adding the units along the Tagnames or filtering columns that were mostly empty (FA)).
 
--   In Western Africa FCDB, 2019, Tagnames were provided and, as the
-    KE18, have been also previously reviewed and pre-processed for MAPS.
-    Note that the edible portion is divided into two variables: EDIBLE1
-    and EDIBLE2, we are using EDIBLE1 as the `Edible_factor_in_FCT`
+-   In WA19, Tagnames were provided and, as for KE18, has been previously reviewed and pre-processed for MAPS.
+    Note that the edible portion is divided into two variables: "EDIBLE1"
+    and "EDIBLE2", we are using "EDIBLE1" as the `Edible_factor_in_FCT`
     variable following FAO Fisheries Global NCT, 2022.
 
--   In Brazil FCDB, 2013 Tagnames were provided by the FAO team as it was
-    previously processed. Hence, only renaming of the information variables (e.g., food id = fdc_id) was needed.
+-   In BR11, Tagnames were provided by the FAO team as it was
+    previously processed. Hence, only renaming of the information variables (e.g., "food id" = fdc_id) was needed.
 
--   In uFiSh FCDB, 2016, it included Taganames and we only needed
-    to allocate the edible portion to Edible coefficient, from whole to fillet/flesh (EDIBLE1), following the FAO Fisheries Global NCT, 2022 and as it was done in WA18.
+-   In UF16, it included Taganames and we only needed
+    to rename "Edible coefficient, from whole to fillet/flesh (EDIBLE1)" to `Edible_factor_in_FCT`, following what was reported in the FAO Fisheries Global NCT, 2022,and as it was done in WA19.
 
 For others datasets included, Tagnames were not reported and they needed to be
 generated using the information reported in the Fisheries Global NCT, 2022, and the documentation accompanying each FCT.
 
--   In the Denmark FCDB, 2019 documentation [REF](<https://frida.fooddata.dk/pdf/en-frida-2-introduction_20-12-2016-esax.pdf>), we found that the variable named as "vitamin A (RE)" was in reality the
-Vitamin A RAE, and hence the corresponding Tagname was VITA_RAEmg,
-similarly vitamin D was VITDEQ, according to Denmark FCDB, 2019
+-   In the DK19 documentation [REF](<https://frida.fooddata.dk/pdf/en-frida-2-introduction_20-12-2016-esax.pdf>), we found that the variable named as "vitamin A (RE)" was in reality the
+Vitamin A RAE, and hence the corresponding Tagname was `VITA_RAEmg`,
+similarly "vitamin D" was `VITDEQmg`, according to DK19
 documentation and FAO/INFOODS, 2012. 
 
--  In New Zealand FCDB, 2018, renaming was manually done, additionally information about vitamin D was uncertain.
+-  In NZ18, renaming was manually done. Information about Vit. D was insufficient to certainly know the Vit. D fraction reported in the FCT. 
 
--  In the UK FCDB, Tagnames were added manually. In addition, some things
+-  In the UK21,  Tagnames were added manually. In addition, some things
 that were noted were: Alcohol was reported as volumen (Alcohol (ALC) g/
-mL (w/v)). We did not transformed the units because: 1) alcohol was not included as one of the NVs to be reviewed and, 2) we finally did not include this FCDB into the final Fishery Global NCT, 2022. However, for the future, if we want to change to match the 100g EP values, we could re-calculate ALC variable by using Eq.1 and the density of each food which is provided in the FCDB (specific_gravity). Vitamin D was renamed to the VITDmg Tagname, however re-calculation using D3 and 25-hydroxy D3 values would be recommended when
+mL (w/v)). We did not transformed the units because: 1) alcohol was not included as one of the NVs to be reviewed and, 2) we finally did not include this FCT into the final Fishery Global NCT, 2022. However, for the future, if we want to change to match the 100g EP values, we could re-calculate ALC variable by using Eq.1 and the density of each food which is provided in the FCT (specific_gravity). Vitamin D was renamed to `VITDmg`, however re-calculation using D3 and 25-hydroxy D3 values would be recommended when
 possible. Finally, for the DHA and EPA, we used cis- version, but it should
 be reviewed. This was based on the documentation available in the
-Composition of Foods integrated dataset: PHE (Public Health England)
-(2021) Composition of foods integrated dataset (CoFID). Available at:
-<https://www.gov.uk/government/publications/composition-of-foods-integrated-dataset-cofid>
-(accessed 28/03/2022).
+Composition of Foods integrated dataset: PHE (Public Health England) (2021) Composition of foods integrated dataset (CoFID). Available at:
+<https://www.gov.uk/government/publications/composition-of-foods-integrated-dataset-cofid> (accessed 28/03/2022).
 
--   In the US FCDB, renaming was also done manually and based on the documentation and the information provided in the Fisheries Global NCT, 2022. We identified the Tagnames in one of the attached file, hence for the future a comparison/ update using those Tagname could be done. 
+-   In the US19, renaming was also done manually and based on the documentation and the information provided in the Fisheries Global NCT, 2022. We identified the Tagnames in one of the attached files, hence for the future a comparison/ update using those Tagnames could be done. 
 
--   In Bangladesh FCDB, 2013 we renamed the variables to the Tagnames
-manually, VITE definition was not clear and hence, in future should be checked.
+-   In BA13 we renamed the variables to the Tagnames
+manually, Vitamin E (reported as "VITE") definition was not clear and hence, in future should be checked.
 
--   In Norwegian FCDBs, 2021, variables were manually renamed to the Tagnames.
+-   In NO21, variables were manually renamed to the Tagnames.
 This was included for this project hence a more in-depth review of each
 component was needed and it is described in the **Section X.X of the NO21 documentation**
 
 #### 2.2. Other tidying operations 
 
 
-##### Removing parentheses and brackets 
+##### Removing parentheses and brackets <br>
 
-In JA15 parentheses were used to denote "estimated values". According to JA15 documentation, those were used to "Composition values estimated based on values listed in the food composition tables of foreign countries, raw material blending ratio recipe, etc. are indicated by placing them in parentheses. For some of Cereals, Fruits and Mushrooms, composition values derived from estimation or calculation using the listed values of similar foods are indicated by placing them in parentheses." (REF).
+In JA15, parentheses were used to denote "estimated values". According to JA15 documentation, those were used to "Composition values estimated based on values listed in the food composition tables of foreign countries, raw material blending ratio recipe, etc. are indicated by placing them in parentheses. For some of Cereals, Fruits and Mushrooms, composition values derived from estimation or calculation using the listed values of similar foods are indicated by placing them in parentheses." (REF).
 
-In KE18, brackets ("[]") denoting not preferred values, as for the KE18 reporting: "For alternative analytical method or lower quality. Data from non-preferred tagnames were presented only where preferred tagname data was not available." (REF).
+In KE18, brackets ("[]") denoting not preferred values, as for the KE18 reporting: "For alternative analytical method or lower quality. Data from non-preferred Tagnames were presented only where preferred Tagnames data was not available." (REF).
 
 Bracket for low quality values were removed or generated a new column
 with the alternative analytical method for UF16, WA19 and KE18. In addition, for the later, a star ("\*") was used to identify items fortified with folic acid. Note some issues on the reporting of this fortification were found previously, however the data was not reviewed in-depth because folate and derivates were outside the scope of this work. When we removed the brackets, for future development accounting for the impact of the "estimated values" should be studied. 
 
+##### Food groups <br>
+
+Each FCT has its own food groups, for instance in some FCTs were useful for identifying fishery and fishery products. For instance in UK21 fisheries were divided into five food groups: "White fish (JA)", "Fatty fish (JC)", "Crustacea  (JK)", "Molluscs (JM)", and "Fish products and dishes (JR)". The id (`fcd_id`) could be used as well to identify as all fisheries, as all started with "16". 
+
 ### 3. Transforming values
 
-##### 3.1. Characters in nutrient values
-**NOTE: Maybe good to convert into table**
+##### 3.1. Characters in nutrient values <br>
 
-Trace and/or below detection limit were reported and converted to zero in the following FCTs: IN17 ("<LOD"), BA13, BR11, JA15 ("Tr"), and KE18, UK16, and WA19 ("tr"). 
+Trace and/or below detection limit were reported and converted to zero in the following FCTs: IN17 ("<LOD"), BA13, BR11, JA15 ("Tr"), and KE18, UK21, and WA19 ("tr"). 
 
-Characters were used to report missing values were "nv" in DK19, "-" in JA15, and "M" in NO21. All were transformed to `NA`. 
+Characters and symbols were used to report missing values were "nv" in DK19, "-" in JA15, and "M" in NO21 which were all transformed to `NA`. 
 
 
-##### 3.2 & 3.3. Unit conversions and re-calculation
+##### 3.2 & 3.3. Unit conversions and re-calculation <br>
 
-In addition, some components were reported in different units as those
+Some components were reported in different units as those
 reported in the Tagnames, hence unit conversion operations were performed. For
 instance:
 
-In the Indian FCDB, 2017, fatty acids needed to be converted from mg/100g EP to g/ 100g EP, and amino acids from g/100g PROT to mg/100g EP (Eq.2.3).
+In the IN17, fatty acids needed to be converted from mg/100g EP to g/ 100g EP, and amino acids from g/100g PROT to mg/100g EP (Eq.2.3).
 
-Similarly, in the Japan FCDB, 2015, we need to change the unit of the fatty acids from mg to g, and the edible portion was calculated from refuse (Eq.3.1).
+Similarly, in JA15, we need to change the unit of the fatty acids from mg to g, and the edible portion was calculated from refuse (Eq.3.1).
 
 Moreover, when (substantial) changes, like those mentioned above, were
-made to the values reported in the original FCDBs, documentation was
+made to the values reported in the original FCT, documentation was
 done on GitHub so future users could review our decisions:
 
 Documentation in GitHub [Issue #9](https://github.com/LuciaSegovia/UoN-FAO/issues/9), [Issue #10](https://github.com/LuciaSegovia/UoN-FAO/issues/10). 
 
-#### 3.4. Combined variables (standardised):
+#### 3.4. Combined variables (standardised) <br>
 
-This was done after merging all the dataset together, and it's reported on the `QC.R`. 
+This was done after merging all the dataset together, and it's reported on the `merging_all.R`. 
 
 Here's the list of the standardised variables as reported in the Fisheries Global NCT, 2022, of which we only reported those in bold (e.g., VITB6_mg_standardised, FAT_g_standardised)
 
@@ -477,7 +478,7 @@ Here's the list of the standardised variables as reported in the Fisheries Globa
  - ENERCkJ_standardised
  - ENERCkcal_standardised
  - CHOAVLDFg_standardised
- **- FAT_g_standardised**
+ - **FAT_g_standardised**
  - FIBTGg_standardised
  - VITAmcg_standardised
  - VITA_RAEmcg_standardised
@@ -485,83 +486,259 @@ Here's the list of the standardised variables as reported in the Fisheries Globa
  - VITEmg_standardised
  - THIAmg_standardised
  - FOLDFEmcg_standardised
- **- VITB6_mg_standardised**
- **- NIAEQmg_std**
+ - **VITB6_mg_standardised**
+ - **NIAEQmg_std**
  - NIAEQmg_standadised
  - NIATRIPmg_standardised
  - VITDmg_standardised
 
-Scripts with all renaming and other transformation the steps for each FCDBs 
 
-#### Updating the Global Fish NCT:
+#### Updating the Global Fish NCT, 2022
 
-##### 1.  Merging all the data together
 
-Once the FCTs/FCDBs were loaded and harmonised, we combined them into
-a single data file. The UK21 was excluded from the Fishery Global NCT, 2022 hence ICS FAOSTAT code were not available for the fish in that FCT. For identifying fishery and fishery products in that FCT we used the `food_group`: White fish (JA), Fatty fish (JC), Crustacea  (JK), Molluscs (JM), and Fish products and dishes (JR). The id could be used as well, as all fisheries `fcd_id` started with "16". 
+##### 1.  Merging all the data together <br>
+
+
+Once the FCTs were loaded and harmonised, we combined them into
+a single data file. 
+
 
 ##### 2.  Allocating the FAO codes: ISSCAAP, alpha-three, and ICS FAOSTAT.
 
-Fish matching between FCTs fish entries and ICS FAOSTAT, alpha-three code and ISSCAAP code was previously done in the Fishery Global NCT, 2022. Hence, we used that information to generate a dataset ("ics-code_fish-code.csv") with information on: `ICS.FAOSTAT.SUA.Current.Code`, `source_fct`, `NDB_number`, `fdc_id`, `Food.description`, `Scientific.name`, `ISSCAAP.Group`, and `X3.alpha.code`. Minor adjustment were needed, for instance, the `fcd_id` in the Fishery Global NCT, 2022 were as in the "original" KE18. In order to match our `fdc_id` we need to remove the first "0" in each code. For the US19, we needed to change the `fdc_id` to `NDB_number` for the merging. Then, we merged the dataset derived from Fishery Global NCT, 2022 with information on each fish entry ISSCAAP, ICS FAOSTAT and alpha-three codes (`ics_code_file`) and the newly Fisheries nutrient table (`fish_fct`) by each fish entry id. (`fdc_id`). That operation resulted in a dataset with all the fishery products and its corresponding ICS FAOSTAT code, alpha-three code and ISSCAAP code.
+Fish matching between FCTs fish entries and ICS FAOSTAT, alpha-three code and ISSCAAP code was previously done in the Fishery Global NCT, 2022. Hence, we used that information to generate a dataset which contained information for each fish entry about ISSCAAP, ICS FAOSTAT and alpha-three codes ("ics-code_fish-code.csv"). The dataframe `ics_code_file` contained the information in the following variables: `ICS.FAOSTAT.SUA.Current.Code`, `source_fct`, `NDB_number`, `fdc_id`, `Food.description`, `Scientific.name`, `ISSCAAP.Group`, and `X3.alpha.code`.
 
-After merging, we kept only fish that were allocated with ICS code, hence, around 318 fish entries were filtered out, mainly from UK21 but some from NO21 (see NO21_docu.R) as well:
 
-`fish_fct %>% filter(is.na(ICS.FAOSTAT.SUA.Current.Code)) %>% count(source_fct)`
+Minor adjustment were needed, for instance, the food id of KE18 in the Fishery Global NCT, 2022 were as in the "original" (raw) KE18 (e.g., "0807"). In order to match the KE18 ids. in our dataset, we removed the first "0" (e.g., "807"). For the US19, we needed to change the `fdc_id` to `NDB_number`. Then, we merged `ics_code_file` (the dataset derived from Fishery Global NCT, 2022) and the newly Fisheries nutrient table (`fish_fct`) by each fish entry id. (`fdc_id`). That operation resulted in a dataset with all the fishery products and its corresponding ICS FAOSTAT code, alpha-three code and ISSCAAP code.
 
-```{r}
+
+The UK21 was excluded from the Fishery Global NCT, 2022 hence ICS FAOSTAT code were not available for the fish in that FCT. 
+
+
+After all the merging operations, only fish with information on ICS code were kept, hence, around 318 fish entries were filtered out, mainly from UK21 but some from NO21 (see NO21_docu.R) as well
+
+
+`r fish_fct %>% filter(is.na(ICS.FAOSTAT.SUA.Current.Code)) %>% count(source_fct)`
+
+
+```{r, loading-data, echo=FALSE}
 
 source("merging_all.R")
 
 ```
 
-##### 3.  Calculating the component values per ICS FAOSTAT fish category
+##### 3. Calculating the component values per ICS FAOSTAT fish category
+
 
 After merging and filtering the fishes, and before calculating the nutrient values of each ICS FAOSTAT fish category, we performed some visualisation (e.g., data availability) of the data and some quality check for most of the nutrient values. Those quality check are reported in `visualisation.R` and `QC.R`.
 
 
-###### Proteins
+###### 3.1. Data avaibility per each ICS FAOSTAT fish category
 
 
+**Figure 1: Percentage of missing values per component and FCT**
 
-###### Carbohydrates
+```{r, heat-map missing}
 
--   Five FCTs/FCDBs did not report CHOAVLDFg
-    (`fao_fish_fct %>% filter(is.na(CHOAVLDFg)) %>% distinct(source_fct)`).
--   Of those, two reported CHOCDFg instead
-    (`fao_fish_fct %>% filter(is.na(CHOAVLDFg), !is.na(CHOCDFg))`)
--   Other two reported CHOAVLg
-    (`fao_fish_fct %>% filter(is.na(CHOAVLDFg), !is.na(CHOAVLg)) %>% count(source_fct)`).
--   IN17 did not reported content in CHO and fibre for fish and
-    products. Although, it could be calculated as CHOAVLDFg, or we could
-    also assumed to be zero.
--   CHOAVLMg and CHOCSMg could be removed from the final database as it
-    is of no use and/or relevance for fishes.
+#├ Plot (heat map): % of missing values per FCT ----
 
-###### Fat
+fao_fish_fct %>% select(components, source_fct) %>% 
+  naniar::gg_miss_fct(., fct = source_fct)
 
--   Eight FCTs/FCDBs did not report FATg
--   Three reported FAT_g
-    (`fao_fish_fct %>% filter(is.na(FATg), !is.na(FAT_g)) %>% count(source_fct)`)
-    while four reported FATCEg
-    (`fao_fish_fct %>% filter(is.na(FATg), !is.na(FAT_g)) %>% count(source_fct)`)
--   WA19 reported mainly FATg but 57 entries were reported as FATCEg
-    (21%)
-
-- We combined those Tagnames into `FAT_g_standardised` as reported in section 4.4. 
+```
 
 
-###### Fibre
+**Figure 2: Coverage: Percentage of reported values per component**
 
--   Fibre, crude (FIBCg) could be removed, it did not added information on any missing (FBGTg). For the future development, check whether NA values for fibre could be assume equal to zero (see Next steps: Assumed zero section).
+We used this graph to identify those component that had enough values converage to be included in the expansion of the Fisheries Global NCT, 2022. 
 
-
-###### Alcohol
-
--   Ten FCTs/FCDBs did not report ALCg, of the three that did report it,
-    the mean value was zero. For the future, we can hence assume alcohol = zero for fish and products.
+We decided to include those components that had more than 60% of coverage across all the FCTs.
 
 
-Of the nutrients used to calculate energy, the most important for fish and fish products are proteins, fat, water and ash. Hence, the review of those components should be carried more in-depth than the other, as for CHO, fibre, and alcohol could be assumed zero, for most of fish and shellfish products, with the exceptions of preparations, fermented or molluscs (FAO/INFOODS, 2012). 
+```{r, bar-chart coverage}
+
+#├ Plot (bar chart): Coverage ----
+
+fao_fish_fct %>% select(1:10, components) %>% 
+  mutate_at(components, as.numeric) %>% 
+  pivot_longer(cols = all_of(components),
+               names_to = "NV", 
+               values_to = "n") %>% 
+  filter(!is.na(n)) %>% 
+  group_by(NV) %>% 
+  summarise(total = n()) %>%
+  ungroup() %>% 
+  mutate(perc = total/nrow(fao_fish_fct), 
+         cat = ifelse(perc >.75, 
+                      "high", 
+                      ifelse(perc < 0.45, 
+                             "poor", "medium" ))) %>% 
+  ggplot(aes(x=reorder(NV, perc), y = perc*100, fill = as.factor(cat))) +
+  geom_bar(stat = "identity") +
+  theme_light() +
+  coord_flip() +
+  scale_fill_manual("Coverage",
+  values=c("darkolivegreen3","lightgoldenrod2", "red4"), 
+  labels = c("High (> 75%)", "Medium (75-45%)", "Poor (<45%)")) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank()) +
+  labs( x= "", y= "", title = "Availability of data: Percentage (%) of fish entries with values of selected components")
+
+```
+
+
+**Table 3: Count of values per component and SUA fish category** 
+
+We highlighted in red when no values were reported for a component in a SUA category and in yellow when less than three values were reported per SUA category. 
+
+
+```{r, table data-available}
+
+# 5) Table: Identifying missing values for each SUA fish category.
+
+final_nv <-  c("WATERg"   ,   "F22D6N3g",     "F20D5N3g" , 
+               "VITB6_mg_standardised", 
+               "NIAmg","VITB12mcg" , "CUmg", "SEmcg")
+
+
+##├ Table: Data available (count) per fish category and nutrient ----
+
+x <- fao_fish_fct %>% select(-NDB_number) %>% 
+  mutate_at(final_nv, as.numeric) %>% 
+  group_by(ics_faostat_sua_english_description) %>% 
+  summarise_if(is.numeric,  
+               funs(
+                    n = sum(!is.na(.)))) %>% 
+  select(-ICS.FAOSTAT.SUA.Current.Code_n)
+
+col_order <- sort(colnames(x), decreasing = T)
+
+fao_fish_summary <- x[, col_order]
+
+
+body_fct1 <- function(col, row){
+  cells_body(
+    columns = col,
+    rows = {{row}} == 0
+  )
+}
+
+body_fct2 <- function(col, row){
+  cells_body(
+    columns = col,
+    rows = {{row}} == 1
+  )
+}
+
+
+fao_fish_summary %>%
+  select(ics_faostat_sua_english_description, ends_with("_n")) %>% 
+  gt() %>% 
+  tab_spanner(
+    label = "Data available (count) per fish category and nutrient",
+    columns = c(2:9)
+  ) %>% 
+  cols_label(
+    ics_faostat_sua_english_description = "Fish categories",
+    WATERg_n = "Water",
+    VITB6_mg_standardised_n = "Vitamin B6",
+    VITB12mcg_n = "Vitamin B12", 
+    SEmcg_n = "Selenium", 
+    NIAmg_n = "Niacin", 
+    F22D6N3g_n = "DHA",
+    F20D5N3g_n = "EPA", 
+    CUmg_n = "Copper"
+  ) %>%
+  
+  tab_style(
+    style = list(
+      cell_fill(color = scales::alpha("red", 0.7)),
+      cell_text(color = "white", weight = "bold")
+    ),
+    locations = list(
+      body_fct1(2, WATERg_n),
+      body_fct1(3, VITB6_mg_standardised_n),
+      body_fct1(4, VITB12mcg_n),
+      body_fct1(5, SEmcg_n),
+      body_fct1(6, NIAmg_n),
+      body_fct1(7, F22D6N3g_n),
+      body_fct1(8, F20D5N3g_n),
+      body_fct1(9, CUmg_n)
+    )) %>%
+  
+  tab_style(
+    style = list(
+      cell_fill(color = scales::alpha("yellow", 0.7)),
+      cell_text(color = "black", weight = "bold")
+    ),
+    locations = list(
+      body_fct2(2, WATERg_n),
+      body_fct2(3, VITB6_mg_standardised_n),
+      body_fct2(4, VITB12mcg_n),
+      body_fct2(5, SEmcg_n),
+      body_fct2(6, NIAmg_n),
+      body_fct2(7, F22D6N3g_n),
+      body_fct2(8, F20D5N3g_n),
+      body_fct2(9, CUmg_n)
+    )) %>%  
+  tab_options(
+    row_group.border.top.width = px(3),
+    row_group.border.top.color = "black",
+    row_group.border.bottom.color = "black",
+    table.border.top.color = "white",
+    table.border.top.width = px(3),
+    table.border.bottom.color = "white",
+    table.border.bottom.width = px(3),
+    column_labels.border.bottom.color = "black",
+    column_labels.border.bottom.width = px(2),
+  )
+
+```
+
+
+We identified missing values at ICS FAOSTAT fish category, only for Se in four ICS FAOSTAT fish categories: `r toString(missing)`. Hence, we imputed some values from other fish entries reported. The scripts that impute the values are reported in `missing.R`, and the rationale is outline bellow.   
+
+For **Cephalopods, cured**, we used the water-adjusted Se mean concentration of the following items, using the WATERg and SEmcg of: (All from JA15)
+
+|fcd_id| food_desc| WATERg|SEmcg|
+|-|-|-|-|
+|10342| Mollusks, neon flying squid, raw | 79.3 |28|
+|10345| Mollusks, Japanese common squid, raw [Syn. short-finned squid] | 80.2| 41|
+
+To "complete" the Se concentration of the following "Cephalopods, cured":
+
+[1] "Mollusks, firefly squid, seasoned and smoked"\
+[2] "Mollusks, processed squid, "Surume" dried squid"\
+[3] "Mollusks, processed squid, "Saki-ika" dried, seasoned and shredded
+squid"
+[4] "Mollusks, processed squid, seasoned and smoked"
+
+For **Cephalopods, canned**, there was only one item under that category: *"Mollusks, Escargot Apple snails, canned in brine"*. However that snails should be recorded under "Molluscs, excluding cephalopods", according to the description in the documentation (REF). Hence, to populate this category, we decided to use the fish entries from "preparations nei", which were described as "boiled/ moist heat" (n=22). This was decided based on:
+
+a) The description of *Cephalopods, Canned* in the FAO documentation, which is "Raw or precooked meat from gutted or ungutted animals, canned in brine, oil or other medium (all edible) treated at temperatures adequate to ensure sterilization. Examples are: vacuum-packed small octopus, canned squid in own ink or oil.".
+b) Nutrient values reported on the Spanish FCTs for "squids, fresh" and "squids, canned" were very similar. Unfortunately, there was no information for Se,
+c) And, same fish should be a better representation, despite the cooking preparation, than a different food, particularly when they are split into different categories. In addition, when perfect match is not possible the mean of several foods is recommended (FAO/INFOODS, 2012)
+
+NOTE: Some concerns related to the edible portion, so in the "canned" description we are assuming that it is all edible, and hence 100g of a canned squid would have X% of squid and Y% of the medium. This is not captured by the boiled, or fresh product.
+
+For **Aquatic animals, nei, cured and preparation nei**, when we checked the items included in that category there were mostly Sea urchin, jellyfish, sea cucumber and sea squirt from the Japan FCT, 2019. However, when we tried to identify Se values from the "Aquatic animals, nei, fresh" category, we realised that it was very diverse category, including from crocodiles to sea cucumber. The only Se information that was available and comparable was for sea cucumber,
+thus we used `WATER` and `SEmcg` to water-adjust the Se concentration of: "Sea cucumber, raw" (WATERg = 92.2, SEmcg = 37) for imputing `SEmcg` in: 
+
+[1] "Sea cucumber, "Konowata" salted and fermented viscera"
+[2] "Sea urchin, "Tsubu-uni" salted whole gonads"\
+[3] "Sea urchin, "Neri-uni" salted whole gonad paste"\
+[4] "Jellyfish, Salted, desalted"
+[5] "Sea squirt, "Shiokara" salted and fermented meat and viscera \\[Syn. Ascidian\\]"
+
+The median Se conc. of the category is 14.1mcg.
+
+For **Crustaceans, cured**, we needed to impute Se concentration for "Crustacean, Sakura shrimp, dried", for which we used (10415) "Crustacean, whiteleg shrimp, raw" (WATER = 78.60, SEmcg = 27). And, for "Shrimp (crayfish), whole, dried",  we calculated mean/median of UF16 values as it was reported in the references (UF1(092004)), plus the following: "European/Euro-American/Oceanian crayfishes, flesh, raw (n.s.)", "European/Euro-American/Oceanian crayfishes, wild, flesh, raw (n.s.)", "European/Euro-American/Oceanian crayfishes, farmed flesh, raw". According to Vásquez-Caicedo et al. (2008) and Bognar (2002), retention factors for Se are between 0.9-1, with dry heat (braise, fry in oven, broiling, grilling) being 1.
+
+Information regarding the values used to impute/calculate the `SEmcg` for those items can be found un the column `commet`. 
+
+###### 3.2. Data quality per each ICS FAOSTAT fish category
+
 
 ###### 1) Niacin
 
@@ -592,7 +769,7 @@ Vitamin B6 was reported by all the FCDBs but KE18. Most of the FCDBs
 used analytical values (VITB6Amg), followed by calculated (VITB6Cmg) and
 only the Norwegian FCDBs used a mixed of values (VITB6_mg).
 
-Then, as reported in section 4.4., VITB6Cmg, VITB6Amg, and VITB6C_mg were combined into `VITB6C_mg_standardised`. 
+Then, as reported in section 3.4., VITB6Cmg, VITB6Amg, and VITB6C_mg were combined into `VITB6C_mg_standardised`. 
 
 ###### 4) Vitamin B12
 
@@ -641,58 +818,53 @@ Mean mackerel fresh to (10157)
 
 (35055) with (35164), by water-adjusting and assuming the oil has no contribution to `Semcg`. Although, due to the low water content and overall high content in Se of the category, it would only increase the mean. Again from the "Aquatic mammals, meat", we only have 3 values out of 15 values, which makes the mean quite high, although we can assess if that mean is high or is in line with the overall category mean due to the lack of data availability. 
 
+###### Other components 
 
-#Data avaibility per each ICS FAOSTAT fish category
 
-We identified missing values at ICS FAOSTAT fish category, only for Se in four ICS FAOSTAT fish categories: 
+Of the nutrients used to calculate energy, the most important for fish and fish products are proteins, fat, water and ash. Hence, the review of those components should be carried more in-depth than the other, as for CHO, fibre, and alcohol could be assumed zero, for most of fish and shellfish products, with the exceptions of preparations, fermented or molluscs (FAO/INFOODS, 2012).
 
-`print(missing)`
 
-For **Cephalopods, cured**, we used the water-adjusted Se mean concentration of the following items, using the WATERg and SEmcg of: (All from JA15)
+###### Proteins
 
-|fcd_id| food_desc| WATERg|SEmcg|
-|-|-|-|-|
-|10342| Mollusks, neon flying squid, raw | 79.3 |28|
-|10345| Mollusks, Japanese common squid, raw [Syn. short-finned squid] |
-80.2| 41|
 
-To "complete" the Se concentration of the following "Cephalopods, cured":
 
-[1] "Mollusks, firefly squid, seasoned and smoked"\
-[2] "Mollusks, processed squid, "Surume" dried squid"\
-[3] "Mollusks, processed squid, "Saki-ika" dried, seasoned and shredded
-squid"
-[4] "Mollusks, processed squid, seasoned and smoked"
+###### Carbohydrates
 
-For **Cephalopods, canned**, there was only one item under that category: *"Mollusks, Escargot Apple snails, canned in brine"*. However that snails should be recorded under "Molluscs, excluding cephalopods", according to the description in the documentation (REF). Hence, to populate this category, we decided to use the fish entries from "preparations nei", which were described as "boiled/ moist heat" (n=22). This was decided based on:
+-   Five FCTs/FCDBs did not report CHOAVLDFg
+    (`fao_fish_fct %>% filter(is.na(CHOAVLDFg)) %>% distinct(source_fct)`).
+-   Of those, two reported CHOCDFg instead
+    (`fao_fish_fct %>% filter(is.na(CHOAVLDFg), !is.na(CHOCDFg))`)
+-   Other two reported CHOAVLg
+    (`fao_fish_fct %>% filter(is.na(CHOAVLDFg), !is.na(CHOAVLg)) %>% count(source_fct)`).
+-   IN17 did not reported content in CHO and fibre for fish and
+    products. Although, it could be calculated as CHOAVLDFg, or we could
+    also assumed to be zero.
+-   CHOAVLMg and CHOCSMg could be removed from the final database as it
+    is of no use and/or relevance for fishes.
 
-a) The description of *Cephalopods, Canned* in the FAO documentation, which is "Raw or precooked meat from gutted or ungutted animals, canned in brine, oil or other medium (all edible) treated at temperatures adequate to ensure sterilization. Examples are: vacuum-packed small octopus, canned squid in own ink or oil.".
-b) Nutrient values reported on the Spanish FCTs for "squids, fresh" and "squids, canned" were very similar. Unfortunately, there was no information for Se,
-c) And, same fish should be a better representation, despite the cooking preparation, than a different food, particularly when they are split into different categories. In addition, when perfect match is not possible the mean of several foods is recommended (FAO/INFOODS, 2012)
+###### Fat
 
-NOTE: Some concerns related to the edible portion, so in the "canned" description we are assuming that it is all edible, and hence 100g of a canned squid would have X% of squid and Y% of the medium. This is not captured by the boiled, or fresh product.
+-   Eight FCTs/FCDBs did not report FATg
+-   Three reported FAT_g
+    (`fao_fish_fct %>% filter(is.na(FATg), !is.na(FAT_g)) %>% count(source_fct)`)
+    while four reported FATCEg
+    (`fao_fish_fct %>% filter(is.na(FATg), !is.na(FAT_g)) %>% count(source_fct)`)
+-   WA19 reported mainly FATg but 57 entries were reported as FATCEg
+    (21%)
 
-For **Aquatic animals, nei, cured and preparation nei**, when we checked the items included in that category there were mostly Sea urchin, jellyfish, sea cucumber and sea squirt from the Japan FCT, 2019. However, when we tried to identify Se values from the "Aquatic animals, nei, fresh" category, we realised that it was very diverse category, including from crocodiles to sea cucumber. The only Se information that was available and comparable was for sea cucumber,
-thus we used `WATER` and `SEmcg` to water-adjust the Se concentration of: "Sea cucumber, raw" (WATERg = 92.2, SEmcg = 37) for imputing `SEmcg` in: 
+- We combined those Tagnames into `FAT_g_standardised` as reported in section 4.4. 
 
-[1] "Sea cucumber, "Konowata" salted and fermented viscera"
-[2] "Sea urchin, "Tsubu-uni" salted whole gonads"\
-[3] "Sea urchin, "Neri-uni" salted whole gonad paste"\
-[4] "Jellyfish, Salted, desalted"
-[5] "Sea squirt, "Shiokara" salted and fermented meat and viscera \\[Syn. Ascidian\\]"
 
-The median Se conc. of the category is 14.1mcg.
+###### Fibre
 
-For **Crustaceans, cured**, we needed to impute Se concentration for "Crustacean, Sakura shrimp, dried", for which we used (10415) "Crustacean, whiteleg shrimp, raw" (WATER = 78.60, SEmcg = 27). And, for "Shrimp (crayfish), whole, dried",  we calculated mean/median of UF16 values as it was reported in the references (UF1(092004)), plus the following: "European/Euro-American/Oceanian crayfishes, flesh, raw (n.s.)", "European/Euro-American/Oceanian crayfishes, wild, flesh, raw (n.s.)", "European/Euro-American/Oceanian crayfishes, farmed flesh, raw". According to Vásquez-Caicedo et al. (2008) and Bognar (2002), retention factors for Se are between 0.9-1, with dry heat (braise, fry in oven, broiling, grilling) being 1.
+-   Fibre, crude (FIBCg) could be removed, it did not added information on any missing (FBGTg). For the future development, check whether NA values for fibre could be assume equal to zero (see Next steps: Assumed zero section).
 
-Information regarding the values used to impute/calculate the `SEmcg` for those items can be found un the column `commet`. 
 
-#Questions:
+###### Alcohol
 
-Why using PROCNT(g) instead of PROTCNTg?
+-   Ten FCTs/FCDBs did not report ALCg, of the three that did report it,
+    the mean value was zero. For the future, we can hence assume alcohol = zero for fish and products.
 
-Snail (Helix pomatia) - under Molluscs, excluding cephalopods (that's
-ok) and under Cephalopods (why?)
 
 ### Final Quality Checks
 

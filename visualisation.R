@@ -1,0 +1,400 @@
+
+
+#0) Loading the data 
+#NOTE: For the images to be saved create a folder called "images"
+
+#If data is not loaded 
+#source("merging_all.R")
+library(gt)
+#library(gtExtras)
+
+
+#1) Check that we have all FCTs merged ----
+
+fao_fish_fct %>% count(source_fct)
+
+colnames(fao_fish_fct)
+
+
+#├ List of components that we are interested in: ----
+ 
+components <- c( "WATERg", "F22D6N3g",
+  "F20D5N3g",
+  "VITB6Amg",
+  "VITB6Cmg",
+  "VITB6_mg",
+#  "VITB6_mg_standardised",
+  "NIAEQmg",
+  "NIAmg",
+  "NIATRPmg",
+  "TRPmg",
+  "VITB12mcg",
+  "VITDEQmcg",
+  "VITDmcg",
+  "CHOCALmcg",
+  "ERGCALmcg",
+  "CHOCALOHmcg",
+  "ERGCALOHmcg",
+  "CUmg",
+  "SEmcg",
+  "IDmcg" )
+
+
+#2) Plots of overall component counts and missing values ----
+
+#Plot: overall % of missing values
+
+fao_fish_fct %>% select(1:10, components) %>% vis_miss(sort_miss = T) 
+
+#├ Plot (heat map): % of missing values per FCT ----
+
+fao_fish_fct %>% select(components, source_fct) %>% 
+  naniar::gg_miss_fct(., fct = source_fct)
+
+#Perfect for ppt (width = 12, height = 7)
+# ggsave(here::here("images", "missing-values-fct.png"), width = 12, height = 7)
+
+#├ Plot (lollipop-flip) ----
+#Total count of the no. of reported values per component
+
+#List of components for generating the plot
+
+fao_fish_fct %>% select(1:10, components) %>% 
+  mutate_at(components, as.numeric) %>% 
+  pivot_longer(cols = all_of(components),
+               names_to = "components", 
+               values_to = "n") %>% 
+  filter(!is.na(n)) %>% 
+  group_by(components) %>% 
+  summarise(total = n()) %>%
+  ungroup() %>% 
+  ggplot( aes(x=components, y=total)) +
+  geom_segment( aes(x=components, xend=components, y=0, yend=total), 
+                color="skyblue") +
+  geom_point( color="blue", size=4, alpha=0.6) +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank()) +
+  xlab("") +
+  ylab("Total count")
+
+#Perfect for ppt (width = 12, height = 7)
+#ggsave(here::here("images", "total-count_lolli-flip.png"), width = 10, height = 8)
+
+
+#├ Plot (bar chart): Coverage ----
+#Coverage: Percentage of reported values per component
+
+fao_fish_fct %>% select(1:10, components) %>% 
+  mutate_at(components, as.numeric) %>% 
+  pivot_longer(cols = all_of(components),
+               names_to = "NV", 
+               values_to = "n") %>% 
+  filter(!is.na(n)) %>% 
+  group_by(NV) %>% 
+  summarise(total = n()) %>%
+  ungroup() %>% 
+  mutate(perc = total/nrow(fao_fish_fct), 
+         cat = ifelse(perc >.75, 
+                      "high", 
+                      ifelse(perc < 0.45, 
+                             "poor", "medium" ))) %>% 
+  ggplot(aes(x=reorder(NV, perc), y = perc*100, fill = as.factor(cat))) +
+  geom_bar(stat = "identity") +
+  theme_light() +
+  coord_flip() +
+  scale_fill_manual("Coverage",
+  values=c("darkolivegreen3","lightgoldenrod2", "red4"), 
+  labels = c("High (> 75%)", "Medium (75-45%)", "Poor (<45%)")) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank()) +
+  labs( x= "", y= "", title = "Availability of data: Percentage (%) of fish entries with values of selected components")
+   # + 
+  #guides(x = guide_axis(n.dodge = 2))
+
+#Perfect for ppt (width = 12, height = 7)
+#ggsave(here::here("images", "perc-coverage_bar-flip_reorder.png"), width = 12, height = 7)
+
+
+#3) Plots by Fish type (new variable) ----- 
+
+
+#├ Multiple plot (heat map): Missing values by fish prep ----
+
+#List of fish type for generating the plots
+#fish <- str_split_fixed(fao_fish_fct$ics_faostat_sua_english_description, ", " , n=2) %>% .[,1] %>% unique()
+fish <- fao_fish_fct %>% distinct(fish_type) %>% pull()
+
+#List of components for generating the plot
+
+nv <- c("WATERg",
+        "F22D6N3g",
+        "F20D5N3g",
+        "VITB6Amg",
+        "VITB6Cmg",
+        "VITB6_mg",
+        "NIAEQmg",
+        "NIAmg",
+        "NIATRPmg",
+        "TRPmg",
+        "VITB12mcg",
+        "VITDEQmcg",
+        "VITDmcg",
+        "CHOCALmcg",
+        "ERGCALmcg",
+        "CHOCALOHmcg",
+        "ERGCALOHmcg",
+        "CUmg",
+        "SEmcg",
+        "IDmcg")
+
+#A empty list to store the plots
+plot <- list()
+
+#A loop to generate mutiple plots (one per fish type)
+
+for(i in 1:length(fish)){
+  
+plot[[i]] <- fao_fish_fct %>% 
+  filter(fish_type == fish[i]) %>% 
+  select(all_of(nv), fish_prep) %>% 
+  naniar::gg_miss_fct(., fct = fish_prep) +
+  labs( x= "", y= "", title = paste0(i, ") ",  fish[i]))
+
+print(plot[[i]])
+ggsave(paste0("images/", gsub(" ", "_", fish[i]), ".png"), width = 5, height = 5)
+
+}
+
+#gridExtra::grid.arrange(plot[[1]], plot[[2]], nrow = 1)
+
+#4) Plots by Fish preparation (new variable) ----- 
+
+#├ Plot (lollipop flip): Count of compo per fish type faceted by prep. ----
+
+#List of fish type for generating the plots
+fish <- fao_fish_fct %>% distinct(fish_type) %>% pull()
+
+#A empty list to store the plots
+plot <- list()
+
+#A loop to generate mutiple plots (one per fish type)
+
+for(i in 1:length(fish)){
+
+  plot[[i]] <- fao_fish_fct %>% select(col_names) %>% 
+  mutate_at(nv, as.numeric) %>% 
+  pivot_longer(cols = all_of(nv),
+               names_to = "components", 
+               values_to = "n") %>% 
+  filter(!is.na(n)) %>% 
+  group_by(components, fish_type, fish_prep,  ics_faostat_sua_english_description,
+           ) %>% 
+  summarise(total = n()) %>%
+  ungroup() %>% 
+  filter(fish_type == fish[i]) %>% 
+  ggplot( aes(x=components, y=total)) +
+  geom_segment( aes(x=components, xend=components, y=0, yend=total), 
+                color="skyblue") +
+  geom_point( color="blue", size=4, alpha=0.6) +
+  theme_light() +
+  coord_flip() +
+  facet_grid(cols = vars(fish_prep)) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank()) +
+  labs(x="", y = "", title = paste("No. of ", tolower(fish[i]), "in each category reporting selected componets"))
+
+ print(plot[[i]])
+#saving plot(s)
+ggsave(paste0("images/count_", gsub(" ", "_", tolower(fish[i])),
+              ".png"), width = 12, height = 7)
+}
+
+
+# 5) Table: Identifying missing values for each SUA fish category.
+
+final_nv <-  c("WATERg"   ,   "F22D6N3g",     "F20D5N3g" , 
+               "VITB6_mg_standardised", 
+               "NIAmg","VITB12mcg" , "CUmg", "SEmcg")
+
+
+##├ Table: Data available (count) per fish category and nutrient ----
+
+x <- fao_fish_fct %>% select(-NDB_number) %>% 
+  mutate_at(final_nv, as.numeric) %>% 
+  group_by(ics_faostat_sua_english_description) %>% 
+  summarise_if(is.numeric,  
+               funs(
+                    n = sum(!is.na(.)))) %>% 
+  select(-ICS.FAOSTAT.SUA.Current.Code_n)
+
+col_order <- sort(colnames(x), decreasing = T)
+
+fao_fish_summary <- x[, col_order]
+
+
+body_fct1 <- function(col, row){
+  cells_body(
+    columns = col,
+    rows = {{row}} == 0
+  )
+}
+
+body_fct2 <- function(col, row){
+  cells_body(
+    columns = col,
+    rows = {{row}} == 1
+  )
+}
+
+
+tab_1 <- fao_fish_summary %>%
+  select(ics_faostat_sua_english_description, ends_with("_n")) %>% 
+  gt() %>% 
+  tab_spanner(
+    label = "Data available (count) per fish category and nutrient",
+    columns = c(2:9)
+  ) %>% 
+  cols_label(
+    ics_faostat_sua_english_description = "Fish categories",
+    WATERg_n = "Water",
+    VITB6_mg_standardised_n = "Vitamin B6",
+    VITB12mcg_n = "Vitamin B12", 
+    SEmcg_n = "Selenium", 
+    NIAmg_n = "Niacin", 
+    F22D6N3g_n = "DHA",
+    F20D5N3g_n = "EPA", 
+    CUmg_n = "Copper"
+  ) %>%
+  
+  tab_style(
+    style = list(
+      cell_fill(color = scales::alpha("red", 0.7)),
+      cell_text(color = "white", weight = "bold")
+    ),
+    locations = list(
+      body_fct1(2, WATERg_n),
+      body_fct1(3, VITB6_mg_standardised_n),
+      body_fct1(4, VITB12mcg_n),
+      body_fct1(5, SEmcg_n),
+      body_fct1(6, NIAmg_n),
+      body_fct1(7, F22D6N3g_n),
+      body_fct1(8, F20D5N3g_n),
+      body_fct1(9, CUmg_n)
+    )) %>%
+  
+  tab_style(
+    style = list(
+      cell_fill(color = scales::alpha("yellow", 0.7)),
+      cell_text(color = "black", weight = "bold")
+    ),
+    locations = list(
+      body_fct2(2, WATERg_n),
+      body_fct2(3, VITB6_mg_standardised_n),
+      body_fct2(4, VITB12mcg_n),
+      body_fct2(5, SEmcg_n),
+      body_fct2(6, NIAmg_n),
+      body_fct2(7, F22D6N3g_n),
+      body_fct2(8, F20D5N3g_n),
+      body_fct2(9, CUmg_n)
+    )) %>%  
+  tab_options(
+    row_group.border.top.width = px(3),
+    row_group.border.top.color = "black",
+    row_group.border.bottom.color = "black",
+    table.border.top.color = "white",
+    table.border.top.width = px(3),
+    table.border.bottom.color = "white",
+    table.border.bottom.width = px(3),
+    column_labels.border.bottom.color = "black",
+    column_labels.border.bottom.width = px(2),
+  )
+
+
+# 6) Vis: by Fish preparation: Oils  ----- 
+
+nv <- c("WATERg",
+        "F22D6N3g",
+        "F20D5N3g",
+        "VITB6Amg",
+        "VITB6Cmg",
+        "VITB6_mg",
+       # "NIAEQmg",
+        "NIAmg",
+      #  "NIATRPmg",
+      #  "TRPmg",
+        "VITB12mcg",
+       # "VITDEQmcg",
+      #  "VITDmcg",
+      #  "CHOCALmcg",
+      #  "ERGCALmcg",
+      #  "CHOCALOHmcg",
+      #  "ERGCALOHmcg",
+      #  "IDmcg",
+        "CUmg",
+        "SEmcg")
+
+#Values of the plot
+fao_fish_fct %>% filter(str_detect(fish_prep, "oils")) %>% 
+  select(nv, source_fct, fish_prep, fish_type) %>% 
+  pivot_longer(cols = all_of(nv),
+               names_to = "components", 
+               values_to = "n") %>% 
+  mutate_at("n", as.numeric) %>% 
+  group_by(components, fish_prep, fish_type) %>% 
+  summarise(total = median(n, na.rm = T)) %>%
+  gt( rowname_col = "component")
+
+              
+
+#No. of unique items per FCT
+fao_fish_fct %>% filter(str_detect(fish_prep, "oils")) %>%
+  distinct(fdc_id, source_fct) %>% count(source_fct)
+
+#Finding source of extreme values - all from DK19
+fao_fish_fct %>% filter(str_detect(fish_prep, "oils")) %>%
+  select(col_names) %>% 
+  filter(IDmcg >300, CHOCALmcg>100, SEmcg >1) %>% gt()# %>% 
+#gtsave(filename = "images/high-conc-oils.pdf")
+
+#├ Plot (lollipop flip): Median concentration of compo in oils ----
+
+fao_fish_fct %>% filter(str_detect(fish_prep, "oils")) %>% 
+  select(nv, source_fct) %>% 
+  naniar::gg_miss_fct(., fct = source_fct)
+
+fao_fish_fct %>% filter(str_detect(fish_prep, "oils")) %>% 
+  select(nv, source_fct, fish_prep) %>% 
+  pivot_longer(cols = all_of(nv),
+               names_to = "components", 
+               values_to = "n") %>% 
+  mutate_at("n", as.numeric) %>%
+  group_by(components, fish_prep) %>% 
+  summarise(total = median(n, na.rm = T)) %>% ungroup() %>%
+  filter(total < 300) %>%  #filtering out the outliers - I and CHOCAL from DK19
+  ggplot( aes(x=components, y=total)) +
+  geom_segment( aes(x=components, xend=components, y=0, yend=total), color="grey") +
+  geom_point( color="orange", size=4) +
+  theme_light() +
+  coord_flip() +
+  facet_grid(vars(fish_prep)) +
+  theme(
+    panel.grid.major.x = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank()
+  ) +
+  xlab("") +
+  ylab("Median concentration")
+
+
+#ggsave(here::here("images", "median-conc-oils.png"), width = 12, height = 7)
+ggsave(here::here("images", "median-conc-oils_wo-outliers.png"), width = 12,
+       height = 7)
+

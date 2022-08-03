@@ -271,10 +271,57 @@ glimpse(fao_fish_fct)
 (count(fish_fct) - (277+41)) == count(fao_fish_fct)
 
 
-#3) Visualisation of results and QC ----
+# 3. 4) Combining Tagnames to generate variables ----
+
+##├ VITB6_mg_standardised  ----
+#This function combine all the Tagnames for VITB6
+
+for(i in 1:nrow(fao_fish_fct)){
+  print(i)
+  if (!is.na(fao_fish_fct$VITB6Amg[i])) {
+    print(!is.na(fao_fish_fct$VITB6Amg[i]))
+    fao_fish_fct$VITB6_mg_standardised[i] <- fao_fish_fct$VITB6Amg[i]
+  }  
+  if (is.na(fao_fish_fct$VITB6Amg[i])) { 
+    fao_fish_fct$VITB6_mg_standardised[i] <- fao_fish_fct$VITB6Cmg[i]
+  } 
+  if (is.na(fao_fish_fct$VITB6Amg[i]) & is.na(fao_fish_fct$VITB6Cmg[i])) {
+    fao_fish_fct$VITB6_mg_standardised[i] <- fao_fish_fct$VITB6_mg[i]
+  }
+  if (is.na(fao_fish_fct$VITB6Amg[i]) & is.na(fao_fish_fct$VITB6Cmg[i]) & is.na(fao_fish_fct$VITB6_mg[i])) {
+    fao_fish_fct$VITB6_mg_standardised[i] <- NA
+  }
+  print(fao_fish_fct$VITB6_mg_standardised[i])
+}
+
+##├  FAT_g_standardised ----
+
+#This function combine all the Tagnames for FAT_g_standardised
+
+for(i in 1:nrow(fao_fish_fct)){
+  print(i)
+  if (!is.na(fao_fish_fct$FATg[i])) {
+    print(!is.na(fao_fish_fct$FATg[i]))
+    fao_fish_fct$FAT_g_standardised[i] <- fao_fish_fct$FATg[i]
+  }  
+  if (is.na(fao_fish_fct$FATg[i])) { 
+    fao_fish_fct$FAT_g_standardised[i] <- fao_fish_fct$FAT_g[i]
+  } 
+  if (is.na(fao_fish_fct$FATg[i]) & is.na(fao_fish_fct$FAT_g[i])) {
+    fao_fish_fct$FAT_g_standardised[i] <- fao_fish_fct$FATCEg[i]
+  }
+  if (is.na(fao_fish_fct$FATg[i]) & is.na(fao_fish_fct$FAT_g[i]) & 
+      is.na(fao_fish_fct$FATCEg[i])) {
+    fao_fish_fct$FAT_g_standardised[i] <- NA
+  }
+  print(fao_fish_fct$FAT_g_standardised[i])
+}
+
+
+# 4) Visualisation of results and QC ----
 #Check "visualisation.R" and "QC.R"
 
-#3.1) Generating a dataset for visualization and analysis ----
+# 4.1) Generating a dataset for visualization and analysis ----
 
 #├ Generating a two grouping variables: Fish type and Fish prep  ----
 
@@ -296,8 +343,3 @@ fao_fish_fct %>% count(fish_type, fish_prep) %>% arrange(desc(n))
 #Check ISSCAAP code and groups
 colnames(fao_fish_fct)
 subset(fao_fish_fct, is.na(ISSCAAP.Group))
-
-
-
-
-

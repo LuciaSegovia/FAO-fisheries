@@ -238,32 +238,6 @@ which(fao_fish_fct$VITB6Amg > 1)
 which(!is.na(fao_fish_fct$VITB6_mg))
 which(is.na(fao_fish_fct$VITB6Amg) & is.na(fao_fish_fct$VITB6Cmg))
 
-#├ 3.1) Generating VITB6_mg_standardised variable ----
-
-#This function combine all the Tagnames for VITB6
-
-for(i in 1:nrow(fao_fish_fct)){
-  print(i)
-  if (!is.na(fao_fish_fct$VITB6Amg[i])) {
-    print(!is.na(fao_fish_fct$VITB6Amg[i]))
-    fao_fish_fct$VITB6_mg_standardised[i] <- fao_fish_fct$VITB6Amg[i]
-  }  
-  if (is.na(fao_fish_fct$VITB6Amg[i])) { 
-    fao_fish_fct$VITB6_mg_standardised[i] <- fao_fish_fct$VITB6Cmg[i]
-  } 
-  if (is.na(fao_fish_fct$VITB6Amg[i]) & is.na(fao_fish_fct$VITB6Cmg[i])) {
-    fao_fish_fct$VITB6_mg_standardised[i] <- fao_fish_fct$VITB6_mg[i]
-  }
-  if (is.na(fao_fish_fct$VITB6Amg[i]) & is.na(fao_fish_fct$VITB6Cmg[i]) & is.na(fao_fish_fct$VITB6_mg[i])) {
-    fao_fish_fct$VITB6_mg_standardised[i] <- NA
-  }
-  print(fao_fish_fct$VITB6_mg_standardised[i])
-}
-
-#print(paste("b6_=", fao_fish_fct$VITB6_mg[i]))
-#    fao_fish_fct$VITB6_mg_standardised[i] <- fao_fish_fct$VITB6_mg[i]
-#  }
-
 
 fao_fish_fct %>% filter(!is.na(VITB6_mg_standardised)) %>% 
   count(source_fct)
@@ -414,34 +388,6 @@ x2 <- fao_fish_fct %>%
 
 #Checking data w/ and w/o outliers
 diff <- as.data.frame(all.equal(x1, x2))
-
-## FAT ----
-
-#FATg
-fao_fish_fct %>% filter(is.na(FATg)) %>% count(source_fct)
-fao_fish_fct %>% filter(is.na(FATg), !is.na(FAT_g)) %>% count(source_fct)
-fao_fish_fct %>% filter(is.na(FATg), !is.na(FATCEg)) %>% count(source_fct)
-
-#This function combine all the Tagnames for FAT_g_standardised
-
-for(i in 1:nrow(fao_fish_fct)){
-  print(i)
-  if (!is.na(fao_fish_fct$FATg[i])) {
-    print(!is.na(fao_fish_fct$FATg[i]))
-    fao_fish_fct$FAT_g_standardised[i] <- fao_fish_fct$FATg[i]
-  }  
-  if (is.na(fao_fish_fct$FATg[i])) { 
-    fao_fish_fct$FAT_g_standardised[i] <- fao_fish_fct$FAT_g[i]
-  } 
-  if (is.na(fao_fish_fct$FATg[i]) & is.na(fao_fish_fct$FAT_g[i])) {
-    fao_fish_fct$FAT_g_standardised[i] <- fao_fish_fct$FATCEg[i]
-  }
-  if (is.na(fao_fish_fct$FATg[i]) & is.na(fao_fish_fct$FAT_g[i]) & 
-      is.na(fao_fish_fct$FATCEg[i])) {
-    fao_fish_fct$FAT_g_standardised[i] <- NA
-  }
-  print(fao_fish_fct$FAT_g_standardised[i])
-}
 
 
 #5) DHA (22:6 n-3) ----
@@ -741,6 +687,7 @@ diff <- as.data.frame(all.equal(x1, x2))
 anti_join(x1, x2, by = "ics_faostat_sua_english_description")
 
 ## Removing low quality items ----
+
 #Caviar, cod roe with mayonnaise (04.307)
 #Caviar, polar (04.373)
 
