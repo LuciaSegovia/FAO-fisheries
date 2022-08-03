@@ -57,7 +57,7 @@ source("merging_all.R")
   
   fao_fish_fct %>% 
     filter( fdc_id %in% squid) %>%
-    select(fdc_id,food_desc, WATERg,  SEmcg)
+    select(fdc_id,food_desc, WATERg,  SEmcg) 
   
   x <- median(as.numeric(fao_fish_fct$SEmcg[fao_fish_fct$fdc_id %in% squid]))
   y <- median(as.numeric(fao_fish_fct$WATERg[fao_fish_fct$fdc_id %in% squid]))
@@ -95,7 +95,10 @@ source("merging_all.R")
            str_detect(food_desc, "boil|moist"), 
            #  source_fct == "JA15",
            !is.na(SEmcg)) %>%
-    select(source_fct, fdc_id,food_desc, fish_prep, WATERg,  SEmcg)
+    select(fdc_id,food_desc, WATERg,  SEmcg, source_fct) %>% 
+    mutate_at(c("WATERg", "SEmcg"), as.numeric) %>% 
+    mutate_if(is.numeric, ~round(., 2)) %>% 
+    knitr::kable()
   
   dim(fao_fish_fct)
   
