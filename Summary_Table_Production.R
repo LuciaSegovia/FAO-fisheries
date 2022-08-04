@@ -1,3 +1,9 @@
+
+# Packages dependencies
+# tinytex::install_tinytex(version = "latest")
+# dplyr, ggplot, gt
+
+
 library(tidyverse)
 
 source(here::here("QC.R"))
