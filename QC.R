@@ -69,7 +69,7 @@ fao_fish_fct %>% filter(is.na(NIAmg)) %>% count(source_fct)
 fao_fish_fct %>% filter(is.na(TRPmg)) %>% count(source_fct)
 fao_fish_fct %>% filter(is.na(NIAEQmg)) %>% count(source_fct)
 
-#├ 1.1) NIAmg_std calculated from NIAEQmg, and NIAmg
+#├ 1.1) NIAmg_std calculated from NIAEQmg, and NIAmg ----
 
 fao_fish_fct <- fao_fish_fct %>% 
   mutate(NIAmg_std =

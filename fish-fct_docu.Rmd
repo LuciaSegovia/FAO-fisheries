@@ -1027,8 +1027,7 @@ for the items can be found in the column `comment`.
 
 ###### 1) Niacin
 
-We check for "extreme values", and after plotting the values comparing
-the values, overall all values seemed plausible. For example, one of the
+We check for "extreme values", and after plotting the values, we identified some potential "extreme values". However after comparing these values with similar fish product, all the values seemed plausible. For example, one of the
 high value was smoke-dried and fermented fish (i.e., low water
 concentration). When the niacin concentration was compared on dry-weight
 basis concentration with similar fresh items, the niacin concentration
@@ -1045,21 +1044,21 @@ The rest of the SUA categories remained more or less the same.
 
 ###### 2) Copper
 
-Octopus from IN17 (fdc_id = R003) looks very high compared with other
+Similarly for Cu, we identified items that had the highest values: Octopus from IN17 (fdc_id = R003) which looked very high, even when compared with other
 octopus values. Double-check the value.
 
 Oyster from UF16 (fdc_id = 093013) also seems high compared with other
-oyster but seems plausible given the type of food. Double-check the
-value.
+oyster but seems plausible given the type of food. For instance, of the 10 items with the highest Cu concentration, 4 were oyster. 
 
 Another item from the JA15 (fdc_id = 10350) is also extremely high,
 however when we compared it with the "fresh" values is still in line
-with the water content of that item.
+with the water content of that item. However, because the item is driving the very high mean for
+the category "Cephalopods, cured", 
+`r mean(as.numeric(fao_fish_fct$CUmg[fao_fish_fct$ics_faostat_sua_english_description == "Cephalopods, cured"]))` we have decided to remove it from the calculations. 
 
-In addition, there is one item that is driving the very high mean for
-the category "Cephalopods, cured", again, we checked and it is due to
-the low water concentration, hence the value is still plausible. In
-order to minimise the influence of this type of items, more values
+`r mean(as.numeric(fao_fish_fct$CUmg[fao_fish_fct$ics_faostat_sua_english_description == "Cephalopods, cured" & fao_fish_fct$fdc_id != "10350"]))`
+
+For future, and in order to minimise the influence of this type of items, more values
 should be sought for that category.
 
 ###### 3) Vitamin B6
@@ -1122,11 +1121,9 @@ those values are shown below.
 
 `r subset(fao_fish_fct, fdc_id %in% c("T39", "04.043", "04.333", "04.107", "04.055"), select = c(fdc_id, food_desc, WATERg, SEmcg)) %>% knitr::kable()`
 
-When we checked by SUA category, we identified the "Other pelagic fish,
-cured" which had the highest mean value,only two fish entries and only
-one Se value. Similarly, "Aquatic mammals, preparations nei" only
-reported information for three entries of which only two had a `SEmcg`
-value.
+When we checked by SUA category, we identified the "Other pelagic fish, cured" which had the highest mean value,only two fish entries and only one Se value. Similarly, "Aquatic mammals, preparations nei" only reported information for three entries of which only two had a `SEmcg` value.
+
+Again from the "Aquatic mammals, meat", we only have 3 values out of 15 values, which makes the mean quite high, although we can assess if that mean is high or is in line with the overall category mean due to the lack of data availability.
 
 For future improvement, we could impute some values in order to smooth
 the overall mean of this SUA categories.
@@ -1332,8 +1329,4 @@ Current mean of FIBTGg =
 **Se concentration**: Mean mackerel fresh to (10157) (35055) with
 (35164), by water-adjusting and assuming the oil has no contribution to
 `Semcg`. Although, due to the low water content and overall high content
-in Se of the category, it would only increase the mean. Again from the
-"Aquatic mammals, meat", we only have 3 values out of 15 values, which
-makes the mean quite high, although we can assess if that mean is high
-or is in line with the overall category mean due to the lack of data
-availability.
+in Se of the category, it would only increase the mean. 

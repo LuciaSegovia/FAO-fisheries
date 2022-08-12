@@ -50,6 +50,12 @@ results_table <- results_table %>%
    mutate_if(is.numeric,  round,
              digits = 2)
 
+### To - DOOO!!
+## Recalculate the mean Cumg concentration of Cephalopods, cured
+#remove JA15 (fdc_id = 10350) from the mean & add comment!
+
+mean(as.numeric(fao_fish_fct$CUmg[fao_fish_fct$ics_faostat_sua_english_description == "Cephalopods, cured" & fao_fish_fct$fdc_id != "10350"]))
+
 write.csv(results_table, file = here::here("Output",
                               "Summarised_Results_Table_v1.csv"), 
           row.names = FALSE)
