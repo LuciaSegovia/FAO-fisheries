@@ -70,7 +70,7 @@ results_table$comment[results_table$fdc_id == "10350"] <- "the Cumg value was ex
 
 
 write.csv(results_table, file = here::here("Output",
-                              "Summarised_Results_Table_v1.1csv"), 
+                              "Summarised_Results_Table_v1.1.csv"), 
           row.names = FALSE)
 
 
