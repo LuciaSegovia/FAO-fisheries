@@ -50,14 +50,27 @@ results_table <- results_table %>%
    mutate_if(is.numeric,  round,
              digits = 2)
 
-### To - DOOO!!
-## Recalculate the mean Cumg concentration of Cephalopods, cured
-#remove JA15 (fdc_id = 10350) from the mean & add comment!
+fao_fish_fct$WATERg <- as.numeric(fao_fish_fct$WATERg)
+  
 
-mean(as.numeric(fao_fish_fct$CUmg[fao_fish_fct$ics_faostat_sua_english_description == "Cephalopods, cured" & fao_fish_fct$fdc_id != "10350"]))
+## Recalculate the mean Cumg concentration of Cephalopods, cured
+#Identifying the ICS code of Cephalopods, cured.#1572 
+fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code[fao_fish_fct$ics_faostat_sua_english_description == "Cephalopods, cured"]
+
+#Checking that we have the right row, and column
+results_table$ics_faostat_sua_english_description[results_table$ICS.FAOSTAT.SUA.Current.Code == "SUMMARY ROW - Group 1572"]
+results_table$CUmg[results_table$ICS.FAOSTAT.SUA.Current.Code == "SUMMARY ROW - Group 1572"]
+
+#Excluded JA15 (fdc_id = 10350) from the mean & added comment!
+cu <- mean(as.numeric(fao_fish_fct$CUmg[fao_fish_fct$ics_faostat_sua_english_description == "Cephalopods, cured" & fao_fish_fct$fdc_id != "10350"]))
+results_table$comment[results_table$ICS.FAOSTAT.SUA.Current.Code == "SUMMARY ROW - Group 1572"] <- round(cu,2)
+results_table$CUmg[results_table$ICS.FAOSTAT.SUA.Current.Code == "SUMMARY ROW - Group 1572"] <- "excluded Cumg value from JA15 (fdc_id = 10350)"
+results_table$CUmg[results_table$fdc_id == "10350"] 
+results_table$comment[results_table$fdc_id == "10350"] <- "the Cumg value was excluded from the mean"
+
 
 write.csv(results_table, file = here::here("Output",
-                              "Summarised_Results_Table_v1.csv"), 
+                              "Summarised_Results_Table_v1.1csv"), 
           row.names = FALSE)
 
 

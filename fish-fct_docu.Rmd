@@ -943,6 +943,9 @@ canned" SUA category.
 
 ```{r, table cephalopods-boiled}
 
+fao_fish_fct$WATERg <- as.numeric(fao_fish_fct$WATERg)
+fao_fish_fct$SEmcg <- as.numeric(fao_fish_fct$SEmcg)
+
   fao_fish_fct %>% 
     filter(fish_type == "Cephalopods", 
            fish_prep %in% c("preparations nei"), 
@@ -950,7 +953,7 @@ canned" SUA category.
            #  source_fct == "JA15",
            !is.na(SEmcg)) %>%
     select(fdc_id,food_desc, WATERg,  SEmcg, source_fct) %>% 
-    mutate_at(c("WATERg", "SEmcg"), as.numeric) %>% 
+ #   mutate_at(c("WATERg", "SEmcg"), as.numeric) %>% 
     mutate_if(is.numeric, ~round(., 2)) %>% 
     knitr::kable()
 
@@ -1050,18 +1053,15 @@ octopus values. Double-check the value.
 Oyster from UF16 (fdc_id = 093013) also seems high compared with other
 oyster but seems plausible given the type of food. For instance, of the 10 items with the highest Cu concentration, 4 were oyster. 
 
-Another item from the JA15 (fdc_id = 10350) is also extremely high,
-however when we compared it with the "fresh" values is still in line
-with the water content of that item. However, because the item is driving the very high mean for
-the category "Cephalopods, cured", 
-`r mean(as.numeric(fao_fish_fct$CUmg[fao_fish_fct$ics_faostat_sua_english_description == "Cephalopods, cured"]))` we have decided to remove it from the calculations. 
-
-`r mean(as.numeric(fao_fish_fct$CUmg[fao_fish_fct$ics_faostat_sua_english_description == "Cephalopods, cured" & fao_fish_fct$fdc_id != "10350"]))`
-
-For future, and in order to minimise the influence of this type of items, more values
-should be sought for that category.
+Another item from the JA15 (fdc_id = 10350) was also extremely high,
+however when we compared it with the "fresh" values, it was still in line
+with the water content of that item. However, because the item was driving the very high mean for
+the category "Cephalopods, cured", (mean = 
+`r mean(as.numeric(fao_fish_fct$CUmg[fao_fish_fct$ics_faostat_sua_english_description == "Cephalopods, cured"]))`) we decided to remove it from the final mean, which yielded more nuanced value (mean = `r round(mean(as.numeric(fao_fish_fct$CUmg[fao_fish_fct$ics_faostat_sua_english_description == "Cephalopods, cured" & fao_fish_fct$fdc_id != "10350"])),2)`). For future, and in order to minimise the influence of this type of food items, more values should be sought for each category.
 
 ###### 3) Vitamin B6
+
+Vitamin B6 was reported in all but one FCT (KE18). Overall, values were within plausible values. The highest values reported were for Tuna and they were still within normal ranges. 
 
 ###### 4) Vitamin B12
 
@@ -1119,7 +1119,7 @@ JA15 reported overall the highest Se median value with "extreme values",
 coming consistently from that FCT, followed by NZ18. Some values of
 those values are shown below.
 
-`r subset(fao_fish_fct, fdc_id %in% c("T39", "04.043", "04.333", "04.107", "04.055"), select = c(fdc_id, food_desc, WATERg, SEmcg)) %>% knitr::kable()`
+`r subset(fao_fish_fct, fdc_id %in% c("T39", "04.043", "04.333", "04.107", "04.055"), select = c(fdc_id, food_desc, WATERg, SEmcg)) %>% knitr::kable(., digits=2)`
 
 When we checked by SUA category, we identified the "Other pelagic fish, cured" which had the highest mean value,only two fish entries and only one Se value. Similarly, "Aquatic mammals, preparations nei" only reported information for three entries of which only two had a `SEmcg` value.
 
@@ -1142,11 +1142,11 @@ molluscs (FAO/INFOODS, 2012).
 ###### Carbohydrates
 
 -   Five FCTs/FCDBs did not report CHOAVLDFg
-    (`fao_fish_fct %>% filter(is.na(CHOAVLDFg)) %>% distinct(source_fct)`).
+    (`r fao_fish_fct %>% filter(is.na(CHOAVLDFg)) %>% distinct(source_fct)`).
 -   Of those, two reported CHOCDFg instead
-    (`fao_fish_fct %>% filter(is.na(CHOAVLDFg), !is.na(CHOCDFg))`)
+    (`r fao_fish_fct %>% filter(is.na(CHOAVLDFg), !is.na(CHOCDFg))`)
 -   Other two reported CHOAVLg
-    (`fao_fish_fct %>% filter(is.na(CHOAVLDFg), !is.na(CHOAVLg)) %>% count(source_fct)`).
+    (`r fao_fish_fct %>% filter(is.na(CHOAVLDFg), !is.na(CHOAVLg)) %>% count(source_fct)`).
 -   IN17 did not reported content in CHO and fibre for fish and
     products. Although, it could be calculated as CHOAVLDFg, or we could
     also assumed to be zero.
@@ -1157,28 +1157,19 @@ molluscs (FAO/INFOODS, 2012).
 
 In order to compare the DHA and EPA with the fat content, we needed to
 combine several fat Tagnames. We combined those Tagnames into
-`FAT_g_standardised` as reported in section 4.4.
-
--   Eight FCTs/FCDBs did not report FATg
-
--   Three reported FAT_g
-    (`fao_fish_fct %>% filter(is.na(FATg), !is.na(FAT_g)) %>% count(source_fct)`)
-    while four reported FATCEg
-    (`fao_fish_fct %>% filter(is.na(FATg), !is.na(FAT_g)) %>% count(source_fct)`)
-
--   WA19 reported mainly FATg but 57 entries were reported as FATCEg
-    (21%)
+`FAT_g_standardised` as reported in section 4.4. We checked the contribution from each of the fractions. 
+`r fao_fish_fct %>% select(starts_with("FAT"), -FATRNg) %>% summarise_all(., ~sum(!is.na(.))/sum(!is.na(fao_fish_fct$FAT_g_standardised))*100) %>% round(.,2) %>% knitr::kable()`
 
 ###### Fibre
 
--   Fibre, crude (FIBCg) could be removed, it did not added information
-    on any missing (FBGTg). For the future development, check whether NA
+Fibre, crude (FIBCg) could be removed, it did not added information
+on any missing (FBGTg). For the future development, check whether `NA`
     values for fibre could be assume equal to zero (see Next steps:
     Assumed zero section).
 
 ###### Alcohol
 
--   Ten FCTs/FCDBs did not report ALCg, of the three that did report it,
+-   Ten FCTs/FCDBs did not report `ALCg`, of the three that did report it,
     the mean value was zero. For the future, we can hence assume alcohol
     = zero for fish and products.
 
@@ -1190,37 +1181,27 @@ of the data shown. We also need to perform those extra steps as we have
 added some new fish entries, and hence, we need to make sure that
 reconciliation with all the other nutrients are performed.
 
-#### Water content
+#### Water content, protein, Ca, and Fe
 
-#### DHA and EPA concetration
+We compared the values generated with the R scripts with the results that were generated and shared in excel file for a selection of components. We did that to ensure that the scripting approach was not introducing any systematic errors. Most of the values were identical or with minor variation that could fall within rounding differences. There were six SUA categories with "major" differences: "Marine fish nei, canned", "Aquatic animals nei, preparations nei", "Aquatic mammals, meat", "Marine fish nei, cured", "Freshwater & diadromous fish, fresh", "Freshwater & diadromous fish, frozen, whole". The source of differences were identified in consultation with the FAO team. The main source of discrepancies were typos or `NA` values being filled up. This was a great excersise as strengthen both approach helping to identify any potential mistakes in the final Fisheries Global NCT.  
 
-We calculated the mean and other summary stats for the each fish
-category in total, and only for the entries that reported the DHA and
-EPA. This was to evaluate the impact of missing values into the final
+#### DHA and EPA concentration
+
+We calculated the mean and other summary statistics for the each fish
+category, and only for the entries that reported the DHA and
+EPA. This was done to evaluate the impact of missing values into the final
 results.
 
-We also calculate the percentage of FA (i.e., the corresponding
-percentage of each FA to the total FAT). To do so we used the following
-equation. Note that we used the `FAT_g_standardised` variable which is a
-combination of the Tagnames (and different extractions): FAT, FAT\_, and
-FATCE. In addition, FATCE is not recommended for use in unit conversion
-(FAO/INFOODS, 2012).
+We calculate the proportion of each fatty acid (DHA and EPA) to the total fat, for all the fish entries and only for those with complete values (i.e., reporting a value for `FAT_g_standardised`, `DHAg`, and `EPAg`). Then, we compare the difference between the two. Note that we used the `FAT_g_standardised` variable which is a
+combination of the Tagnames (and different extractions): `FATg`,  `FAT_g`, and
+`FATCEg`. The use of FATCE is not recommended for use in unit conversion
+(FAO/INFOODS, 2012).However, as it is not going to be used to report values, and only for checking, we proceed to compare the percentage of each FA for the whole
+dataset and only those entries with FA values.
 
 Eq.: FA(%) = FAg/FATg x 100 , (F22D6N3g_perc =
 F22D6N3g/FAT_g\_standardised\*100)
 
-However, as it is not going to be used to report values, and only for
-checking, we proceed to compare the percentage of each FA for the whole
-dataset and only those entries with FA values.
-
-We added information on the difference in percentage for each fish
-category, and we found that for DHA only 19 fish categories (out of 95)
-had a difference smaller than zero (0), that ranged from -0.55 to -0.17,
-and no difference value was higher than zero. Whereas for EPA, we found
-five values smaller than zero (-0.02 to -0.11), and two values larger
-than zero: 1.13, and 1.58 for "Aquatic plants, dried", and "Aquatic
-plants, preparations nei". For which small number of entries were
-included, and a considerably diverse fishery category.
+There were major differences between the two datasets, particularly for 16 SUAs categories that reported >10% difference in total fat between values with DHA and EPA and those without. The main reason were that those SUA category were were very broad, and hence the composition was highly variable. Also, the number of entries were very small as they were rare species (i.e., aquatic mammals, or aquatic plants). 
 
 We also calculate the percentage of relative coverage (number of entries
 reporting FAT_g\_standardised/ number of entries reporting the DHA/EPA
@@ -1248,20 +1229,12 @@ US21 - Using data embeded in US21 to allocate the Tagnames for all NVs.
     method of the same/similar component. E.g., Extracting alternative
     analitycal method (i.e., NIA for Niacin) that are provided in the
     same column of the preferred analytical method (i.e., NIAEQ for
-    Niacin) but within bracket.
-
-Observed in BA13, KE18, WA19,
+    Niacin) but within bracket.This type of data structure was observed in BA13, KE18, and WA19. 
 
 -   A function that extract the "estimated" values and/or low quality
     values between brackets or parenthesis, and it generate a metadata
     info on that. Eg. A new column with a string providing information
-    on which values were low quality and/or estimated
-
-JA11: There is a use of bracket to denote "estimated values". We are
-removing the brackets but we should look at how to keep a record and
-what's the meaning of estimated values.
-
-KE18: "Low quality" values were reported within brackets.
+    on which values were low quality and/or estimated. This was observed in JA15, where the use of bracket to denote "estimated values". We removed the brackets but we should look at how to keep a record and the meaning of estimated values. In KE18, "Low quality" values were reported within brackets.
 
 -   A function to change Trace values, expressed as "tr", "Tr", "\<LOD",
     to 0 (zero).
@@ -1317,12 +1290,12 @@ Unit conversion (when possible) to match Tagnames (per 100g EP FW)
 
 -Fibre: We could check whether they are listed under fish or fish
 preparations. If preparations then check what type of preparation,
-otherwise we could assume zero.
+otherwise we could assume zero. Current mean of FIBTGg =
+`r round(fao_fish_fct %>% filter(!is.na(FIBTGg)) %>% pull(FIBTGg) %>% as.numeric() %>% mean(., na.rm = T), 2)`.
 
-Current mean of FIBTGg =
-`fao_fish_fct %>% filter(!is.na(FIBTGg)) %>% pull(FIBTGg) %>% as.numeric() %>% mean(., na.rm = T)`.
+- Alcohol
 
--   Alcohol: We could assume zero.
+- CHOAVLDF for non-processed foods. 
 
 ##### Imputing nutrient values
 
