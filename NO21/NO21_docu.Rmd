@@ -1,6 +1,9 @@
 ---
 title: "Processing the Norwegian Food Composition Database"
-author: "Segovia de la Revilla, Lucia"
+author: 
+- "Lucia Segovia D L Revilla"
+- "Thomas Codd"
+- "Louise Ander"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   word_document: default
