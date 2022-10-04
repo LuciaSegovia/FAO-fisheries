@@ -1,7 +1,7 @@
 ---
 title: "Processing the Norwegian Food Composition Database"
 author: 
-- "Lucia Segovia D L Revilla"
+- "Lucia Segovia de la Revilla"
 - "Thomas Codd"
 - "Louise Ander"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
