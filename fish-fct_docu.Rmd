@@ -4,9 +4,7 @@ author:
 - "Lucia Segovia D L Revilla"
 - "Thomas Codd"
 - "Louise Ander"
-
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-
 output:
   pdf_document: default
   html_document: default

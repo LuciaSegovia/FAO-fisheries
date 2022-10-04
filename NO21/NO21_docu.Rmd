@@ -5,6 +5,9 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   word_document: default
   html_document: default
+
+link-citations: yes
+bibliography: references.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -44,7 +47,7 @@ Information on the food components and their description can be found [here](www
 
 5) fat (FAT_g): It is defined as the sum of fatty acids and other components, however no information regarding the method used to calculate that component values was provided.
 
-6) carbo (CHOAVLg): carbohydrates calculated as the sum of starch and sugars; available carbohydrates. Some borrowed may be calculated by difference (CHOAVLDF(g)). Those calculated by difference were not identified in the FCDB and it seemed that were imputed from the original source instead of calculated, as it is advised by the FAO guidelines for FC compilation (FAO/INFOODS, 2012)). The total of starch, glycogen and all types of sugar (glucose, fructose, lactose, sucrose and maltose). Note that this component is not particularly important in fish and fishery products, beside the for processed foods, such as fish gratin, patties, etc.
+6) carbo (CHOAVLg): carbohydrates calculated as the sum of starch and sugars; available carbohydrates. Some borrowed may be calculated by difference (CHOAVLDF(g)). Those calculated by difference were not identified in the FCDB and it seemed that were imputed from the original source instead of calculated, as it is advised by the FAO guidelines for FC compilation [@fao/info]). The total of starch, glycogen and all types of sugar (glucose, fructose, lactose, sucrose and maltose). Note that this component is not particularly important in fish and fishery products, beside the for processed foods, such as fish gratin, patties, etc.
 
 7) dietary_fibre (FIBTGg): From 2015, the Norwegian analytical values for dietary fibre are based on the AOAC 2009.01 method. Analytical values from 2014 and earlier are analysed by using the method AOAC 985.29 (Prosky method) (from 1985) and AOAC 991,43 (from 1991).
 
@@ -63,7 +66,7 @@ Information was provided for vitamins that was used to identify the correct Tagn
 For most of the mineral no information was provided. Only for Iodine for which values were compiled explicitly for the Norwegian FCDB from 2018. And salt was reported instead of sodium (1 g salt contains about 0.4 g sodium (i.e. 0.393 g)).
 
 
-Variables that need to be calculated:
+Variables that were calculated:
 
  - SOP: sum of proximate - Not included.
  - Energy (see below)
@@ -153,7 +156,7 @@ We classified each fish-related entry according to the type of processing (table
 
 Then, we check that the allocations were done correctly with special attention to the aquatic mammals, aquatic animals, aquatic plants and molluscs. 
 
-*Fixing special groups*: There was no fishery products belonging to the ISSCAAP codes of aquatic mammals, aquatic animals, or aquatic plants in the NO21. Two molluscs were misclassified as "preparations" (group 7) that were corrected. 
+*Fixing special groups*: There was no fishery products belonging to the ISSCAAP codes of aquatic mammals, aquatic animals, or aquatic plants in the NO21. Two molluscs were misclassified as "preparations" (group 7) that were corrected. Further, "Canned" referred only to fish (or other animals) and excluded "roe and roe preparations". 
 
 **This step is an iterative process where as follow (Diagram)**
 
@@ -172,12 +175,48 @@ Beside that, for some fish entries an ISSCAAP code could not be clearly allocate
  - Snails, canned was allocated to molluscs, canned
 
 Some other fish entries needed further clarification:
- * 04.101 - Roe paste, canned - NA
- * Excluded are: Sushi 
+
+ * 04.101 - "Roe paste, canned"
+ * 04.100 - "Cod roe, compressed, canned" 
+ * 04.318 - "Cod roe, canned, fried in fat" 
+ I.e., inconsistency w/ canned description
+ 
+ * Sushi 
 
 #### Quality Assessment
 
 Then, given that the names and description provided allowed an straight forward matching, we have assigned the corresponding quality score of A2.
+
+##### Evaluation of the components values
+
+The scripts for the quality assessment is "NO21_QC.R".
+
+##### Sum of Proximat (SOP)
+
+SOP is commonly calculated to check the quality of the data . Among other compononet, ash content (`ASHg`) is needed for its calculation, however ash contetn was not reported in the NO21. Although not ideal, a proxy for ash content (`ASHg_std`) was calculated using the mineral concentration (**Eq.1.1**) and, then used to calculate the SOP (`SOP_std`) (**Eq.1.2**). In general, despite the lack of ash data, results were good, with only 14 items falling outside the FAO/ INFOOD thresholds suggested in the FAO/INFOODS Guidelines for for Checking Food Composition Data prior to the Publication of a User Table/Database[@fao/info]. Most of the falling outside the range could still be attributed to the lack of accurate data on ash concentration (i.e.,missing `ASHg`). Only one item was extremely out of the range: "04.366 - Surimi, LobNobs" which was excluded from the final selection of fishery items.
+
+Eq. 1.1: Ash value (g/100 g EP) = (CA (mg) + FE (mg) + MG (mg)+ P (mg) + K (mg) + NA (mg) + ZN (mg)+ CU (mg) + MN (mg) + CL (mg))/1000
+
+Eq.1.2: SOP = Sum of water + protein + fat + available carbohydrates + dietary fibre + alcohol + ash
+
+
+##### CHOAVLg
+
+We are comparing extracting the "unique" ISSCAAP, product_type and ICS name of each fish product with the CHOAVLg > 0 to compare the values with similar fishery products in the Fisheries Global NCT. When doing that, we unexpectedly identified two entries that were "raw" and "frozen" with CHOAVLg > 0, which are "Periwinkle, common, Norwegian".
+
+Additionally,  "04.373 - Caviar, polar" and "04.307- Caviar, cod roe with mayonnaise" were excluded because SOP_std was higher than standard and CHOAVLg was also very high compared with other values for caviar in Fisheries Global NCT, 2022, and the source reference (114a) was not very reliable. Similarly, "04.089 - Caviar, capelin roe" was excluded due to high CHO and weak source of the value. We also excluded the entry "04.323 Fish burger, breaded, fried, with bread, cheese, sauce, fast food restaurant" because it included bread sauce ect. and it was not only the fish burger. 
+
+#### ASHg
+
+As it has previously mentioned in this report, ASHg were not available, however ash values are necesary to calculate carbohydrates by difference. This variable was calculated at (FAO) SUA fish category. Therefore, two approaches were tested: 1) the ASHg calculated for the SOP, and 2) because we had information on analysed carbohydrates (CHOAVLg), we used the CHOAVLDg formula (**Eq.2.1**) to calculate ash (`ASHg_bydiff`) (**Eq.2.2**). 
+
+We checked the mean difference in ash content by the two methods (`ASHg_bydiff`), and calculated the carbohydrates by difference (`CHOVALDg_std`) using the former method. Finally, we evaluated the mean difference in carbohydrates by difference and the analysed carbohydrate. After, all the tests, we decided that the later method for calculating ash content (`ASHg_bydiff`) would yield more accurate results.  
+
+Eq.2.1: 
+Eq.2.2:  
+
+Hence,`ASHg_bydiff` values were used then to recalculate CHOVALDg at (FAO) SUA fish category in the Fisheries Global NCT, 2022.
+
 
 ### Limitations
 
