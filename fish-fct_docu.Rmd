@@ -1,8 +1,9 @@
 ---
 title: "Documentation of the extension of the fisheries composition dataset"
 author:
-- "Lucia Segovia D L Revilla"
+- "Lucia Segovia de la Revilla"
 - "Thomas Codd"
+- "Liberty Mlambo"
 - "Louise Ander"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
@@ -12,6 +13,9 @@ output:
 editor_options:
   markdown:
     wrap: 72
+    
+link-citations: yes
+bibliography: mylibrary.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -112,7 +116,7 @@ c.  Combining or Re-calculating variables: Summary statistics will be
 
 ### 1. Preparation steps: Identifying the data
 
-#### 1. 1. Reviewing FCTs of the current version of the Fisheries Global NCT 
+#### 1. 1. Reviewing FCTs of the current version of the Fisheries Global NCT
 
 Of the 13 FCTs included in the Global Table of Nutrient Values, for the
 Fisheries Global NCT, 2022 (FISHERIES-GlobalNCT_ForSharing_Feb2022.xls),
@@ -132,7 +136,7 @@ Because most of the FCTs included were previously reviewed by the FAO
 team, there was no need of checking the overall quality of the other
 FCTs.
 
-#### 1. 2. Identifying new potential sources of NVs 
+#### 1. 2. Identifying new potential sources of NVs
 
 We reviewed some FCTs that could provide information on fish and fishery
 products for the pre-defined nutrients of interest. Some potential
@@ -154,7 +158,7 @@ In table 1, we can find information on the final list of FCDBs included.
 access, format and reviewing team.
 
 | BiblioID   | Reference                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Link to access original data                                                                | Access                                                                                     |       Format       | Reviewer |
-|------------|-------------|------------|------------|:----------:|------------|
+|------------|------------|------------|------------|:----------:|------------|
 | US19       | US Department of Agriculture (USDA), Agricultural Research Service, Nutrient Data Laboratory. USDA National Nutrient Database for Standard Reference, Legacy. Version Current: April 2019.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | <http://www.ars.usda.gov/nutrientdata>                                                      | Publicly available                                                                         |       Access       | FAO      |
 | AU19       | Food Standards Australia New Zealand (FSANZ). 2019. The Australian Food Composition Database, release 1 \\[online\\]. Canberra.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | <http://www.foodstandards.gov.au>                                                           | Internal                                                                                   |       excel        | FAO      |
 | NZ18       | New Zealand Food Composition Database. 2019. New Zealand FOODfilesTM 2018 Manual. The New Zealand Institute for Plant and Food Research Limited and Ministry of Health.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | <http://www.foodcomposition.co.nz/foodfiles>                                                | Publicly available                                                                         |       excel        | FAO      |
@@ -188,14 +192,14 @@ the original FCT (raw files) in individual folders named with the
 BiblioID (See table 1) which is stored in the variable `source_fct` (See
 table 2).
 
-### 2. Tidying the data 
+### 2. Tidying the data
 
 In order to merge all data from various FCTs we needed to harmonise the
 information in each dataset. The steps that were taken are explained
 below and annotated scripts for each FCTs can be found in this
 repository in each corresponding folder.
 
-#### 2.1. Renaming variable names 
+#### 2.1. Renaming variable names
 
 Each FCT has its own variable names, including for nutrient values. Some
 FCTs included information related to the FAO/ INFOODS food components
@@ -220,7 +224,7 @@ to be compliant with R conventions. E.g., removing spaces in variables
 names, changing symbols to characteres (e.g., µg to mcg), or
 standardising the name formatting from using underscores and/or
 parenthesis to using only underscores. Also, changing dashes (-) to
-underscores (-). Note that within the Tagnames, the dash is used to
+underscores (\_). Note that within the Tagnames, the dash is used to
 denote that the method for obtaining that (component) value is unknown.
 This is important for the quality assessment of the data.
 
@@ -233,97 +237,112 @@ in the previous version of the Fisheries Global NCT.
 **Table 2.**: List of variables names (including Tagnames), description
 and reference for the Tagnames.
 
-| Variable name                                                        | Description                                                                                                                                                                                                                                                                                                                                                 | Reference                               |
-|------------------|-------------------------------------|------------------|
-| fdc_id                                                               | food identifier as per original source (FCT)                                                                                                                                                                                                                                                                                                                | \-                                      |
-| food_desc                                                            | food name and description as per original source (FCT)                                                                                                                                                                                                                                                                                                      | \-                                      |
-| food_group                                                           | food group as per original source (FCT)                                                                                                                                                                                                                                                                                                                     | \-                                      |
-| scientific_name                                                      | Scientific name of the food                                                                                                                                                                                                                                                                                                                                 | \-                                      |
-| source_fct                                                           | Id. of the FCT (BiblioID), see Table 1                                                                                                                                                                                                                                                                                                                      | \-                                      |
-| nutrient_data_source                                                 | references or data source for the nutrient values                                                                                                                                                                                                                                                                                                           | \-                                      |
-| Edible_factor_in_FCT                                                 | edible portion reported as fraction edible, imputed from the original FCT, or calculated from refuse in the FCT                                                                                                                                                                                                                                             | \-                                      |
-| Edible_desc                                                          | information provided on the edible portion                                                                                                                                                                                                                                                                                                                  | \-                                      |
-| specific_gravity                                                     | density reported in the original units as in the origianl FCT                                                                                                                                                                                                                                                                                               | \-                                      |
-| SOPg                                                                 | Sum of Proximate in g per 100g EP as reported in the original FCT                                                                                                                                                                                                                                                                                           | \-                                      |
-| ASHg                                                                 | Ashes in g per 100g of EP                                                                                                                                                                                                                                                                                                                                   | \-                                      |
-| ENERCkJ                                                              | Energy in kJ/ 100g of EP as reported in the original FCT                                                                                                                                                                                                                                                                                                    | \-                                      |
-| ENERCkcal                                                            | Energy in kcal/ 100g EP as reported in the original FCT                                                                                                                                                                                                                                                                                                     | \-                                      |
-| WATERg                                                               | Water/ moisture content in g per 100g of EP                                                                                                                                                                                                                                                                                                                 | \-                                      |
-| PROCNTg                                                              | protein in g per 100g of EP, as reported in the original FCT and assumed to be calculated from nitrogen (NTg) content                                                                                                                                                                                                                                       | FAO/INFOODS, 2012                       |
-| NTg                                                                  | Nitrogen, total                                                                                                                                                                                                                                                                                                                                             | FAO/INFOODS, 2012                       |
-| XN                                                                   | Nitrogen conversion factor                                                                                                                                                                                                                                                                                                                                  | FAO/INFOODS, 2012                       |
-| FATg                                                                 | total fat content in g per 100g of EP. Sum of triglycerides, phospholipids, sterols and related compounds obtained by a mixed solvent extraction                                                                                                                                                                                                            | FAO/INFOODS, 2012                       |
-| FAT_g                                                                | fat content unknown method of calculation in g per 100g of EP                                                                                                                                                                                                                                                                                               | \-                                      |
-| FATCEg                                                               | fat content measured using continuous extraction (e.g., Soxhlet method) expressed in g per 100g of EP                                                                                                                                                                                                                                                       | FAO/INFOODS, 2012                       |
-| CHOAVLDFg                                                            | available carbohydrates calculated by difference (E.g., 100 - (weight in grams of water + protein + fat + ash + fibre + alcohol in 100 g of food)) imputed from the original source                                                                                                                                                                         | FAO/INFOODS, 2012                       |
-| CHOAVLg                                                              | available carbohydrates calculated by weight in g per 100g of EP                                                                                                                                                                                                                                                                                            | FAO/INFOODS, 2012                       |
-| CHOCSMg                                                              | carbohydrates, total; calculated by summation. This values is the sum of the sugars, starches, oligosaccharide, and dietary fibre in g per 100g of EP                                                                                                                                                                                                       | FAO/INFOODS, 2012                       |
-| CHOAVLMg                                                             | carbohydrates, available in monosaccharide equivalent. This value includes the free sugars plus dextrins, starch, and glycogen in g per 100g of EP                                                                                                                                                                                                          | FAO/INFOODS, 2012                       |
-| FIBTGg                                                               | total dietary fibre by AOAC Prosky method expressed in g per 100g of EP                                                                                                                                                                                                                                                                                     | FAO/INFOODS, 2012                       |
-| NSPg                                                                 | non-starch polysaccharide, (Englyst fibre) expressed in g per 100g of EP                                                                                                                                                                                                                                                                                    | FAO/INFOODS, 2012                       |
-| FIBCg                                                                | fibre, crude in g per 100g of EP                                                                                                                                                                                                                                                                                                                            | FAO/INFOODS, 2012                       |
-| ALCg                                                                 | alcohol in g per 100g                                                                                                                                                                                                                                                                                                                                       | \-                                      |
-| ALCg_100mL                                                           | alcohol expressed in g per 100mL                                                                                                                                                                                                                                                                                                                            | \-                                      |
-| SUGARg                                                               | total sugar (the sum of free mono- and disaccharides) in g per 100g of EP                                                                                                                                                                                                                                                                                   | \-                                      |
-| FASATg                                                               | fatty acids, total saturated in g per 100g                                                                                                                                                                                                                                                                                                                  | FAO/INFOODS, 2012                       |
-| FAMSg                                                                | fatty acids, total monounsaturated in g per 100g                                                                                                                                                                                                                                                                                                            | FAO/INFOODS, 2012                       |
-| FAPUg                                                                | fatty acids, total polyunsaturated in g per 100g of EP                                                                                                                                                                                                                                                                                                      | FAO/INFOODS, 2012                       |
-| FATRNg                                                               | fatty acids, total trans in g per 100g EP                                                                                                                                                                                                                                                                                                                   | FAO/INFOODS, 2012                       |
-| F22D6N3g                                                             | docosahexaenoic acid (DHA) (22:6 n-3) in g/100g of EP                                                                                                                                                                                                                                                                                                       | \-                                      |
-| F20D5N3g                                                             | eicosapentaenoic acid (EPA) (20:5 n-3) in g/100g of EP                                                                                                                                                                                                                                                                                                      | \-                                      |
-| CHOLEmg                                                              | cholesterol determined by enzymatic or chromatographic method in mg per 100g of EP                                                                                                                                                                                                                                                                          | \-                                      |
-| CHOL_mg                                                              | cholesterol by unknown method of determination in mg per 100g of EP                                                                                                                                                                                                                                                                                         | \-                                      |
-| RETOLmcg                                                             | retinol in mcg per 100g of EP                                                                                                                                                                                                                                                                                                                               | \-                                      |
-| VITAmcg                                                              | Vitamin A (Retinol Eq. (RE) = mcg retinol + 1/6 mcg ß- carotene + 1/12 mcg other pro-vitamin A carotenoids) in mcg per 100g of EP                                                                                                                                                                                                                           | FAO/INFOODS, 2012                       |
-| VITA_RAEmcg                                                          | Vitamin A (Retinol Activity Eq. (RAE) = mcg retinol + 1/12 mcg ß- carotene + 1/24 mcg other provitamin A carotenoids) in mcg per 100g of EP                                                                                                                                                                                                                 | FAO/INFOODS, 2012                       |
-| CARTBEQmcg                                                           | beta-carotene equivalents, is the sum of the beta-carotene + 1/2 quantity of other carotenoids with vitamin A activity, expressed in mcg per 100g of EP                                                                                                                                                                                                     | FAO/INFOODS, 2012                       |
-| CARTAmcg                                                             | alpha-carotene in mcg per 100g of EP                                                                                                                                                                                                                                                                                                                        | FAO/INFOODS, 2012                       |
-| CARTBmcg                                                             | beta-carotene in mcg per 100g of EP                                                                                                                                                                                                                                                                                                                         | FAO/INFOODS, 2012                       |
-| CRYPXBmcg                                                            | beta-cryptoxanthin in mcg per 100g of EP                                                                                                                                                                                                                                                                                                                    | FAO/INFOODS, 2012                       |
-| VITEmg                                                               | vitamin E calculated by summation of the vitamin E activities of the active tocopherols and tocotrienols expressed as alpha-tocopherol equivalent in mg per 100g of EP (alpha-tocophero eq. = alpha-tocopherol + 0.4 beta-tocopherol + 0.1 gamma-tocopherol+ 0.01 delta-tocopherol+ 0.3 alpha-tocotrienol + 0.05 beta-tocotrienol + 0.01 gamma-tocotrienol) | FAO/INFOODS, 2012                       |
-| TOCPHAmg                                                             | alpha-tocopherol in mg per 100g of EP                                                                                                                                                                                                                                                                                                                       | Tagnames, 2007 (accessed on 2022-06-08) |
-| TOCPHBmg                                                             | beta-tocopherol in mg per 100g of EP                                                                                                                                                                                                                                                                                                                        | Tagnames, 2007 (accessed on 2022-06-08) |
-| TOCPHGmg                                                             | gamma-tocopherol in mg per 100g of EP                                                                                                                                                                                                                                                                                                                       | Tagnames, 2007 (accessed on 2022-06-08) |
-| TOCPHDmg                                                             | delta-tocopherol in mg per 100g of EP                                                                                                                                                                                                                                                                                                                       | Tagnames, 2007 (accessed on 2022-06-08) |
-| TOCTRAmg                                                             | alpha-tocotrienol in mg per 100g of EP                                                                                                                                                                                                                                                                                                                      | Tagnames, 2007 (accessed on 2022-06-08) |
-| TOCTRBmg                                                             | beta-tocotrienol in mg per 100g of EP                                                                                                                                                                                                                                                                                                                       | Tagnames, 2007 (accessed on 2022-06-08) |
-| TOCTRGmg                                                             | gamma-tocotrienol in mg per 100g of EP                                                                                                                                                                                                                                                                                                                      | Tagnames, 2007 (accessed on 2022-06-08) |
-| THIAmg                                                               | thiamin, vitamin B1 analysed and expressed as thiamin in mg per 100g of EP                                                                                                                                                                                                                                                                                  | FAO/INFOODS, 2013b                      |
-| THIAHCLmg                                                            | thiamin hydrochloride, vitamin B1 analysed and expressed as thiamin hydrochloride in mg per 100g of EP                                                                                                                                                                                                                                                      | FAO/INFOODS, 2013b                      |
-| RIBFmg                                                               | Riboflavin (Vitamin B2) in mg per 100g of EP                                                                                                                                                                                                                                                                                                                | Tagnames, 2007 (accessed on 2022-06-08) |
-| VITB6Amg                                                             | Vitamin B6 determined by analysis in mg/100g of EP                                                                                                                                                                                                                                                                                                          | FAO/INFOODS, 2012                       |
-| VITB6Cmg                                                             | Vitamin B6 determined by calculation (sum of pyridoxal, pyridoxamine and pyridoxine) in mg per 100g EP                                                                                                                                                                                                                                                      | FAO/INFOODS, 2012                       |
-| VITB6_mg                                                             | Vitamin B6 by unknown method in mg/100g of EP                                                                                                                                                                                                                                                                                                               | Tagnames, 2007 (accessed on 2022-06-08) |
-| FOLDFEmcg                                                            | dietary folate equivalents calculated as food folate + 1.7 x synthetic folic acid and expressed in mcg per 100g of EP                                                                                                                                                                                                                                       | FAO/INFOODS, 2012                       |
-| FOLmcg                                                               | folate, total (food folate + synthetic folic) in mcg per 100g EP. Includes both conjugated and free folate (determined by microbiological assay)                                                                                                                                                                                                            | FAO/INFOODS, 2012                       |
-| FOLACmcg                                                             | folic acid. Synthetic folic acid used in fortification and expressed in mcg per 100g EP                                                                                                                                                                                                                                                                     | FAO/INFOODS, 2012                       |
-| FOLFDmcg                                                             | folate food, naturally occurring food folate (determined by microbiological assay) in mcg per 100g EP                                                                                                                                                                                                                                                       | FAO/INFOODS, 2012                       |
-| FOLSUMmcg                                                            | folate, sum vitamers in mcg per 100g EP. It includes mostly tetrahydrofolate, 5-methyltetrahydrofolate, 5-formyltetrahydrofolate, 10-formylfolic acid, 10-formyldihyrdofolate and folic acid (determined by HPLC)                                                                                                                                           |                                         |
-| FOL_mcg                                                              | folate total, unknown method                                                                                                                                                                                                                                                                                                                                | Fisheries Global NCT, 2022              |
-| NIAEQmg                                                              | niacin equivalents, total. Preformed niacin plus niacin equivalents from tryptophan (TRP) in mg per 100g EP                                                                                                                                                                                                                                                 | FAO/INFOODS, 2012                       |
-| NIAmg                                                                | Niacin, prefrormed in mg per 100g EP                                                                                                                                                                                                                                                                                                                        | FAO/INFOODS, 2012                       |
-| NIATRPmg                                                             | niacin equivalents, from tryptophan. 1/60 x tryptophan (TRP) expressed in mg per 100g EP                                                                                                                                                                                                                                                                    | FAO/INFOODS, 2012                       |
-| TRPmg = tryptophan in mg per 100g of EP (includes only L-tryptophan) | Tagnames, 2007 (accessed on 2022-06-08)                                                                                                                                                                                                                                                                                                                     |                                         |
-| VITB12mcg                                                            | Vitamin B12 (cobalamin, including all the active forms in foods) expressed in mcg per 100g EP                                                                                                                                                                                                                                                               | Tagnames, 2007 (accessed on 2022-06-08) |
-| VITCmg                                                               | vitamin C (L-ascorbic acid plus Ldehydro-ascorbic acid). Usually analyzed by HPLC and expressed in mg per 100g of EP                                                                                                                                                                                                                                        | FAO/INFOODS, 2012                       |
-| ASCLmg                                                               | L-ascorbic acid in mg per 100g of EP. Titrimetry can normally analyze L-ascorbic acid only                                                                                                                                                                                                                                                                  | FAO/INFOODS, 2012                       |
-| VITDEQmcg                                                            | vitamin D calculated as the sum of Vitamin D3 + D2 + 5 x 25-hydroxycholecalciferol and expressed in mcg per 100g of EP                                                                                                                                                                                                                                      | FAO/INFOODS, 2012                       |
-| VITDmcg                                                              | vitamin D calculated by summation of ergocalciferol and cholecalciferol and expressed in mcg per 100g of EP. This definition is mostly used                                                                                                                                                                                                                 | FAO/INFOODS, 2012                       |
-| CHOCALmcg                                                            | cholecalciferol (D3) in mcg per 100g of EP                                                                                                                                                                                                                                                                                                                  | FAO/INFOODS, 2012                       |
-| ERGCALmcg                                                            | ergocalciferol (D2) in mcg per 100g of EP                                                                                                                                                                                                                                                                                                                   | FAO/INFOODS, 2012                       |
-| CHOCALOHmcg                                                          | 25-hydroxycholecalciferol in mcg per 100g of EP                                                                                                                                                                                                                                                                                                             | FAO/INFOODS, 2012                       |
-| ERGCALOHmcg                                                          | 25-hydroxyergocalciferol                                                                                                                                                                                                                                                                                                                                    | Own definition based on CHOCALOHmcg     |
-| CAmg                                                                 | calcium in mg per 100g of EP                                                                                                                                                                                                                                                                                                                                | Tagnames, 2007 (accessed on 2022-06-08) |
-| MGmg                                                                 | magnesium in mg per 100g of EP                                                                                                                                                                                                                                                                                                                              | Tagnames, 2007 (accessed on 2022-06-08) |
-| MNmg                                                                 | manganese in mg per 100g of EP                                                                                                                                                                                                                                                                                                                              | Tagnames, 2007 (accessed on 2022-06-08) |
-| Pmg                                                                  | phosphorus in mg per 100g of EP                                                                                                                                                                                                                                                                                                                             | Tagnames, 2007 (accessed on 2022-06-08) |
-| FEmg                                                                 | iron in mg per 100g of EP                                                                                                                                                                                                                                                                                                                                   | Tagnames, 2007 (accessed on 2022-06-08) |
-| NAmg                                                                 | sodium in mg per 100g of EP                                                                                                                                                                                                                                                                                                                                 | Tagnames, 2007 (accessed on 2022-06-08) |
-| Kmg                                                                  | potassium in mg per 100g of EP                                                                                                                                                                                                                                                                                                                              | Tagnames, 2007 (accessed on 2022-06-08) |
-| CUmg                                                                 | copper in mg per 100g of EP                                                                                                                                                                                                                                                                                                                                 | Tagnames, 2007 (accessed on 2022-06-08) |
-| ZNmg                                                                 | Zinc in mg per 100g of EP                                                                                                                                                                                                                                                                                                                                   | Tagnames, 2007 (accessed on 2022-06-08) |
-| SEmcg                                                                | selenium in mcg per 100g of EP                                                                                                                                                                                                                                                                                                                              | Tagnames, 2007 (accessed on 2022-06-08) |
-| IDmcg                                                                | iodine in mcg per 100g of EP                                                                                                                                                                                                                                                                                                                                | Tagnames, 2007 (accessed on 2022-06-08) |
+| Variable name          | Description                                                                                                                                                                                                                                                                                                                                                 | Value type        |
+|------------------|------------------------------------|------------------|
+| fdc_id                 | Food identifier as per original source (FCT)                                                                                                                                                                                                                                                                                                                | Compiled          |
+| food_desc              | Food name and description as per original source (FCT)                                                                                                                                                                                                                                                                                                      | Compiled          |
+| food_group             | Food group as per original source (FCT)                                                                                                                                                                                                                                                                                                                     | Compiled          |
+| scientific_name        | Scientific name of the food                                                                                                                                                                                                                                                                                                                                 | Compiled          |
+| source_fct             | Id. of the FCT (BiblioID), see Table 1                                                                                                                                                                                                                                                                                                                      | Generated         |
+| nutrient_data_source   | References or data source for the nutrient values                                                                                                                                                                                                                                                                                                           | Compiled          |
+| Edible_factor_in_FCT   | Edible portion reported as fraction edible, imputed from the original FCT, or calculated from refuse in the FCT                                                                                                                                                                                                                                             | Compiled          |
+| Edible_desc            | Information provided on the edible portion                                                                                                                                                                                                                                                                                                                  | Compiled          |
+| specific_gravity       | Density reported in the original units as in the original FCT                                                                                                                                                                                                                                                                                               | Compiled          |
+| SOPg                   | Sum of Proximate in g per 100g EP as reported in the original FCT                                                                                                                                                                                                                                                                                           | Compiled          |
+| SOPg_std               | Sum of Proximate in g per 100g EP (Eq. 3.3)                                                                                                                                                                                                                                                                                                                 | Calculated        |
+| ASHg                   | Ashes in g per 100g of EP                                                                                                                                                                                                                                                                                                                                   | Compiled          |
+| ASHg_std               | Ashes in g per 100g of EP (Eq. 3.4)                                                                                                                                                                                                                                                                                                                         | Calculated        |
+| ENERCkJ                | Energy in kJ/ 100g of EP as reported in the original FCT                                                                                                                                                                                                                                                                                                    | Compiled          |
+| ENERCkJ_standardised   | Energy in kJ/ 100g of EP (Eq. 3.5)                                                                                                                                                                                                                                                                                                                          | Calculated        |
+| ENERCkcal              | Energy in kcal/ 100g EP as reported in the original FCT                                                                                                                                                                                                                                                                                                     | Compiled          |
+| ENERCkcal_standardised | Energy in kcal/ 100g EP (Eq. 3.5)                                                                                                                                                                                                                                                                                                                           | Calculated        |
+| WATERg                 | Water/ moisture content in g per 100g of EP                                                                                                                                                                                                                                                                                                                 | Compiled          |
+| PROCNTg                | Protein in g per 100g of EP, as reported in the original FCT and assumed to be calculated from nitrogen (NTg) content                                                                                                                                                                                                                                       | Compiled          |
+| NTg                    | Nitrogen, total                                                                                                                                                                                                                                                                                                                                             | Compiled          |
+| XN                     | Nitrogen conversion factor                                                                                                                                                                                                                                                                                                                                  | Compiled          |
+| FATg                   | Total fat content in g per 100g of EP. Sum of triglycerides, phospholipids, sterols and related compounds obtained by a mixed solvent extraction                                                                                                                                                                                                            | Compiled          |
+| FAT_g                  | fat content unknown method of calculation in g per 100g of EP                                                                                                                                                                                                                                                                                               | Compiled          |
+| FATCEg                 | Fat content measured using continuous extraction (e.g., Soxhlet method) expressed in g per 100g of EP                                                                                                                                                                                                                                                       | Compiled          |
+| FATg_standardised      | Total fat content in g per 100g of EP regardless of the Tagname (and analytical method used). Including FATg, FAT_g and FATCEg.                                                                                                                                                                                                                             | Calculated        |
+| CHOAVLDFg              | Available carbohydrates calculated by difference (E.g., 100 - (weight in grams of water + protein + fat + ash + fibre + alcohol in 100 g of food)) imputed from the original source                                                                                                                                                                         | Compiled          |
+| CHOAVLg                | Available carbohydrates calculated by weight in g per 100g of EP                                                                                                                                                                                                                                                                                            | Compiled          |
+| CHOCSMg                | Carbohydrates, total; calculated by summation. This values is the sum of the sugars, starches, oligosaccharide, and dietary fibre in g per 100g of EP                                                                                                                                                                                                       | Compiled          |
+| CHOAVLMg               | Carbohydrates, available in monosaccharide equivalent. This value includes the free sugars plus dextrins, starch, and glycogen in g per 100g of EP                                                                                                                                                                                                          | Compiled          |
+| CHOAVLDFg_std          | Available carbohydrates calculated by difference (Eq. 3.6).                                                                                                                                                                                                                                                                                                 | Calculated        |
+| FIBTGg                 | Total dietary fibre by AOAC Prosky method expressed in g per 100g of EP                                                                                                                                                                                                                                                                                     | Compiled          |
+| NSPg                   | Non-starch polysaccharide, (Englyst fibre) expressed in g per 100g of EP                                                                                                                                                                                                                                                                                    | Compiled          |
+| FIBCg                  | Fibre, crude in g per 100g of EP                                                                                                                                                                                                                                                                                                                            | Compiled          |
+| ALCg                   | Alcohol in g per 100g                                                                                                                                                                                                                                                                                                                                       | Compiled          |
+| ALCg_100mL             | Alcohol expressed in g per 100mL                                                                                                                                                                                                                                                                                                                            | Compiled          |
+| SUGARg                 | Total sugar (the sum of free mono- and disaccharides) in g per 100g of EP                                                                                                                                                                                                                                                                                   | Compiled          |
+| FASATg                 | Fatty acids, total saturated in g per 100g                                                                                                                                                                                                                                                                                                                  | Compiled          |
+| FAMSg                  | Fatty acids, total monounsaturated in g per 100g                                                                                                                                                                                                                                                                                                            | Compiled          |
+| FAPUg                  | Fatty acids, total polyunsaturated in g per 100g of EP                                                                                                                                                                                                                                                                                                      | Compiled          |
+| FATRNg                 | Fatty acids, total trans in g per 100g EP                                                                                                                                                                                                                                                                                                                   | Compiled          |
+| F22D6N3g               | Docosahexaenoic acid (DHA) (22:6 n-3) in g/100g of EP                                                                                                                                                                                                                                                                                                       | Compiled          |
+| F20D5N3g               | Eicosapentaenoic acid (EPA) (20:5 n-3) in g/100g of EP                                                                                                                                                                                                                                                                                                      | Compiled          |
+| CHOLEmg                | Cholesterol determined by enzymatic or chromatographic method in mg per 100g of EP                                                                                                                                                                                                                                                                          | Compiled          |
+| CHOL_mg                | Cholesterol by unknown method of determination in mg per 100g of EP                                                                                                                                                                                                                                                                                         | Compiled          |
+| RETOLmcg               | Retinol in mcg per 100g of EP                                                                                                                                                                                                                                                                                                                               | Compiled          |
+| VITAmcg_std            | Vitamin A (Retinol Eq. (RE) in mcg per 100g of EP calculated using Eq.3.7.                                                                                                                                                                                                                                                                                  |                   |
+| Calculated             | FAO/INFOODS, 2012                                                                                                                                                                                                                                                                                                                                           |                   |
+| VITAmcg                | Vitamin A (Retinol Eq. (RE) = mcg retinol + 1/6 mcg ß- carotene + 1/12 mcg other pro-vitamin A carotenoids) in mcg per 100g of EP                                                                                                                                                                                                                           | Compiled          |
+| VITA_RAEmcg            | Vitamin A (Retinol Activity Eq. (RAE) = mcg retinol + 1/12 mcg ß- carotene + 1/24 mcg other provitamin A carotenoids) in mcg per 100g of EP                                                                                                                                                                                                                 | Compiled          |
+| VITA_RAEmcg_std        | Vitamin A (Retinol Activity Eq. (RAE)) in mcg per 100g of EP calculated using Eq.3.6.                                                                                                                                                                                                                                                                       |                   |
+| Calculated             | FAO/INFOODS, 2012                                                                                                                                                                                                                                                                                                                                           |                   |
+| CARTBEQmcg             | Beta-carotene equivalents, is the sum of the beta-carotene + 1/2 quantity of other carotenoids with vitamin A activity, expressed in mcg per 100g of EP                                                                                                                                                                                                     | Compiled          |
+| CARTBEQmcg_std         | Beta-carotene equivalents, expressed in mcg per 100g of EP and calculated using Eq. 3.7. It also can be imputed using function "CARTBEQmcg_std_imputation" (See section 3.4.)                                                                                                                                                                               | Calculated        |
+| CARTAmcg               | Alpha-carotene in mcg per 100g of EP                                                                                                                                                                                                                                                                                                                        | Compiled          |
+| CARTBmcg               | Beta-carotene in mcg per 100g of EP                                                                                                                                                                                                                                                                                                                         | Compiled          |
+| CRYPXBmcg              | Beta-cryptoxanthin in mcg per 100g of EP                                                                                                                                                                                                                                                                                                                    | Compiled          |
+| VITEmg                 | Vitamin E calculated by summation of the vitamin E activities of the active tocopherols and tocotrienols expressed as alpha-tocopherol equivalent in mg per 100g of EP (alpha-tocophero eq. = alpha-tocopherol + 0.4 beta-tocopherol + 0.1 gamma-tocopherol+ 0.01 delta-tocopherol+ 0.3 alpha-tocotrienol + 0.05 beta-tocotrienol + 0.01 gamma-tocotrienol) | Compiled          |
+| FAO/INFOODS, 2012      |                                                                                                                                                                                                                                                                                                                                                             |                   |
+| TOCPHAmg               | Alpha-tocopherol in mg per 100g of EP                                                                                                                                                                                                                                                                                                                       | Compiled          |
+| TOCPHBmg               | Beta-tocopherol in mg per 100g of EP                                                                                                                                                                                                                                                                                                                        | Compiled          |
+| TOCPHGmg               | Gamma-tocopherol in mg per 100g of EP                                                                                                                                                                                                                                                                                                                       | Compiled          |
+| TOCPHDmg               | Delta-tocopherol in mg per 100g of EP                                                                                                                                                                                                                                                                                                                       | Compiled          |
+| TOCTRAmg               | Alpha-tocotrienol in mg per 100g of EP                                                                                                                                                                                                                                                                                                                      | Compiled          |
+| TOCTRBmg               | Beta-tocotrienol in mg per 100g of EP                                                                                                                                                                                                                                                                                                                       | Compiled          |
+| TOCTRGmg               | Gamma-tocotrienol in mg per 100g of EP                                                                                                                                                                                                                                                                                                                      | Compiled          |
+| THIAmg                 | Thiamin, vitamin B1 analysed and expressed as thiamin in mg per 100g of EP                                                                                                                                                                                                                                                                                  | Compiled          |
+| THIAHCLmg              | Thiamin hydrochloride, vitamin B1 analysed and expressed as thiamin hydrochloride in mg per 100g of EP                                                                                                                                                                                                                                                      | Compiled          |
+| RIBFmg                 | Riboflavin (Vitamin B2) in mg per 100g of EP                                                                                                                                                                                                                                                                                                                | Compiled          |
+| VITB6Amg               | Vitamin B6 determined by analysis in mg/100g of EP                                                                                                                                                                                                                                                                                                          | Compiled          |
+| VITB6Cmg               | Vitamin B6 determined by calculation (sum of pyridoxal, pyridoxamine and pyridoxine) in mg per 100g EP                                                                                                                                                                                                                                                      | Compiled          |
+| VITB6_mg               | Vitamin B6 by unknown method in mg/100g of EP                                                                                                                                                                                                                                                                                                               | Compiled          |
+| VITB6_mg_standardised  | Vitamin B6 in mg/100g of EP regardless of the Tagname (and analytical method used). Including VITB6Amg, VITB6Cmg and VITB6_mg.                                                                                                                                                                                                                              | Compiled          |
+| FOLDFEmcg              | Dietary folate equivalents calculated as food folate + 1.7 x synthetic folic acid and expressed in mcg per 100g of EP                                                                                                                                                                                                                                       | FAO/INFOODS, 2012 |
+| FOLmcg                 | Folate, total (food folate + synthetic folic) in mcg per 100g EP. Includes both conjugated and free folate (determined by microbiological assay)                                                                                                                                                                                                            | Compiled          |
+| FOLACmcg               | Folic acid. Synthetic folic acid used in fortification and expressed in mcg per 100g EP                                                                                                                                                                                                                                                                     | Compiled          |
+| FOLFDmcg               | Folate food, naturally occurring food folate (determined by microbiological assay) in mcg per 100g EP                                                                                                                                                                                                                                                       | Compiled          |
+| FOLSUMmcg              | Folate, sum vitamers in mcg per 100g EP. It includes mostly tetrahydrofolate, 5-methyltetrahydrofolate, 5-formyltetrahydrofolate, 10-formylfolic acid, 10-formyldihyrdofolate and folic acid (determined by HPLC)                                                                                                                                           |                   |
+| Compiled               | \-                                                                                                                                                                                                                                                                                                                                                          |                   |
+| FOL_mcg                | Folate total, unknown method                                                                                                                                                                                                                                                                                                                                | Compiled          |
+| NIAEQmg                | Niacin equivalents, total. Preformed niacin plus niacin equivalents from tryptophan (TRP) in mg per 100g EP                                                                                                                                                                                                                                                 | Compiled          |
+| NIAmg                  | Niacin, prefrormed in mg per 100g EP                                                                                                                                                                                                                                                                                                                        | Compiled          |
+| NIATRPmg               | Niacin equivalents, from tryptophan. 1/60 x tryptophan (TRP) expressed in mg per 100g EP                                                                                                                                                                                                                                                                    | Compiled          |
+| TRPmg                  | Tryptophan in mg per 100g of EP (includes only L-tryptophan)                                                                                                                                                                                                                                                                                                |                   |
+| Compiled               | Tagnames, 2007 (accessed on 2022-06-08)                                                                                                                                                                                                                                                                                                                     |                   |
+| VITB12mcg              | Vitamin B12 (cobalamin, including all the active forms in foods) expressed in mcg per 100g EP                                                                                                                                                                                                                                                               | Compiled          |
+| VITCmg                 | Vitamin C (L-ascorbic acid plus Ldehydro-ascorbic acid). Usually analyzed by HPLC and expressed in mg per 100g of EP                                                                                                                                                                                                                                        | Compiled          |
+| ASCLmg                 | L-ascorbic acid in mg per 100g of EP. Titrimetry can normally analyze L-ascorbic acid only                                                                                                                                                                                                                                                                  | Compiled          |
+| VITDEQmcg              | Vitamin D calculated as the sum of Vitamin D3 + D2 + 5 x 25-hydroxycholecalciferol and expressed in mcg per 100g of EP                                                                                                                                                                                                                                      | Compiled          |
+| VITDmcg                | Vitamin D calculated by summation of ergocalciferol and cholecalciferol and expressed in mcg per 100g of EP. This definition is mostly used                                                                                                                                                                                                                 | Compiled          |
+| CHOCALmcg              | Cholecalciferol (D3) in mcg per 100g of EP                                                                                                                                                                                                                                                                                                                  | Compiled          |
+| ERGCALmcg              | Ergocalciferol (D2) in mcg per 100g of EP                                                                                                                                                                                                                                                                                                                   | Compiled          |
+| CHOCALOHmcg            | 25-hydroxycholecalciferol in mcg per 100g of EP                                                                                                                                                                                                                                                                                                             | Compiled          |
+| ERGCALOHmcg            | 25-hydroxyergocalciferol                                                                                                                                                                                                                                                                                                                                    | Compiled          |
+| CAmg                   | Calcium in mg per 100g of EP                                                                                                                                                                                                                                                                                                                                | Compiled          |
+| MGmg                   | Magnesium in mg per 100g of EP                                                                                                                                                                                                                                                                                                                              | Compiled          |
+| MNmg                   | Manganese in mg per 100g of EP                                                                                                                                                                                                                                                                                                                              | Compiled          |
+| Pmg                    | Phosphorus in mg per 100g of EP                                                                                                                                                                                                                                                                                                                             | Compiled          |
+| FEmg                   | Iron in mg per 100g of EP                                                                                                                                                                                                                                                                                                                                   | Compiled          |
+| NAmg                   | Sodium in mg per 100g of EP                                                                                                                                                                                                                                                                                                                                 | Compiled          |
+| Kmg                    | Potassium in mg per 100g of EP                                                                                                                                                                                                                                                                                                                              | Compiled          |
+| CUmg                   | Copper in mg per 100g of EP                                                                                                                                                                                                                                                                                                                                 | Compiled          |
+| ZNmg                   | Zinc in mg per 100g of EP                                                                                                                                                                                                                                                                                                                                   | Compiled          |
+| SEmcg                  | Selenium in mcg per 100g of EP                                                                                                                                                                                                                                                                                                                              | Compiled          |
+| IDmcg                  | Iodine in mcg per 100g of EP                                                                                                                                                                                                                                                                                                                                | Compiled          |
 
 #### 2.2. Other tidying operations <br>
 
@@ -382,7 +401,7 @@ all the unit conversion we followed the FAO/INFOODS Guidelines for
 Converting Units, Denominators and Expression (FAO/INFOODS, 2012b), and
 the suggested standard reporting units.
 
-Eg. Converting alcohol from weight in volumen (w/v) to weight in mass.
+Eg. Converting alcohol from weight in volume (w/v) to weight in mass.
 
 **Eq.1** ALC (g/100mL) / density (g/mL) = ALC (g/100 EP)
 
@@ -397,12 +416,39 @@ Eg. amino acids (AA) reported per g in 100g of PROT to mg in 100g of EP:
 
 #### 3.3. Re-calculating variables <br>
 
-For example Energy needs to be calculated from other components or
-edible portion from refuse.
+Some variables are calculated from other variables, hence they need to
+be recalculated to account for imputed values or when calculating mean
+concentration. Some of those are: Sum of proximate, Energy (kcal, kJ),or
+Carbohydrates available, by difference among others. Other variable that
+is often re-calculated is edible portion from refuse. A special case was ash values which are needed to calculate Available carbohydrate by difference. In the NO21, ash values were not reported, however, because available carbohydates were analysed, we used the an iteration of the **Eq. 3.4a** to calculate ash concentration (Eq.3.4b).
 
-**Eq.3.1** Edible = 100-Refuse(%)/100
 
-**Eq.3.2** Edible = 1-Refuse
+**Eq.3.1** Edible portion = 100-Refuse(%)/100
+
+**Eq.3.2** Edible portion = 1-Refuse
+
+**Eq.3.3** Sum of Proximate (g/100g) = Sum of water + protein + fat +
+available carbohydrates + dietary fibre + alcohol + ash
+
+**Eq.3.4a** Carbohydrates available by difference (g/100g) = 100 - (sum
+of water + protein + fat + ash + alcohol + dietary fibre)
+
+**Eq.3.4b** Ash by difference (g/100g) = 100 - (sum of water + protein +
+fat + *available carbohydate* + alcohol + dietary fibre)
+
+**Eq.3.5a.** Energy (kJ/100g):
+
+**Eq.3.5b.** Energy (kcal/100g):
+
+**Eq.3.6.** Vitamin A, retinol eq. (RE) (mcg/100g) = Retinol
+(mcg/100g) + 1/6\* Beta-Carotene eq. (mcg/100g)
+
+**Eq.3.7.** Vitamin A, retinol activity eq. (RAE) (mcg/100g): Retinol
+(mcg/100g) + 1/12\* Beta-Carotene eq. (mcg/100g)
+
+**Eq.3.8.**. Beta-Carotene eq. (mcg/100g) = 1\*Beta-carotene
+(mcg/100g) + 0.5\* Alpha-carotene (mcg/100g) + 0.5\* Beta-cryptoxanthin
+(mcg/100g)
 
 #### 3.4. Combining Tagnames <br>
 
@@ -412,7 +458,25 @@ nutrients selected for review some could be expressed using different
 Tagnames, depending on: the fraction analysed (e.g., Vitamin D3, Vitamin
 D2), or the method of analysis (e.g., VITB6A, VITB6C). When possible,
 they were standardised by combining values from similar Tagnames such as
-Vitamin B6 into a `_standardised` variable.
+Vitamin B6 or total fat into a `_standardised` variable.
+
+#### 3.5. Imputing values <br>
+
+There were cases were imputation or back calculation from one or more
+food components were used to complete missing values. For example:
+
+1. Retinol: For instance, when a food entry was missing the retinol
+    value (`RETOLmcg`) but it reported Vitamin A (RAE) (`VITA_RAEmcg`)
+    and Beta-Carotene eq. (`CARBEQmcg`), The retinol was calculated
+    using the [equation XX](LINK). Additionally, when Vitamin A (RAE)
+    (`VITA_RAEmcg`) and Vitamin A (RAE) (`VITAmcg`) was provided,
+    retinol as calculated by the [equation XX](LINK). This function
+    added a comment (see `comment`) with information about the
+    components that were used to impute the final `RETOLmcg` value. If
+    no comment was provided, then it was provided by the original food
+    composition source. More information about the development of the
+    function is provided in Issue \#46
+
 
 ##### Generating functions for data transformation <br>
 
@@ -423,21 +487,83 @@ to remove brackets (see functions.R).
 **Combining variables**: `VITB6_mg_standardised` and
 `FAT_g_standardised` variables were generated by using a function.
 
+**Calculating variables**: For instance, Vitamin A, retinol
+eq.(mcg/100g) and Beta-Carotene eq.(mcg/100g) were calculated using a
+function for the weighted sum of the listed variables.
+
+**Imputing values**: For instance, `RETOLmcg_Recalculator()` was used to
+impute retinol values by back-calculation from Vitamin A (RAE) and
+Beta-Carotene eq.
+
+Here's the list of the standardised variables as reported in the
+Fisheries Global NCT, 2022 (Feb., 2022), of which all except food folate
+(FOLDFEmcg) were reported and functions developed to generate them in
+the Fisheries Global NCT, 2022 (Oct., 2022).
+
+-   SOP_own = Sum of Proximate
+-   ENERCkJ_standardised
+-   ENERCkcal_standardised
+-   CHOAVLDFg_standardised
+-   FAT_g\_standardised
+-   FIBTGg_standardised
+-   VITAmcg_standardised
+-   VITA_RAEmcg_standardised
+-   CARTBEQmcg_standardised
+-   VITEmg_standardised
+-   THIAmg_standardised
+-   FOLDFEmcg_standardised\*
+-   VITB6_mg_standardised
+-   NIAEQmg_standadised
+-   NIATRIPmg_standardised
+-   VITDmg_standardised
+
 ## Updating the Global Fish NCT
 
 Once the FCTs were loaded and harmonised, we combined them into a single
-data file, filter the fish entries and merged with the information
+data file (data library), filter the fish entries and merged with the information
 already provided by the FAO team regarding each fish entry ISSCAAP, ICS
 FAOSTAT and alpha-three codes.
 
-For this particular case the steps 3.4 and 3.4 were performed after
+For this particular case the steps 3.4 and 3.5 were performed after
 merging all the datasets together.
 
 All the steps are done and documented in the `merging_all.R` script.
 
-#### Checking Tagnames for completeness <br>
+### 4. Data visualisation
 
-#### Checking quality of the values <br>
+#### 4.1. Checking Tagnames for completeness <br>
+
+We checked the number of missing values per food component using data visualisation. We used the *package naniar* for visualising missing values by ICS SUA fishery category and by FCT. This allowed us to identify any typos or mistakes when renaming the food components, and also to identify potential food components that could be excluded due to the high number of missing values. Similarly the need for using imputation techniques (see section 3.5). 
+
+
+#### 4.2. Checking quality of the values <br>
+
+We used histograms and boxplot to identify extreme values by plotting the different components by fish type and fish preparation. These two variables were created for data visalisation purposes and did not make it to the final dataset: Fisheries Global NCT (Oct., 2022). 
+
+
+### 5.  Exporting data and metadata
+
+#### 5.1. Formatting the data
+
+After all the values, particularly the mean values per ICS SUA category, were evaluated the dataset was formatted to be exported into a human-friendly format (e.g. Excel).
+
+First, a summary row was generated for each ICA SUA category which contained the final mean value for each food component of interest. Additionally, some food components were recalculated. 
+
+### Nutrient to be calculated at the summary row:
+
+1) SOP own
+2) Energy (kcal)
+3) Energy (kJ)
+4) Carbohydates by difference (g)
+5) Vitamin A RAE (mcg) -> If retinol (RETOLmcg) and beta-carotene eq. (CARTBEQmcg) are not present, it's not calculated. Formula = [RETOL + CARTBEQmcg/12]
+6) Vitamin A RA (mcg) -> If retinol (RETOLmcg) and beta-carotene eq. (CARTBEQmcg) are not present, it's not calculated. Formula = [RETOL + CARTBEQmcg/6]
+
+Note: For all those variables in the empty row below the summary values print ("calc."). 
+
+### Nutrient to be assumed at the summary row:
+
+1) Alcohol. It was assumed zero. Alcohol should be zero in all and printed in the empty row below the summary value "assumed". 
+
 
 # Results
 
@@ -449,7 +575,7 @@ B6, Vit. B12, Vit. D, Niacin, DHA, EPA.
 
 ### 2. Tidying the data
 
-#### 2.1. Renaming variables 
+#### 2.1. Renaming variables
 
 Checking food component names and renaming them with Tagnames
 
@@ -610,30 +736,35 @@ Documentation in GitHub
 
 #### 3.4. Combined variables (standardised) <br>
 
+## REVIEW
+
 This was done after merging all the dataset together, and it's reported
 on the `merging_all.R`.
 
 Here's the list of the standardised variables as reported in the
-Fisheries Global NCT, 2022, of which we only reported those in bold
-(e.g., VITB6_mg_standardised, FAT_g\_standardised)
+Fisheries Global NCT, 2022, of which we reported all except food folate
+(FOLDFEmcg).
 
 -   SOP_own = Sum of Proximate
 -   ENERCkJ_standardised
 -   ENERCkcal_standardised
 -   CHOAVLDFg_standardised
--   **FAT_g\_standardised**
+-   FAT_g\_standardised
 -   FIBTGg_standardised
 -   VITAmcg_standardised
 -   VITA_RAEmcg_standardised
 -   CARTBEQmcg_standardised
 -   VITEmg_standardised
 -   THIAmg_standardised
--   FOLDFEmcg_standardised
--   **VITB6_mg_standardised**
--   **NIAEQmg_std**
+-   FOLDFEmcg_standardised\*
+-   VITB6_mg_standardised
 -   NIAEQmg_standadised
 -   NIATRIPmg_standardised
 -   VITDmg_standardised
+
+Of which functions were generated to re-calculate the following the
+equations in the section 3.3 of this document and can be found in
+"functions.R".
 
 #### Updating the Global Fish NCT, 2022
 
@@ -907,7 +1038,7 @@ squid"\
 cured"
 
 | fcd_id | food_desc                                                      | WATERg | SEmcg | source_fct |
-|--------------|-----------------|--------------|--------------|--------------|
+|---------------|---------------|---------------|---------------|---------------|
 | 10342  | Mollusks, neon flying squid, raw                               | 79.3   | 28    | JA15       |
 | 10345  | Mollusks, Japanese common squid, raw "Syn. short-finned squid" | 80.2   | 41    | JA15       |
 
@@ -1028,11 +1159,13 @@ for the items can be found in the column `comment`.
 
 ###### 1) Niacin
 
-We check for "extreme values", and after plotting the values, we identified some potential "extreme values". However after comparing these values with similar fish product, all the values seemed plausible. For example, one of the
-high value was smoke-dried and fermented fish (i.e., low water
-concentration). When the niacin concentration was compared on dry-weight
-basis concentration with similar fresh items, the niacin concentration
-was similar.
+We check for "extreme values", and after plotting the values, we
+identified some potential "extreme values". However after comparing
+these values with similar fish product, all the values seemed plausible.
+For example, one of the high value was smoke-dried and fermented fish
+(i.e., low water concentration). When the niacin concentration was
+compared on dry-weight basis concentration with similar fresh items, the
+niacin concentration was similar.
 
 Note that for "Other pelagic fish, cured", one of the high values had a
 great influence in the final mean value. For instance, when we removed
@@ -1045,21 +1178,31 @@ The rest of the SUA categories remained more or less the same.
 
 ###### 2) Copper
 
-Similarly for Cu, we identified items that had the highest values: Octopus from IN17 (fdc_id = R003) which looked very high, even when compared with other
-octopus values. Double-check the value.
+Similarly for Cu, we identified items that had the highest values:
+Octopus from IN17 (fdc_id = R003) which looked very high, even when
+compared with other octopus values. Double-check the value.
 
 Oyster from UF16 (fdc_id = 093013) also seems high compared with other
-oyster but seems plausible given the type of food. For instance, of the 10 items with the highest Cu concentration, 4 were oyster. 
+oyster but seems plausible given the type of food. For instance, of the
+10 items with the highest Cu concentration, 4 were oyster.
 
 Another item from the JA15 (fdc_id = 10350) was also extremely high,
-however when we compared it with the "fresh" values, it was still in line
-with the water content of that item. However, because the item was driving the very high mean for
-the category "Cephalopods, cured", (mean = 
-`r mean(as.numeric(fao_fish_fct$CUmg[fao_fish_fct$ics_faostat_sua_english_description == "Cephalopods, cured"]))`) we decided to remove it from the final mean, which yielded more nuanced value (mean = `r round(mean(as.numeric(fao_fish_fct$CUmg[fao_fish_fct$ics_faostat_sua_english_description == "Cephalopods, cured" & fao_fish_fct$fdc_id != "10350"])),2)`). For future, and in order to minimise the influence of this type of food items, more values should be sought for each category.
+however when we compared it with the "fresh" values, it was still in
+line with the water content of that item. However, because the item was
+driving the very high mean for the category "Cephalopods, cured", (mean
+=
+`r mean(as.numeric(fao_fish_fct$CUmg[fao_fish_fct$ics_faostat_sua_english_description == "Cephalopods, cured"]))`)
+we decided to remove it from the final mean, which yielded more nuanced
+value (mean =
+`r round(mean(as.numeric(fao_fish_fct$CUmg[fao_fish_fct$ics_faostat_sua_english_description == "Cephalopods, cured" & fao_fish_fct$fdc_id != "10350"])),2)`).
+For future, and in order to minimise the influence of this type of food
+items, more values should be sought for each category.
 
 ###### 3) Vitamin B6
 
-Vitamin B6 was reported in all but one FCT (KE18). Overall, values were within plausible values. The highest values reported were for Tuna and they were still within normal ranges. 
+Vitamin B6 was reported in all but one FCT (KE18). Overall, values were
+within plausible values. The highest values reported were for Tuna and
+they were still within normal ranges.
 
 ###### 4) Vitamin B12
 
@@ -1119,9 +1262,16 @@ those values are shown below.
 
 `r subset(fao_fish_fct, fdc_id %in% c("T39", "04.043", "04.333", "04.107", "04.055"), select = c(fdc_id, food_desc, WATERg, SEmcg)) %>% knitr::kable(., digits=2)`
 
-When we checked by SUA category, we identified the "Other pelagic fish, cured" which had the highest mean value,only two fish entries and only one Se value. Similarly, "Aquatic mammals, preparations nei" only reported information for three entries of which only two had a `SEmcg` value.
+When we checked by SUA category, we identified the "Other pelagic fish,
+cured" which had the highest mean value,only two fish entries and only
+one Se value. Similarly, "Aquatic mammals, preparations nei" only
+reported information for three entries of which only two had a `SEmcg`
+value.
 
-Again from the "Aquatic mammals, meat", we only have 3 values out of 15 values, which makes the mean quite high, although we can assess if that mean is high or is in line with the overall category mean due to the lack of data availability.
+Again from the "Aquatic mammals, meat", we only have 3 values out of 15
+values, which makes the mean quite high, although we can assess if that
+mean is high or is in line with the overall category mean due to the
+lack of data availability.
 
 For future improvement, we could impute some values in order to smooth
 the overall mean of this SUA categories.
@@ -1135,41 +1285,182 @@ CHO, fibre, and alcohol could be assumed zero, for most of fish and
 shellfish products, with the exceptions of preparations, fermented or
 molluscs (FAO/INFOODS, 2012).
 
+###### Edible portion
+
+The edible portion used are based on some decision regarding the edible
+portion information at the FAO fisheries and the FCT information.
+However, information provided in the Fisheries Global NCT, 2022 is not
+sufficient to replicate it in R.
+
+We added the `Edible coefficient to be used` in the table at the summary
+row.
+
+###### Sum of proximate (SOP)
+
+Sum of proximate was not reported by all FCTs. Therefore, it was
+re-calculated using the equation reported in the methods section
+(Equation 1). Additionally, it was calculated at ICS (SUA) fish category
+level.
+
+Sum of proximate (=Σof water + protein + fat + available carbohydrates +
+dietary fibre + alcohol + ash)
+
+Ranges: Preferable: 97 - 103g (Greenfield and Southgate, 2003,
+FAO/INFOODS, 2012)). Acceptable: 95 - 105g (FAO/INFOODS, 2012))
+
+###### Water
+
+It was reported by all the FCTs, and no issues were found. It was used
+to validate the values againts the original Fisheries Global NCT, 2022
+and to check that all datasets were correctly imported.
+
+###### Ash
+
+Ash values were reported in all FCTs but the NO21 which was calculated
+from the carbohydrate by difference equation (XX). Full information was
+reported elsewhere (NO21_docu.Rmd). We combined `ASHg` (reported in the
+FCTs) and `ASHg_bydiff` into one variable `ASHg_std`.
+
 ###### Proteins
+
+Proteins values were reported for all the fishery entries included. No
+major issues were found for this component.
+
+###### Fibre
+
+Fibre concentration of fish and other aquatic animals were mostly zero
+and/or `NA` when raw whereas preparations and canned were below 1g per
+100g. Then, aquatic plants were on average higher than 1g up to 41g per
+100g for aquatic plants preparations.
+
+Current mean of FIBTGg =
+`fao_fish_fct %>% filter(!is.na(FIBTGg)) %>% pull(FIBTGg) %>% as.numeric() %>% mean(., na.rm = T)`.
+
+Fibre, crude (FIBCg) could be removed, it did not added information on
+any missing (FBGTg). For raw fishes, `NA` values for fibre could be
+assume equal to zero, as they may not be analysed based on the
+assumption that they will be zero for that food type.
+
+When we looked at (FAO) SUA fisheries categories fibre mean values, most
+of the values were zero, only "Aquatic Plants", "Aquatic Plants Dried"
+and "Aquatic Plants Preparations" contained more than 1g of fibre per
+100g.
+
+Individual `NA` values (i.e., per fish entry) were not assumed zero, but
+they were "ignored" when calculating the category mean.
+
+###### Alcohol
+
+-   Ten FCTs/FCDBs did not report ALCg, of the three that did report it,
+    the mean value was zero. For the future, we can hence assume alcohol
+    = zero for fish and products.
+
+Alcohol: We could assume zero for fisheries.
 
 ###### Carbohydrates
 
 -   Five FCTs/FCDBs did not report CHOAVLDFg
-    (`r fao_fish_fct %>% filter(is.na(CHOAVLDFg)) %>% distinct(source_fct)`).
+    (`fao_fish_fct %>% filter(is.na(CHOAVLDFg)) %>% distinct(source_fct)`).
 -   Of those, two reported CHOCDFg instead
-    (`r fao_fish_fct %>% filter(is.na(CHOAVLDFg), !is.na(CHOCDFg))`)
+    (`fao_fish_fct %>% filter(is.na(CHOAVLDFg), !is.na(CHOCDFg))`)
 -   Other two reported CHOAVLg
-    (`r fao_fish_fct %>% filter(is.na(CHOAVLDFg), !is.na(CHOAVLg)) %>% count(source_fct)`).
+    (`fao_fish_fct %>% filter(is.na(CHOAVLDFg), !is.na(CHOAVLg)) %>% count(source_fct)`).
 -   IN17 did not reported content in CHO and fibre for fish and
     products. Although, it could be calculated as CHOAVLDFg, or we could
     also assumed to be zero.
 -   CHOAVLMg and CHOCSMg could be removed from the final database as it
     is of no use and/or relevance for fishes.
 
+\*\*Calculating CHOAVLDFg_std (CHOAVLDF(g)\_standardized)\*\*
+
+Finally, we evaluated the difference in `CHOVALDg` values between the
+Fisheries Global NCT, 2022 (original) and the recalculated.
+
+Because CHOAVLDFg was re-calculated at Fishery (SUA) category, we
+evaluate CHO w/ and w/o NO21 (as we did w/ FAT). Check which categories
+are different (assuming prep).
+
+We assumed that when CHOAVLDFg was negative, we assumed zero for both
+dataset. "Major differences (\>0.5) were observed in six categories. The
+first two (with 2.1 and 1.7 point of difference) were due to"assumed
+zero" in the Fisheries Global NCT, 2022.
+
+-   The first one ( 1590, Aquatic animals nei, preparations nei)
+    consisted only in two entries from JA15 which were wrongly imported
+    in the Fisheries Global NCT, 2022.
+
+-   The second one, it seemed to be due to minor inconsistencies in the
+    mean values of each proximate, as it shouldn't be different because
+    there is no entry from NO21 which may cause differences, and also
+    all individual values are the same. This is because of the use of
+    "weighted mean" instead of "arithmetic mean".
+
+-   For the third value (1520, Demersal, Preparations nes), new values
+    were added (n=46) as preparation, some of which have relatively high
+    CHO content due to the preparations (e.g., breaded and fried
+    fillets), however the overall increase is still minor (from 0.4g to
+    1.6g).
+
+-   The fourth value was for 1531 - Pelagic fish, cured, the higher mean
+    CHO value was driven by one value in the NO21: "Herring, pickled,
+    cured, marinated, drained" (04.289). The value is in-line with other
+    similar fish item reported in DK19 (). Although, the value seems
+    plausible, we advise to not include the value in the CHO
+    calculation, as it's driving the mean.
+
+-   The fifth, 1533 - Pelagic fish, preparations nei, similarly to the
+    previous point, three values from NO21 for "Herring, pickled" are
+    driving the results. This rises two important points, 1) the
+    classification of those "herring, pickled", and 2) more generally
+    (and important), the use of mean values, which are extremely
+    sensible to outliers/ extreme values.
+
+-   Fnally, the sixth was 1574 - Cephalopods, preparations nei, again
+    the influence of two new "battered" items were driving the results.
+    Although, due to the minor difference (i.e., less than 1g, 0.85g),
+    we decided to keep all the values.
+
+```{r}
+
+hist(fao_fish_fct$CHOAVLDFg2[fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code == "1531"], main="Distribution of CHO values (including CHOAVLDFg and CHOAVLg) for pelagic fish, cured",
+xlab = "Carbohydrates (g/100g) (including CHOAVLDFg and CHOAVLg)")
+
+```
+
+Most of the fishery products with CHO higher than zero are those within
+preparations, nei and cured and canned. The only "fresh"/"frozen" items
+with CHO \> 0g were moluscs (eg. snails). Because CHO (CHOAVg) was
+analysed for NO21, ASHg were not reported thus, CHOAVLDFg could not be
+calculated. We evaluated the impact of using a different CHO method to
+the overall values. We could see that in NO21 there were some mean
+values that were higher than in the Fisheries Global NO21. For example,
+we found that within "Demersal fish, preparations nei" there quite
+number of fish entries that were "breaded", thus the higher content in
+CHO. However, when compared wit other breaded items, the values seemed
+to be within range.
+
+###### Energy
+
+Of the nutrients used to calculate energy, the most important for fish
+and fish products are proteins, fat, water and carbohydrates. Hence, the
+review of those components should be carried more in-depth than the
+other, fibre, and alcohol could be assumed zero, for most of fish and
+shellfish products, with the exceptions of preparations, canned, cured
+and/or molluscs (FAO/INFOODS, 2012).
+
+We will generate a function that will calculate energy in kcal and
+energy in kj using the FAO conversion factors and the fao tagnames that
+will be used to generate the columns: `ENERCkJ_standardized` and
+`ENERCkcal_standardized` for the FAO fishery products database and for
+MAPS to calculate energy used.
+
 ###### Fat
 
 In order to compare the DHA and EPA with the fat content, we needed to
 combine several fat Tagnames. We combined those Tagnames into
-`FAT_g_standardised` as reported in section 4.4. We checked the contribution from each of the fractions. 
+`FAT_g_standardised` as reported in section 4.4. We checked the
+contribution from each of the fractions.
 `r fao_fish_fct %>% select(starts_with("FAT"), -FATRNg) %>% summarise_all(., ~sum(!is.na(.))/sum(!is.na(fao_fish_fct$FAT_g_standardised))*100) %>% round(.,2) %>% knitr::kable()`
-
-###### Fibre
-
-Fibre, crude (FIBCg) could be removed, it did not added information
-on any missing (FBGTg). For the future development, check whether `NA`
-    values for fibre could be assume equal to zero (see Next steps:
-    Assumed zero section).
-
-###### Alcohol
-
--   Ten FCTs/FCDBs did not report `ALCg`, of the three that did report it,
-    the mean value was zero. For the future, we can hence assume alcohol
-    = zero for fish and products.
 
 ### Final Quality Checks
 
@@ -1181,30 +1472,88 @@ reconciliation with all the other nutrients are performed.
 
 #### Water content, protein, Ca, and Fe
 
-We compared the values generated with the R scripts with the results that were generated and shared in excel file for a selection of components. We did that to ensure that the scripting approach was not introducing any systematic errors. Most of the values were identical or with minor variation that could fall within rounding differences. There were six SUA categories with "major" differences: "Marine fish nei, canned", "Aquatic animals nei, preparations nei", "Aquatic mammals, meat", "Marine fish nei, cured", "Freshwater & diadromous fish, fresh", "Freshwater & diadromous fish, frozen, whole". The source of differences were identified in consultation with the FAO team. The main source of discrepancies were typos or `NA` values being filled up. This was a great excersise as strengthen both approach helping to identify any potential mistakes in the final Fisheries Global NCT.  
+As part of the data checks, as described above we compared the Fisheries
+Global NCT, Feb, 2022 (For sharing) compiled using excel, and the
+Fisheries Global NCT, Oct, 2022 compiled using R.
+
+We compared the values generated with the R scripts with the results
+that were generated and shared in excel file for a selection of
+components. We did that to ensure that the scripting approach was not
+introducing any systematic errors. Most of the values were identical or
+with minor variation that could fall within rounding differences. There
+were six SUA categories with "major" differences: "Marine fish nei,
+canned", "Aquatic animals nei, preparations nei", "Aquatic mammals,
+meat", "Marine fish nei, cured", "Freshwater & diadromous fish, fresh",
+"Freshwater & diadromous fish, frozen, whole". The source of differences
+were identified in consultation with the FAO team. The main source of
+discrepancies were typos or `NA` values being filled up. This was a
+great excersise as strengthen both approach helping to identify any
+potential mistakes in the final Fisheries Global NCT.
 
 #### DHA and EPA concentration
 
 We calculated the mean and other summary statistics for the each fish
-category, and only for the entries that reported the DHA and
-EPA. This was done to evaluate the impact of missing values into the final
+category, and only for the entries that reported the DHA and EPA. This
+was done to evaluate the impact of missing values into the final
 results.
 
-We calculate the proportion of each fatty acid (DHA and EPA) to the total fat, for all the fish entries and only for those with complete values (i.e., reporting a value for `FAT_g_standardised`, `DHAg`, and `EPAg`). Then, we compare the difference between the two. Note that we used the `FAT_g_standardised` variable which is a
-combination of the Tagnames (and different extractions): `FATg`,  `FAT_g`, and
-`FATCEg`. The use of FATCE is not recommended for use in unit conversion
-(FAO/INFOODS, 2012).However, as it is not going to be used to report values, and only for checking, we proceed to compare the percentage of each FA for the whole
-dataset and only those entries with FA values.
+We calculate the proportion of each fatty acid (DHA and EPA) to the
+total fat, for all the fish entries and only for those with complete
+values (i.e., reporting a value for `FAT_g_standardised`, `DHAg`, and
+`EPAg`). Then, we compare the difference between the two. Note that we
+used the `FAT_g_standardised` variable which is a combination of the
+Tagnames (and different extractions): `FATg`, `FAT_g`, and `FATCEg`. The
+use of FATCE is not recommended for use in unit conversion (FAO/INFOODS,
+2012).However, as it is not going to be used to report values, and only
+for checking, we proceed to compare the percentage of each FA for the
+whole dataset and only those entries with FA values.
 
 Eq.: FA(%) = FAg/FATg x 100 , (F22D6N3g_perc =
 F22D6N3g/FAT_g\_standardised\*100)
 
-There were major differences between the two datasets, particularly for 16 SUAs categories that reported >10% difference in total fat between values with DHA and EPA and those without. The main reason were that those SUA category were were very broad, and hence the composition was highly variable. Also, the number of entries were very small as they were rare species (i.e., aquatic mammals, or aquatic plants). 
+There were major differences between the two datasets, particularly for
+16 SUAs categories that reported \>10% difference in total fat between
+values with DHA and EPA and those without. The main reason were that
+those SUA category were were very broad, and hence the composition was
+highly variable. Also, the number of entries were very small as they
+were rare species (i.e., aquatic mammals, or aquatic plants).
 
 We also calculate the percentage of relative coverage (number of entries
 reporting FAT_g\_standardised/ number of entries reporting the DHA/EPA
 \*100). Thirty-one and thirty-two fish categories had lower than 60%
 coverage for DHA and EPA respectively.
+
+### TO-DO: Value imputation
+
+One of the main source of variability found when comparing the Fisheries
+Global NCT, Feb, 2022 (For sharing) compiled using excel, and the
+Fisheries Global NCT, Oct, 2022 compiled using R were the imputed
+values.
+
+In this section we investigated some of the imputed values and the
+potential impact on the final values.
+
+##### Assumed zero values
+
+**FIBTGg_std**
+
+In the original Fisheries Global NCT,2022 there were some manually added
+"zero" as assumed values. These values were imported those in our
+dataset under "FIBTGg_std" variable. In addition, a comment was added
+indicating that the fibre value was assumed.
+
+For the future development, check FAO/INFOODS to identify food group
+that may be "assumed" zero when calculating Carbohydrate by difference
+and Energy.(see Next steps: Assumed zero section).
+
+##### Imputed from other food entry
+
+**Namg** **VITAmcg**: Imputed/ Re-calculated from Vitamin A (IU) which
+was imputed.
+
+##### Recalculation from other components
+
+**CARTBEQmcg**: Re-calculated from VITA_mcg and VITA_RAEmcg
 
 ## Next steps: Functions development and improvemnts
 
@@ -1227,12 +1576,17 @@ US21 - Using data embeded in US21 to allocate the Tagnames for all NVs.
     method of the same/similar component. E.g., Extracting alternative
     analitycal method (i.e., NIA for Niacin) that are provided in the
     same column of the preferred analytical method (i.e., NIAEQ for
-    Niacin) but within bracket.This type of data structure was observed in BA13, KE18, and WA19. 
+    Niacin) but within bracket.This type of data structure was observed
+    in BA13, KE18, and WA19.
 
 -   A function that extract the "estimated" values and/or low quality
     values between brackets or parenthesis, and it generate a metadata
     info on that. Eg. A new column with a string providing information
-    on which values were low quality and/or estimated. This was observed in JA15, where the use of bracket to denote "estimated values". We removed the brackets but we should look at how to keep a record and the meaning of estimated values. In KE18, "Low quality" values were reported within brackets.
+    on which values were low quality and/or estimated. This was observed
+    in JA15, where the use of bracket to denote "estimated values". We
+    removed the brackets but we should look at how to keep a record and
+    the meaning of estimated values. In KE18, "Low quality" values were
+    reported within brackets.
 
 -   A function to change Trace values, expressed as "tr", "Tr", "\<LOD",
     to 0 (zero).
@@ -1291,13 +1645,13 @@ preparations. If preparations then check what type of preparation,
 otherwise we could assume zero. Current mean of FIBTGg =
 `r round(fao_fish_fct %>% filter(!is.na(FIBTGg)) %>% pull(FIBTGg) %>% as.numeric() %>% mean(., na.rm = T), 2)`.
 
-- Alcohol
+-   Alcohol
 
-- CHOAVLDF for non-processed foods. 
+-   CHOAVLDF for non-processed foods.
 
 ##### Imputing nutrient values
 
 **Se concentration**: Mean mackerel fresh to (10157) (35055) with
 (35164), by water-adjusting and assuming the oil has no contribution to
 `Semcg`. Although, due to the low water content and overall high content
-in Se of the category, it would only increase the mean. 
+in Se of the category, it would only increase the mean.
