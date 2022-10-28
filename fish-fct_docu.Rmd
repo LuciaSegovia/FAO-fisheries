@@ -7,8 +7,8 @@ author:
 - "Louise Ander"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  pdf_document: default
-  html_document: default
+  bookdown::html_document2
+  html_document2: default
   word_document: default
 editor_options:
   markdown:
@@ -432,7 +432,22 @@ Eg. amino acids (AA) reported per g in 100g of PROT to mg in 100g of EP:
 
 **Eq.2.3** AA mg/100g EP = AA g/100g prot \* prot g/100g EP \*10
 
-#### 3.3. Re-calculating variables <br>
+
+**Eq.3.1** Edible portion = 100-Refuse (%)/100
+
+**Eq.3.2** Edible portion = 1-Refuse
+
+
+#### 3.3. Producing the harmonised data library
+
+Once the FCTs were loaded and harmonised, we combined them into a single
+data file (data library), filter the fish entries and merged with the
+information already provided by the FAO team regarding each fish entry
+ISSCAAP, ICS FAOSTAT and alpha-three codes.
+
+All the steps are done and documented in the `merging_all.R` script.
+
+#### 3.4. Re-calculating variables <br>
 
 Some variables are calculated from other variables, hence they need to
 be recalculated to account for imputed values or when calculating mean
@@ -460,11 +475,8 @@ available carbohydates were analysed, we used the an iteration of the
     function is provided in Issue #46
     
     
-**Eq.4.1** Edible portion = 100-Refuse (%)/100
 
-**Eq.4.2** Edible portion = 1-Refuse
-
-**Eq.5** Sum of Proximate (g/100g) = Sum of water + protein + fat +
+**Eq.4** Sum of Proximate (g/100g) = Sum of water + protein + fat +
 available carbohydrates + dietary fibre + alcohol + ash
 
 **Eq.6a** Carbohydrates available by difference (g/100g) = 100 - (sum
@@ -539,17 +551,7 @@ the Fisheries Global NCT, 2022 (Oct., 2022).
 -   NIATRIPmg_standardised
 -   VITDmg_standardised
 
-#### 3.6. Producing the harmonised data library
 
-Once the FCTs were loaded and harmonised, we combined them into a single
-data file (data library), filter the fish entries and merged with the
-information already provided by the FAO team regarding each fish entry
-ISSCAAP, ICS FAOSTAT and alpha-three codes.
-
-For this particular case the steps 3.4 and 3.5 were performed after
-merging all the datasets together.
-
-All the steps are done and documented in the `merging_all.R` script.
 
 ### 4. Data visualisation
 
@@ -759,7 +761,7 @@ Some components were reported in different units as the recommended units in
 the Tagnames, hence unit conversion operations were performed. For
 instance:
 
-In US19, Tryptophan was reported in g/100g EP which was converted to mg/100g. 
+In US19, Tryptophan was reported in g/100g EP which was converted to mg/100g. In addition, Vitamin A was reported as vitamin A (IU). Hence, when retinol and carotenoids were available, vitamin A (`VITAmcg`) was calculated using those values and the function:`VITAmcg_std_creator()`. However, these components were not available for around 800 food entries, hence an assumption of "all vitamin A was retinol" was used and Vitamn A was calculated using the conversion factor (0.3) proposed in the FAO / INFOODS Guidelines Guidelines for Converting Units, Denominators and Expressions Version 1.0 [@fao/units] for over 400 food entries.
 
 In the IN17, fatty acids needed to be converted from mg/100g EP to g/
 100g EP, and amino acids from g/100g PROT to mg/100g EP (Eq.2.3).
@@ -776,148 +778,11 @@ Documentation in GitHub
 [Issue\\#9](https://github.com/LuciaSegovia/UoN-FAO/issues/9),
 [Issue\\#10](https://github.com/LuciaSegovia/UoN-FAO/issues/10).
 
-#### 3.4. Combined variables (standardised) <br>
-
-## REVIEW
-
-This was done after merging all the dataset together, and it's reported
-on the `merging_all.R`.
-
-Here's the list of the standardised variables as reported in the
-Fisheries Global NCT, 2022, of which we reported all except food folate
-(FOLDFEmcg).
-
-
--   CHOAVLDFg_standardised
--   FAT_g\_standardised
--   FIBTGg_standardised
--   VITAmcg_standardised
--   VITA_RAEmcg_standardised
--   CARTBEQmcg_standardised
--   VITEmg_standardised
--   THIAmg_standardised
--   FOLDFEmcg_standardised\*
--   VITB6_mg_standardised
--   NIAEQmg_standadised
--   NIATRIPmg_standardised
--   VITDmg_standardised
-
-Of which functions were generated to re-calculate the following the
-equations in the section 3.3 of this document and can be found in
-"functions.R".
-
-##### 3.4.1. Sum of proximate (SOP)
-
-Sum of proximate was not reported by all FCTs. Therefore, it was
-re-calculated using the equation reported in the methods section
-(@eq-5). Additionally, it was calculated at ICS (SUA) fish category
-level.
-
-Sum of proximate (=Σof water + protein + fat + available carbohydrates +
-dietary fibre + alcohol + ash)
-
-Ranges: Preferable: 97 - 103g (Greenfield and Southgate, 2003,
-FAO/INFOODS, 2012)). Acceptable: 95 - 105g (FAO/INFOODS, 2012))
-
-##### 3.4.2. Energy
-
-Of the nutrients used to calculate energy, the most important for fish
-and fish products are proteins, fat, water and carbohydrates. Hence, the
-review of those components should be carried more in-depth than the
-other, fibre, and alcohol could be assumed zero, for most of fish and
-shellfish products, with the exceptions of preparations, canned, cured
-and/or molluscs (FAO/INFOODS, 2012).
-
-We will generate a function that will calculate energy in kcal and
-energy in kj using the FAO conversion factors and the fao tagnames that
-will be used to generate the columns: `ENERCkJ_standardized` and
-`ENERCkcal_standardized` for the FAO fishery products database and for
-MAPS to calculate energy used.
-
-##### 3.4.3. Ash
-
-Ash values were reported in all FCTs but the NO21 which was calculated
-from the carbohydrate by difference equation (XX). Full information was
-reported elsewhere (NO21_docu.Rmd). We combined `ASHg` (reported in the
-FCTs) and `ASHg_bydiff` into one variable `ASHg_std`.
-
-##### 3.4.4. Carbohydrates by difference
-
-Carbohydrates by difference were calculated using the Eq.6a. This was possible in all the FCTs but NO21 which did not provided the ash concentration (more information on NO21 documentation). 
-
-Then, we evaluated the difference in `CHOVALDg` values between the
-Fisheries Global NCT, 2022 (original) and the recalculated.
-
-Because CHOAVLDFg was re-calculated at Fishery (SUA) category, we
-evaluate CHO w/ and w/o NO21 (as we did w/ FAT). Check which categories
-are different (assuming prep).
-
-We assumed that when CHOAVLDFg was negative, we assumed zero for both
-dataset. "Major differences (\>0.5) were observed in six categories. The
-first two (with 2.1 and 1.7 point of difference) were due to"assumed
-zero" in the Fisheries Global NCT, 2022.
-
--   The first one ( 1590, Aquatic animals nei, preparations nei)
-    consisted only in two entries from JA15 which were wrongly imported
-    in the Fisheries Global NCT, 2022.
-
--   The second one, it seemed to be due to minor inconsistencies in the
-    mean values of each proximate, as it shouldn't be different because
-    there is no entry from NO21 which may cause differences, and also
-    all individual values are the same. This is because of the use of
-    "weighted mean" instead of "arithmetic mean".
-
--   For the third value (1520, Demersal, Preparations nes), new values
-    were added (n=46) as preparation, some of which have relatively high
-    CHO content due to the preparations (e.g., breaded and fried
-    fillets), however the overall increase is still minor (from 0.4g to
-    1.6g).
-
--   The fourth value was for 1531 - Pelagic fish, cured, the higher mean
-    CHO value was driven by one value in the NO21: "Herring, pickled,
-    cured, marinated, drained" (04.289). The value is in-line with other
-    similar fish item reported in DK19 (). Although, the value seems
-    plausible, we advise to not include the value in the CHO
-    calculation, as it's driving the mean.
-
--   The fifth, 1533 - Pelagic fish, preparations nei, similarly to the
-    previous point, three values from NO21 for "Herring, pickled" are
-    driving the results. This rises two important points, 1) the
-    classification of those "herring, pickled", and 2) more generally
-    (and important), the use of mean values, which are extremely
-    sensible to outliers/ extreme values.
-
--   Finally, the sixth was 1574 - Cephalopods, preparations nei, again
-    the influence of two new "battered" items were driving the results.
-    Although, due to the minor difference (i.e., less than 1g, 0.85g),
-    we decided to keep all the values.
-
-```{r}
-
-hist(fao_fish_fct$CHOAVLDFg2[fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code == "1531"], main="Distribution of CHO values (including CHOAVLDFg and CHOAVLg) for pelagic fish, cured",
-xlab = "Carbohydrates (g/100g) (including CHOAVLDFg and CHOAVLg)")
-
-```
-
-Most of the fishery products with CHO higher than zero are those within
-preparations, nei and cured and canned. The only "fresh"/"frozen" items
-with CHO \> 0g were moluscs (eg. snails). Because CHO (CHOAVg) was
-analysed for NO21, ASHg were not reported thus, CHOAVLDFg could not be
-calculated. We evaluated the impact of using a different CHO method to
-the overall values. We could see that in NO21 there were some mean
-values that were higher than in the Fisheries Global NO21. For example,
-we found that within "Demersal fish, preparations nei" there quite
-number of fish entries that were "breaded", thus the higher content in
-CHO. However, when compared wit other breaded items, the values seemed
-to be within range.
-
-
-
-#### 3.6. Merging all the data together <br>
+#### 3.3. Merging all the data together <br>
 
 Once the FCTs were loaded and harmonised, we combined them into a single data library. 
 
-###### 3.6.1. Allocating the FAO codes: ISSCAAP, alpha-three, and ICS FAOSTAT.
+###### 3.3.1. Allocating the FAO codes: ISSCAAP, alpha-three, and ICS FAOSTAT.
 
 Fish matching between FCTs fish entries and ICS FAOSTAT, alpha-three
 code and ISSCAAP code was previously done in the Fishery Global NCT,
@@ -953,6 +818,96 @@ source("merging_all.R")
 fish_fct %>% filter(is.na(ICS.FAOSTAT.SUA.Current.Code)) %>% count(source_fct)
 
 ```
+
+#### 3.4. Combined variables (standardised) <br>
+
+## REVIEW
+
+This was done after merging all the dataset together, and it's reported
+on the `merging_all.R`.
+
+Here's the list of the standardised variables as reported in the
+Fisheries Global NCT, 2022, the following:
+
+-   SOP_own 
+-   ENERCkJ_standardised
+-   ENERCkcal_standardised
+-   CHOAVLDFg_standardised
+-   FAT_g\_standardised
+-   FIBTGg_standardised
+
+-   VITAmcg_standardised
+-   VITA_RAEmcg_standardised
+-   CARTBEQmcg_standardised
+-   THIAmg_standardised
+-   VITB6_mg_standardised
+-   NIAmcg_standardised
+
+In addition, two special cases are reported here: ASHg_std and RETOLmcg, which were both recalculated. All of which used functions that were generated to re-calculate the variables using the equations in the section 3.3 of this document and can be found in
+"functions.R".
+
+##### 3.4.1. Sum of proximate (SOP)
+
+Sum of proximate was not reported by all FCTs. Therefore, it was
+re-calculated using the equation reported in the methods section
+(@eq-5). Additionally, it was calculated at ICS (SUA) fish category
+level.
+
+Sum of proximate (=Σof water + protein + fat + available carbohydrates +
+dietary fibre + alcohol + ash)
+
+Ranges: Preferable: 97 - 103g (Greenfield and Southgate, 2003,
+FAO/INFOODS, 2012)). Acceptable: 95 - 105g (FAO/INFOODS, 2012))
+
+##### 3.4.2. Energy
+
+Of the nutrients used to calculate energy, the most important for fish
+and fish products are proteins, fat, water and carbohydrates. Hence, the
+review of those components should be carried more in-depth than the
+other, fibre, and alcohol could be assumed zero, for most of fish and
+shellfish products, with the exceptions of preparations, canned, cured
+and/or molluscs (FAO/INFOODS, 2012).
+
+We will generate a function that will calculate energy in kcal and
+energy in kj using the FAO conversion factors and the fao tagnames that
+will be used to generate the columns: `ENERCkJ_standardized` and
+`ENERCkcal_standardized` for the FAO fishery products database and for
+MAPS to calculate energy used.
+
+
+##### 3.4.4. Carbohydrates by difference
+
+Carbohydrates by difference were calculated using the Eq.6a. In NO21, the value of ash (g/100g EP) used were calculated. In addition, we found `r round(sum(str_detect(fao_fish_fct$comment, "CHOAVLDFg_std assumed zero"), na.rm = T)/length(fao_fish_fct$CHOAVLDFg_std)*100)`% of negative values of carbohydrates by difference which were converted to zero and added a comment "CHOAVLDFg_std assumed zero" for documentation. 
+
+The documentation of these changes are important as they would have an impact of the final estimates, particularly as this variable is used to calculate SOP, and more importantly the total energy. If total energy is calculated using negative values it would lead to a underestimation of the total energy supplied by the foods.
+
+##### 3.4.3. Fat
+
+We combined three Tagnames into `FAT_g_standardised` as reported in section 3.4. We checked the contribution from each of the fractions Table \@ref(tab:fat).
+
+```{r fat,  echo=FALSE}
+
+fao_fish_fct %>% select(starts_with("FAT"), -FATRNg) %>% summarise_all(., ~sum(!is.na(.))/sum(!is.na(fao_fish_fct$FAT_g_standardised))*100) %>% round(.,2) %>% knitr::kable(., caption = "The table present the percentage of each fat tagname contribution to the total.")
+
+
+```
+
+##### 3.4.3. Ash
+
+Ash values were reported in all FCTs but the NO21 which was calculated
+from the carbohydrate by difference equation (Eq.3.4b). Full information was
+reported elsewhere (NO21_docu.Rmd). We combined `ASHg` (reported in the
+FCTs) and `ASHg_bydiff` into one variable `ASHg_std`.
+
+
+##### 3.4.3. Fibre
+
+The value of fibre standardised was calculated using only values from the dietary fibre (`FIBTGg`), as no other fractions provided information when dietary fibre  was missing values. Fibre, crude (FIBCg) could not be used to complete missing values in FIBTGg, as FIBCg did not added information on any missing (FIBGTg). For more details, check the section 4.2.8.
+
+##### 3.4.3. Vitamin A (RE) and (RAE)
+
+These two variables were re-calculated using the function `VITAmcg_std_creator()` and `VITA_RAEmcg_std_creator()` which used the variables `RETOLmcg` and `CARTBEQmcg_std` as inputs.
+
 
 ##### 4. Visualising food components for decision-making
 
@@ -1440,50 +1395,32 @@ and to check that all datasets were correctly imported.
 
 
 
-###### Proteins
-
-Proteins values were reported for all the fishery entries included. No
+- Proteins values were reported for all the fishery entries included. No
 major issues were found for this component.
+
 
 - Carbohydrates: Five FCTs/FCDBs did not report CHOAVLDFg, of those, two reported CHOCDFg instead and other two reported CHOAVLg. CHOAVLDFg was recalculated using the function developed.
 
-###### Fibre
-
-Fibre concentration of fish and other aquatic animals were mostly zero
-and/or `NA` when raw whereas preparations and canned were below 1g per
-100g. Then, aquatic plants were on average higher than 1g up to 41g per
-100g for aquatic plants preparations.
-
-Current mean of FIBTGg =
-`fao_fish_fct %>% filter(!is.na(FIBTGg)) %>% pull(FIBTGg) %>% as.numeric() %>% mean(., na.rm = T)`.
-
-Fibre, crude (FIBCg) could be removed, it did not added information on
-any missing (FBGTg). For raw fishes, `NA` values for fibre could be
-assume equal to zero, as they may not be analysed based on the
-assumption that they will be zero for that food type.
-
-When we looked at (FAO) SUA fisheries categories fibre mean values, most
-of the values were zero, only "Aquatic Plants", "Aquatic Plants Dried"
-and "Aquatic Plants Preparations" contained more than 1g of fibre per
-100g.
-
-Individual `NA` values (i.e., per fish entry) were not assumed zero, but
-they were "ignored" when calculating the category mean.
 
 - Alcohol: Ten FCTs/FCDBs did not report ALCg, of the three that did report it,
     the mean value was zero. For the future, we can hence assume alcohol
     = zero for fish and products.
 
-Alcohol: We could assume zero for fisheries.
+
+# - Fibre: The concentration of fibre in fish and other aquatic animals were mostly zero and/or `NA` when raw whereas preparations and canned were below 1g per 100g. Then, aquatic plants were on average higher than 1g up to 41g per 100g for aquatic plants preparations. 
+
+Current mean of FIBTGg =
+`fao_fish_fct %>% filter(!is.na(FIBTGg)) %>% pull(FIBTGg) %>% as.numeric() %>% mean(., na.rm = T)`.
 
 
-###### Fat
+For raw fishes, `NA` values for fibre could be assume equal to zero, as they may not be analysed based on the assumption that they will be zero for that food type. 
 
-In order to compare the DHA and EPA with the fat content, we needed to
-combine several fat Tagnames. We combined those Tagnames into
-`FAT_g_standardised` as reported in section 4.4. We checked the
-contribution from each of the fractions.
-`r fao_fish_fct %>% select(starts_with("FAT"), -FATRNg) %>% summarise_all(., ~sum(!is.na(.))/sum(!is.na(fao_fish_fct$FAT_g_standardised))*100) %>% round(.,2) %>% knitr::kable()`
+When we looked at (FAO) SUA fisheries categories fibre mean values, most of the values were zero, only "Aquatic Plants", "Aquatic Plants Dried" and "Aquatic Plants Preparations" contained more than 1g of fibre per 100g. 
+
+Individual `NA` values (i.e., per fish entry) were assumed zero for energy and SOP, but they were "ignored" when calculating the category mean.
+
+- Vitamin A (RE): This variable was reported in X datasets, and it was re-caluclated using the function `VITAmcg_std_creator()` into the vitamin A (retinol eq.) standardised variable (`VITAmcg_std`). 
+
 
 ### Final Quality Checks
 
@@ -1493,7 +1430,7 @@ of the data shown. We also need to perform those extra steps as we have
 added some new fish entries, and hence, we need to make sure that
 reconciliation with all the other nutrients are performed.
 
-#### Water content, protein, Ca, and Fe
+#### Water content, protein, Ca, and Fe (non-calculated)
 
 As part of the data checks, as described above we compared the Fisheries
 Global NCT, Feb, 2022 (For sharing) compiled using excel, and the
@@ -1545,6 +1482,74 @@ We also calculate the percentage of relative coverage (number of entries
 reporting FAT_g\_standardised/ number of entries reporting the DHA/EPA
 \*100). Thirty-one and thirty-two fish categories had lower than 60%
 coverage for DHA and EPA respectively.
+
+#### Carbohydates and other re-calculated variables
+
+Then, we evaluated the difference in `CHOVALDg_std` values between the
+Fisheries Global NCT, 2022 (Feb) and the Fisheries Global NCT, 2022 (Oct).
+
+Because CHOAVLDFg was re-calculated at Fishery (SUA) category, we
+evaluate CHO w/ and w/o NO21 (as we did w/ FAT). Check which categories
+are different (assuming prep).
+
+We assumed that when CHOAVLDFg was negative, we assumed zero for both
+dataset. "Major differences (\>0.5) were observed in six categories. The
+first two (with 2.1 and 1.7 point of difference) were due to"assumed
+zero" in the Fisheries Global NCT, 2022.
+
+-   The first one ( 1590, Aquatic animals nei, preparations nei)
+    consisted only in two entries from JA15 which were wrongly imported
+    in the Fisheries Global NCT, 2022.
+
+-   The second one, it seemed to be due to minor inconsistencies in the
+    mean values of each proximate, as it shouldn't be different because
+    there is no entry from NO21 which may cause differences, and also
+    all individual values are the same. This is because of the use of
+    "weighted mean" instead of "arithmetic mean".
+
+-   For the third value (1520, Demersal, Preparations nes), new values
+    were added (n=46) as preparation, some of which have relatively high
+    CHO content due to the preparations (e.g., breaded and fried
+    fillets), however the overall increase is still minor (from 0.4g to
+    1.6g).
+
+-   The fourth value was for 1531 - Pelagic fish, cured, the higher mean
+    CHO value was driven by one value in the NO21: "Herring, pickled,
+    cured, marinated, drained" (04.289). The value is in-line with other
+    similar fish item reported in DK19 (). Although, the value seems
+    plausible, we advise to not include the value in the CHO
+    calculation, as it's driving the mean.
+
+-   The fifth, 1533 - Pelagic fish, preparations nei, similarly to the
+    previous point, three values from NO21 for "Herring, pickled" are
+    driving the results. This rises two important points, 1) the
+    classification of those "herring, pickled", and 2) more generally
+    (and important), the use of mean values, which are extremely
+    sensible to outliers/ extreme values.
+
+-   Finally, the sixth was 1574 - Cephalopods, preparations nei, again
+    the influence of two new "battered" items were driving the results.
+    Although, due to the minor difference (i.e., less than 1g, 0.85g),
+    we decided to keep all the values.
+
+```{r}
+
+hist(fao_fish_fct$CHOAVLDFg2[fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code == "1531"], main="Distribution of CHO values (including CHOAVLDFg and CHOAVLg) for pelagic fish, cured",
+xlab = "Carbohydrates (g/100g) (including CHOAVLDFg and CHOAVLg)")
+
+```
+
+Most of the fishery products with CHO higher than zero are those within
+preparations, nei and cured and canned. The only "fresh"/"frozen" items
+with CHO \> 0g were moluscs (eg. snails). Because CHO (CHOAVg) was
+analysed for NO21, ASHg were not reported thus, CHOAVLDFg could not be
+calculated. We evaluated the impact of using a different CHO method to
+the overall values. We could see that in NO21 there were some mean
+values that were higher than in the Fisheries Global NO21. For example,
+we found that within "Demersal fish, preparations nei" there quite
+number of fish entries that were "breaded", thus the higher content in
+CHO. However, when compared wit other breaded items, the values seemed
+to be within range.
 
 ### TO-DO: Value imputation
 
@@ -1616,54 +1621,11 @@ US21 - Using data embeded in US21 to allocate the Tagnames for all NVs.
 -   A function to change Trace values, expressed as "tr", "Tr", "\<LOD",
     to 0 (zero).
 
-UK21 - Check "N" values (found in Edible_portion)
+##### Functions improvement for the future:
 
-#### Sum of proximate (SOP)
-
-Sum of proximate (=$\sum$ of water + protein + fat + available
-carbohydrates + dietary fibre + alcohol + ash)
-
-Ranges: Preferable: 97 - 103 g (Greenfield and Southgate, 2003,
-FAO/INFOODS, 2012)) Acceptable: 95 - 105 g (FAO/INFOODS, 2012))
-
-#### Nutrient values
-
-##### DHA and EPA
-
-Fats and fatty acids concentration in fish and aquatic animals varies
-widely. These components are very sensitive to many environmental,
-seasonal and other changes. Hence, imputing missing values is not
-optimal. Therefore, including more fishery entries with minimal missing
-values should be sought in the future.
-
-##### Energy
-
-We will generate a function that will calculate energy in kcal and
-energy in kj using the FAO conversion factors and the fao tagnames that
-will be used to generate the columns: `ENERCkJ_standardized` and
-`ENERCkcal_standardized` for the FAO fishery products database and for
-MAPS to calculate energy used.
-
-#### Carbohydrates available by difference (CHOAVLDF(g)\_standardized)
-
-100 - (weight in grams [water + protein + fat + ash + alcohol + dietary
-fibre] in 100 g of food)
-
-#### Niacin Eq.
-
-Total niacin equivalent (NIAEQ) = niacin preformed (NIA) + 1/60
-tryptophan (TRP)
-
-#### Unit conversion
-
-Unit conversion (when possible) to match Tagnames (per 100g EP FW)
-
--   Alcohol(w/v) to (w/100g) = ALC (g/100mL) / density (g/mL) = ALC
-    (g/100 EP)
+For the future development, check FAO/INFOODS to identify food group that certain components (e.g., fibre, alcohol, etc.) may be "assumed" zero when calculating Carbohydrate by difference and Energy, otherwise it should flag it as "missing value" need attention (see also "Assumed zero").
 
 ###### Dealing with missing nutrient values
-
-
 
 ##### Assumed zero
 
@@ -1683,6 +1645,33 @@ otherwise we could assume zero. Current mean of FIBTGg =
 (35164), by water-adjusting and assuming the oil has no contribution to
 `Semcg`. Although, due to the low water content and overall high content
 in Se of the category, it would only increase the mean.
+
+#### Nutrient values
+
+##### DHA and EPA
+
+Fats and fatty acids concentration in fish and aquatic animals varies
+widely. These components are very sensitive to many environmental,
+seasonal and other changes. Hence, imputing missing values is not
+optimal. Therefore, including more fishery entries with minimal missing
+values should be sought in the future.
+
+#### Niacin Eq.
+
+Total niacin equivalent (NIAEQ) = niacin preformed (NIA) + 1/60
+tryptophan (TRP)
+
+#### Unit conversion
+
+Unit conversion (when possible) to match Tagnames (per 100g EP FW)
+
+-   Alcohol(w/v) to (w/100g) = ALC (g/100mL) / density (g/mL) = ALC
+    (g/100 EP)
+    
+ 
+
+
+
 
 ### 6. Updating the Fisheries Global NCT
 

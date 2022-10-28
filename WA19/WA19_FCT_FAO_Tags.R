@@ -24,7 +24,7 @@ for( i in 8:62){ #Loops through each column between column 8 and 64
 # Manual renaming ----
 
 wafct_rename_names <- c("fdc_id", "food_desc", "food_descFR", "scientific_name", "nutrient_data_source",
-                            "Edible_factor_in_FCT", "Edible_factor_in_FCT_2", "PROCNTg", "XFA", "XN") #Creates a list of names to apply to certain columns
+                        "Edible_factor_in_FCT", "Edible_factor_in_FCT_2", "PROCNTg", "XFA", "XN") #Creates a list of names to apply to certain columns
 
 wafct <- wafct %>% rename_at(vars(1:7, 12, 52, 63),  ~wafct_rename_names) #Applies the list of names to the columns at certain positions
 

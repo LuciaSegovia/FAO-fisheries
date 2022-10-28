@@ -24,7 +24,7 @@ for(i in 1:ncol(UF16_Raw)){ #This for loop cleans brackets and spaces from the c
 
 # Column Renaming (Manual) and tidying ----
 
-UF16_Raw$source_fct <- "UF16_FCT" #Creates and populates the source_fct column
+UF16_Raw$source_fct <- "UF16" #Creates and populates the source_fct column
 
 Output_table <- UF16_Raw %>%
   slice(-c(1)) %>% #removes the first row
@@ -43,7 +43,7 @@ no_brackets_tr <- function(i){
 
 Output_table <- Output_table %>% 
   rename_at(vars(1, 3:4, 6:7, 9:10, 15),  ~special_names) %>% #Applies the new names in the correct places, replacing the old column names
-   mutate_at(vars(9:ncol(Output_table)), no_brackets_tr)
+  mutate_at(vars(9:ncol(Output_table)), no_brackets_tr)
 
 #Optional - check the data before saving
 glimpse(Output_table)

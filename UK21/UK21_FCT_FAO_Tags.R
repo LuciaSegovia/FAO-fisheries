@@ -27,13 +27,12 @@ for(i in 3:15){ #For loop iterating over only the relevant data tables, taking t
     relocate(X0) #Moves the X0 column to be the first column
   row.names(first2_transposed) <- NULL #Removes the row names
   for (i in 1:nrow(first2_transposed)){
-      header_data <- rbind(header_data, first2_transposed[i,]) #Attaching each row to the header_data table
+    header_data <- rbind(header_data, first2_transposed[i,]) #Attaching each row to the header_data table
   }
 }
 
 header_data <- header_data[!duplicated(header_data$X0),] %>%
   slice(-1) #Removes the first row from header_data
-
 
 
 # Merging tables ----
@@ -56,9 +55,9 @@ for (i in 3:15){ #Used to check for duplicate entries before a merge/left join, 
     Output_table <- sliced_table_data #If the third table is being examined, this sets the output table to that table
   } else{
     stripped_table_data <- sliced_table_data[,-c(2:7)] #Otherwise, the other tables are stripped of metadata
-     Output_table <- left_join(Output_table, stripped_table_data, by.all = "Food Code") #And then joined to the newly formed output table by the Food Code
+    Output_table <- left_join(Output_table, stripped_table_data, by.all = "Food Code") #And then joined to the newly formed output table by the Food Code
   }
-
+  
 }
 
 
@@ -95,7 +94,7 @@ uk21_colnames <- c("fdc_id", #Creates a list of column names following thew FAO 
                    "LACSMg",
                    "ALCg_100mL",
                    "NSPg",
-                   "FBTGg", 
+                   "FIBTGg", 
                    "FASATg_100gFAT", 
                    "FASATg",
                    "FAPUN6g_100gFAT", 
@@ -119,11 +118,11 @@ uk21_colnames <- c("fdc_id", #Creates a list of column names following thew FAO 
                    "CHOLmg",
                    "NAmg", 
                    "Kmg", 
-                   "Camg",
+                   "CAmg",
                    "MGmg",
                    "Pmg",
                    "FEmg",
-                   "Cumg",
+                   "CUmg",
                    "ZNmg",
                    "CLDmg",
                    "MNmg", 
@@ -136,14 +135,14 @@ uk21_colnames <- c("fdc_id", #Creates a list of column names following thew FAO 
                    "VITEmg", 
                    "VITKmcg",
                    "THIAmg", 
-                   "RIBOmg",
+                   "RIBFmg",
                    "NIAmg", 
                    "NIATRPmg", 
                    "NIAEQmg", 
                    "VITB6_mg", 
                    "VITB12mcg",
                    "FOLmcg",
-                   "PANTOmg", 
+                   "PANTACmg", 
                    "BIOTmcg",
                    "VITCmg", 
                    "transRETOLmg",
@@ -168,15 +167,14 @@ uk21_colnames <- c("fdc_id", #Creates a list of column names following thew FAO 
 
 
 
-
 header_data[4] <-  uk21_colnames #creates a fourth column, listing the FAO tagnames
 
 header_data$V4[header_data$X1 == "FOD20:5cn3"] <- "F20D5N3g" #Renames certain fao tagnames in the header_data
 header_data$V4[header_data$X1 == "FOD22:6cn3"] <- "F22D6N3g" #Renames certain fao tagnames in the header_data
-                   
-                
+
+
 fct_tagname <- header_data %>% mutate(V4 = ifelse(is.na(V4), 
-                                                           X1, 
+                                                  X1, 
                                                   V4)) #Creates a list of fct_tagnames - if the V4 column of header_data is na then it gets the name from X1 column, otherwise V43 column
 
 
@@ -187,12 +185,21 @@ Output_table$source_fct <- "UK21_FCT" #Creates and sets the source_fct column
 Output_table <- Output_table %>%
   relocate(source_fct, .after = food_desc) #Moves the source_fct column to the start, with other metadata columns
 
+#Check "N" vs "Tr"
+#Changing "Tr" to zero
+
+TraceToZero <- function(x){
+  x <- gsub("Trace|trace|Tr|tr", "0", x)
+  return(x) 
+}
+
+Output_table[Output_table == "N"] <- NA # Sets all N values, defined as "where a nutrient is present in significant quantities, but there is no reliable information on the amount", to NA
+
+Output_table[,c(9:288)] <- apply(Output_table[,c(9:288)], 2, TraceToZero)
 
 
 write.csv(Output_table, file = here::here("Output", "UK21_FCT_FAO_Tags.csv"),
           row.names = FALSE) #Saves the newly-created data table to the Output folder
-write.csv(header_data, file = here::here("Output", "UK21_FCT_column_names.csv"), 
-          row.names = FALSE) #Saves the header data table to the Output folder
 
 #Run this to clean the environment
 rm(list = ls())

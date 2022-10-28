@@ -147,7 +147,7 @@ col_tagname <- c("fdc_id", #A list of the desired column names in order. NA entr
                  NA,
                  "MGmg", 
                  NA, 
-                 "MNmg",
+                 "MNmcg",
                  "NIATRPmg",
                  "NIAEQmg", 
                  "NIAmg", 

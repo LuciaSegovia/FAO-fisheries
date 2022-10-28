@@ -28,9 +28,9 @@ Output_table <- BR11_Raw %>%
          "scientific_name" = colnames(BR11_Raw)[4],
          "ISSCAAP" = colnames(BR11_Raw)[5],
          "alpha_code" = colnames(BR11_Raw)[6],
-          "VITA_RAEmcg" = VITARAEmcg, 
-        )
-  
+         "VITA_RAEmcg" = VITARAEmcg, 
+  )
+
 
 
 # New Column Creation & relocation ----

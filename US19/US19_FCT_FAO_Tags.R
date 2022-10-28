@@ -1,6 +1,6 @@
 library(RODBC)
 library(tidyverse)
-
+source(here::here("functions.R"))
 
 
 # Data Import ----
@@ -94,7 +94,7 @@ Composite_Table$EDIBLE <- 1-(Composite_Table$Refuse/100) #Edible fraction is cal
 
 
 # Output Table renaming & tidying ----
-
+# TO - DO: VITA is provided as IU - need to double check 
 Output_table <- Composite_Table %>%
   select(-c("Com_Name", "ManufacName", "Ref_Desc")) %>% #These three columns are removed
   rename( #Some columns are renamed - e.g. NDB_No is renamed to fdc_id
@@ -132,7 +132,7 @@ Output_table <- Composite_Table %>%
     CUmg = "Copper, Cu (mg)", 
     MNmg = "Manganese, Mn (mg)",
     SEmcg = "Selenium, Se (µg)",
-    VIA_RAEmcg = "Vitamin A, RAE (µg)", 
+    VITA_RAEmcg = "Vitamin A, RAE (µg)", 
     RETOLmcg = "Retinol (µg)", 
     CARTAmcg = "Carotene, alpha (µg)",
     CARTBmcg = "Carotene, beta (µg)", 
@@ -153,7 +153,7 @@ Output_table <- Composite_Table %>%
     THIAmg = "Thiamin (mg)",
     RIBFmg = "Riboflavin (mg)", 
     NIAmg = "Niacin (mg)", 
-    TRPmg = "Tryptophan (g)", 
+    TRPg = "Tryptophan (g)", 
     VITB6Amg = "Vitamin B-6 (mg)",
     #phyticacid_in_mg = "PHYTCPPD"), - not present
     FOLmcg = "Folate, total (µg)", 
@@ -164,6 +164,11 @@ Output_table <- Composite_Table %>%
     SUGARg = "Sugars, total (g)",
     F22D6N3g = "22:6 n-3 (DHA) (g)", 
     F20D5N3g = "20:5 n-3 (EPA) (g)") %>%
+  mutate( TRPmg =  TRPg*1000, #convert TRP from g to mg
+          comment = NA) %>%   
+  CARTBEQmcg_std_creator() %>%
+  #  rename(CARTBEQmcg = "CARTBEQmcg_std") %>%   #Changing name of re-calculated variable for making VITA f(x) to work)
+  VITAmcg_std_creator() %>%   #Re-calcuating VITAmcg
   relocate(food_group, .after = food_desc) %>% #Some columns are relocated for easier reading
   relocate(source_fct, .after = food_group) %>%
   relocate(nutrient_data_source, .after = source_fct) %>%
@@ -171,6 +176,24 @@ Output_table <- Composite_Table %>%
   relocate(ENERCkcal, .after = WATERg) %>%
   relocate(ENERCkJ, .after = ENERCkcal) %>%
   relocate(Edible_factor_in_FCT, .after = Refuse)
+
+#Re-calcuating VITAmcg from Vit.A (IU)
+#Checking if RETOLmcg or CARTBmcg are available
+which(is.na(Output_table$VITAmcg_std) & !is.na(Output_table$VITAmcg_std))
+which(is.na(Output_table$VITAmcg_std))
+
+#Checking where VITAmcg could be re-caluclated form VIT A (IU)
+n <- which(is.na(Output_table$VITAmcg_std) & !is.na(Output_table$`Vitamin A, IU (IU)`))
+
+#Recalculating - FAO/ INFOODS Guidelines for Converting Units, Denominators and Expressions Version 1.0
+#suggested converting when no other info is available and "assuming" all VITA is retinol.
+#Creating VITAmcg so VITAmcg_std is not over-written by the use of VITAmcg_std_creator() in compilation
+Output_table$VITAmcg <-  NA
+Output_table[n, "VITAmcg"] <- Output_table[n, "Vitamin A, IU (IU)"]*0.3
+
+#Adding info into comment variable
+Output_table$comment <-  NA
+Output_table[n, "comment"] <- "VITAmcg was recalculated from Vitamin A, IU (IU)*03. See documentation for more information"
 
 #Optional - check data before saving
 glimpse(Output_table)

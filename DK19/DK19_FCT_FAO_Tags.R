@@ -134,6 +134,8 @@ col_tagname <- c("fdc_id", "food_group", #List of FAO tagnames, in the same orde
                  NA, "specific_gravity"
 )
 
+col_tagname[105] <- "SUGARg"
+
 for (i in 1:length(col_tagname)){ #This for loop checks to see if the tagname list gives an NA - if not, then the column name is replaced with the tagname
   if(!is.na(col_tagname[i])){
     colnames(Output_table)[i] <- c(col_tagname[i])

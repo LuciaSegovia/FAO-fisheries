@@ -20,7 +20,7 @@ KE18_Raw_FCT <- readxl::read_excel(here::here('KE18', "MOH-KENFCT_2018.xlsx"), s
 ken_names <- c('code', 'fooditem', 'EDIBLE', 'ENERC2', 'ENERC1', 'WATER', #creates a list of the new names
                'PROTCNT', 'FAT',  'CHOAVLDF', 'FIBTG', 'ASH', 
                'CA', 'FE', 'MG', 'P', 'K', 'NA.', 'ZN', 'SE',
-               'VITA_RAE', 'VITA', 'RETOL', 'CARBEQ', 
+               'VITA_RAE', 'VITA', 'RETOL', 'CARTBEQ', 
                'THIA', 'RIBF', 'NIA', 'FOLDFE', 'FOLFD',
                'VITB12', 'VITC', 'CHOLE', 'OXALAC', 'PHYTCPPD', 'IP3', 'IP4',
                'IP5', 'IP6','FASAT', "FAMS","FAPU", 'FCT')
@@ -110,18 +110,18 @@ KE18_Raw_FCT %>% str_which(.,"tr|[tr]|[*]|\\[.*?\\]")
 
 KE18_Raw_FCT <- KE18_Raw_FCT %>% 
   left_join(., readxl::read_excel(here::here('KE18', "MOH-KENFCT_2018.xlsx"), #Attaches sheet 7 to the main table
-                                                     sheet = 7, skip = 2) %>%
-                                 janitor::clean_names() %>% 
-                                 select(2, 4,5) %>% #Selects the columns to merge
-                                 mutate_at("code_kfct18", as.character),
-                               by = c("code" = "code_kfct18")) #merges them based on the code
+                                  sheet = 7, skip = 2) %>%
+              janitor::clean_names() %>% 
+              select(2, 4,5) %>% #Selects the columns to merge
+              mutate_at("code_kfct18", as.character),
+            by = c("code" = "code_kfct18")) #merges them based on the code
 
-
+KE18_Raw_FCT <- KE18_Raw_FCT[!duplicated(KE18_Raw_FCT), ] #Removwes the duplicates that the last batch of code introduces for whatever reason
 
 # Reordering variables and converting nutrient variables into numeric ----
 
 KE18_Raw_FCT <- KE18_Raw_FCT %>% dplyr::relocate(c(scientific_name, foodgroup, biblio_id), #Relocating some columns to after food item
-                                     .after = fooditem) %>%
+                                                 .after = fooditem) %>%
   dplyr::relocate(FCT, .before = code) %>%  #relocating "FCT" to after "code"
   mutate_at(vars(EDIBLE:F24D6g), as.numeric) #converting all values in the main body of the table to numeric
 
@@ -168,7 +168,7 @@ KE18_Raw_FCT <- KE18_Raw_FCT %>% rename( #Renames a number of variables - e.g. "
   PROCNTg = "PROTCNTg", 
   NAmg = "NA.mg") %>% #selecting the variables of interest
   dplyr::select(source_fct:PHYTCPPDmg, TRPmg, FASATgstandardized:FATRNgstandardized,
-         F20D5gstandardized, F22D6gstandardized) 
+                F20D5gstandardized, F22D6gstandardized) 
 
 
 

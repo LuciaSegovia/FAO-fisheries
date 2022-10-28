@@ -779,18 +779,17 @@ fao_fish_fct %>% filter(is.na(FAT_g_standardised)) %>% count(source_fct)
 #fao_fish_fct %>% filter(fdc_id == "10130") %>% select(Lipid_g)
 
 #├ 4) Fibre -----
+
+#Checking fibre fractions available
+fao_fish_fct %>% select(starts_with("FIB")) 
+
 #IN17 did not reported Fibre for fish (assumed zero?)
 fao_fish_fct %>% filter(is.na(FIBTGg)) %>% count(source_fct)
 
+#Checking values of other fractions when dietary fibre was missing
 fao_fish_fct %>% filter(is.na(FIBTGg), !is.na(FIBCg)) %>% count(source_fct)
-#non-existent
-#fao_fish_fct %>% filter(is.na(FIBTGg), !is.na(FIBTSg)) %>% count(source_fct)
-
+#Checking values for Crude fibre when dietary fibre was missing
 fao_fish_fct %>% filter(is.na(FIBTGg), !is.na(NSPg)) %>% count(source_fct)
-#FIBINS: find it
-#fao_fish_fct %>% filter(is.na(FIBTGg), !is.na(`Fibre, water-insoluble (g/100g)`)) %>% count(source_fct)
-#FIBSOL: find it
-#fao_fish_fct %>% filter(is.na(FIBTGg), !is.na(`Fibre, water-soluble (g/100g)`)) %>% count(source_fct)
 
 #├ 5) Alcohol ------
 #Assumed zero

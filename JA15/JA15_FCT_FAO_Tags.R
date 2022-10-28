@@ -1,5 +1,5 @@
 library(tidyverse)
-
+source("functions.R")
 
 
 # Data Import ----
@@ -136,7 +136,9 @@ Output_table <- left_join(Output_table, JA15_FCT_Fatty_Acids_int, by = "Item Num
 # Data tidying, column creation, moving and renaming ----
 
 Output_table[Output_table == "-"] <- NA #Sets all missing entries to NA.
-Output_table[Output_table == "Tr"] <- "0" #Sets all "Tr" entries to 0
+#Output_table[Output_table == "Tr"] <- "0" #Sets all "Tr" entries to 0
+
+Output_table[,c(5:156)] <- apply(Output_table[,c(5:156)], 2, TraceToZero)
 
 Output_table[] <- lapply(Output_table, function(x) gsub("\\*|\\(|\\)", "", x)) # removes special characters from the table contents
 
@@ -155,10 +157,9 @@ Output_table <- Output_table %>%
     food_group_id = "Index Number",
     Edible_factor_in_FCT = "EDIBLEpc", 
     PROCNTg = "Protein, calculated from  reference nitrogen_g", 
-    CHOAVLDFg ="Carbohydrate, total, calculated by difference_g",
+    CHOCDFg ="Carbohydrate, total, calculated by difference_g",
     FATg = "Lipid_g",
   )
-
 
 
 # Data Output ----

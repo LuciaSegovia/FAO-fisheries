@@ -36,7 +36,7 @@ test_df <- NO_FCT_Data %>%
   mutate(CHOAVLDFg_std = 100-(WATERg + PROCNTg + FAT_g + FIBTGg + ALCg +
                                 ASHg_std)) %>% 
   mutate(ASHg_bydiff = 100-(WATERg + PROCNTg + FAT_g + FIBTGg + ALCg +
-                             CHOAVLg)) %>% 
+                              CHOAVLg)) %>% 
   mutate(ASHg_diff = ASHg_bydiff - ASHg_std)
 
 #Checking fish entries outside the SOP range
@@ -73,8 +73,8 @@ subset(NO_FCT_Data, !is.na(ics_faostat_sua_english_description) &
   summarise(
     n = length(ISSCAAP),
     mean_WATERg=mean(as.numeric(WATERg)),
-           # mean_ASHg = mean(as.numeric(ASHg), na.rm = T),
-            mean_CHOAVLDFg =mean(as.numeric(CHOAVLg), na.rm =T))
+    # mean_ASHg = mean(as.numeric(ASHg), na.rm = T),
+    mean_CHOAVLDFg =mean(as.numeric(CHOAVLg), na.rm =T))
 
 #Checking those with higher CHOAVLg
 #Pelagic fish, cured
@@ -83,8 +83,8 @@ subset(NO_FCT_Data, !is.na(ics_faostat_sua_english_description) &
 #Pelagic fish, preparations nei
 
 subset(NO_FCT_Data, as.numeric(CHOAVLg) > 10 &
-  ics_faostat_sua_english_description == "Pelagic fish, preparations nei",
-  select = c(fdc_id, food_desc,CHOAVLg ))
+         ics_faostat_sua_english_description == "Pelagic fish, preparations nei",
+       select = c(fdc_id, food_desc,CHOAVLg ))
 
 #visuaL
 hist(as.numeric(NO_FCT_Data$CHOAVLg[NO_FCT_Data$ics_faostat_sua_english_description == "Demersal fish, preparations nei"]),
@@ -104,8 +104,8 @@ isscaap <- unique(NO_FCT_Data$ISSCAAP[!is.na(NO_FCT_Data$ics_faostat_sua_english
 #We are storing a dataset with more information 
 
 CHO_check <-  unique(subset(NO_FCT_Data, !is.na(ics_faostat_sua_english_description) & 
-                NO_FCT_Data$CHOAVLg > 0, 
-            select = c(ISSCAAP, product_type,ics_faostat_sua_english_description )))
+                              NO_FCT_Data$CHOAVLg > 0, 
+                            select = c(ISSCAAP, product_type,ics_faostat_sua_english_description )))
 
 
 

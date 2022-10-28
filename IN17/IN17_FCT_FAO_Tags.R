@@ -38,7 +38,7 @@ IN17_Renamed <- IN17_Raw %>%
          food_desc = "Food name",
          scientific_name = "Scientific name",
          CHOAVLg = "Table 6. STARCH AND INDIVIDUAL SUGARSg",
-           LACSg =  "...70g",
+         LACSg =  "...70g",
          FASATmg ="FASATFatty Acids (mg)",
          FAMSmg = "FAMSFatty Acids (mg)",
          FAPUmg ="FAPUFatty Acids (mg)", 
@@ -104,7 +104,7 @@ in17_colnames <- c( "Oxalate_Total",
                     "b_Sitosterol",
                     "PHYTCPPmg",
                     "Total_Saponin")
-         
+
 which(colnames(IN17_Renamed) == "Table 9. ORGANIC ACIDSmg")
 
 IN17_Renamed <- IN17_Renamed %>% #renaming organic acids
@@ -134,7 +134,7 @@ IN17_Raw %>%  select(F18D2N6mg)
 
 #Applying unit conversion in the columns by name
 IN17_Renamed <-IN17_Renamed %>% 
-  mutate_at(vars(matches("*_100gPROTCNT")), ~.*PROCNTg/10, na.rm = T)
+  mutate_at(vars(matches("*_100gPROTCNT")), ~.*PROCNTg*10, na.rm = T)
 
 #Renaming the columns according to the new units
 colnames(IN17_Renamed) <- str_replace(colnames(IN17_Renamed), "g_100gPROTCNT", "mg")
@@ -149,8 +149,11 @@ IN17_Renamed$source_fct <- "IN17"
 #Checking all the variables names before saving 
 IN17_Renamed %>% glimpse()
 
-write.csv(IN17_Renamed, file = here::here("Output", "IN17_FCT_FAO_Tags.csv"), row.names = FALSE)
+write.csv(IN17_Renamed,
+          file = here::here("Output", 
+                            "IN17_FCT_FAO_Tags.csv"), row.names = FALSE)
 
 #clean environment
 rm(list = ls())
+
 

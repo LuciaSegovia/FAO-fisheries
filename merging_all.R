@@ -15,21 +15,21 @@ library(visdat)
 
 ##Checking and loading updates
 
-# source_fct_name <- c("DK19" ,
-#                      "IN17" ,
-#                      "KE18" ,   
-#                      "NZ18" ,
-#                      "UK21" ,
-#                      "BA13" ,  
-#                      "UF16" ,
-#                      "WA19" ,
-#                      "NO21")
-# 
-# 
-# for(i in source_fct_name){
-#   source(paste0(i, "/", i, "_FCT_FAO_Tags.R"))
-# }
-# 
+#source_fct_name <- c("DK19" ,
+#                     "IN17" ,
+#                     "KE18" ,   
+#                     "NZ18" ,
+#                     "UK21" ,
+#                     "BA13" ,  
+#                     "UF16" ,
+#                     "WA19" ,
+#                     "NO21")
+#
+#
+#for(i in source_fct_name){
+#  source(paste0(i, "/", i, "_FCT_FAO_Tags.R"))
+#}
+
 
 #1) Loading all FCDBs into one single database ----
 
@@ -270,52 +270,6 @@ glimpse(fao_fish_fct)
 #Total fish entries - entries w/o ICS == to final count
 (count(fish_fct) - (277+41)) == count(fao_fish_fct)
 
-
-# 3. 4) Combining Tagnames to generate variables ----
-
-##├ VITB6_mg_standardised  ----
-#This function combine all the Tagnames for VITB6
-
-for(i in 1:nrow(fao_fish_fct)){
-  print(i)
-  if (!is.na(fao_fish_fct$VITB6Amg[i])) {
-    print(!is.na(fao_fish_fct$VITB6Amg[i]))
-    fao_fish_fct$VITB6_mg_standardised[i] <- fao_fish_fct$VITB6Amg[i]
-  }  
-  if (is.na(fao_fish_fct$VITB6Amg[i])) { 
-    fao_fish_fct$VITB6_mg_standardised[i] <- fao_fish_fct$VITB6Cmg[i]
-  } 
-  if (is.na(fao_fish_fct$VITB6Amg[i]) & is.na(fao_fish_fct$VITB6Cmg[i])) {
-    fao_fish_fct$VITB6_mg_standardised[i] <- fao_fish_fct$VITB6_mg[i]
-  }
-  if (is.na(fao_fish_fct$VITB6Amg[i]) & is.na(fao_fish_fct$VITB6Cmg[i]) & is.na(fao_fish_fct$VITB6_mg[i])) {
-    fao_fish_fct$VITB6_mg_standardised[i] <- NA
-  }
-  print(fao_fish_fct$VITB6_mg_standardised[i])
-}
-
-##├  FAT_g_standardised ----
-
-#This function combine all the Tagnames for FAT_g_standardised
-
-for(i in 1:nrow(fao_fish_fct)){
-  print(i)
-  if (!is.na(fao_fish_fct$FATg[i])) {
-    print(!is.na(fao_fish_fct$FATg[i]))
-    fao_fish_fct$FAT_g_standardised[i] <- fao_fish_fct$FATg[i]
-  }  
-  if (is.na(fao_fish_fct$FATg[i])) { 
-    fao_fish_fct$FAT_g_standardised[i] <- fao_fish_fct$FAT_g[i]
-  } 
-  if (is.na(fao_fish_fct$FATg[i]) & is.na(fao_fish_fct$FAT_g[i])) {
-    fao_fish_fct$FAT_g_standardised[i] <- fao_fish_fct$FATCEg[i]
-  }
-  if (is.na(fao_fish_fct$FATg[i]) & is.na(fao_fish_fct$FAT_g[i]) & 
-      is.na(fao_fish_fct$FATCEg[i])) {
-    fao_fish_fct$FAT_g_standardised[i] <- NA
-  }
-  print(fao_fish_fct$FAT_g_standardised[i])
-}
 
 
 # 4) Visualisation of results and QC ----
