@@ -383,7 +383,7 @@ nia_conversion_creator <- function(dataset) {
         dataset %>%
             as_tibble() %>%
             mutate_at(.vars = columns, .funs = as.numeric) %>%
-            mutate(nia_conversion_std = case_when(
+            mutate(NIAmg_std = case_when(
                 !is.na(NIAmg) ~ NIAmg,
                 is.na(NIAmg) ~ (NIAEQmg - (1 / 60 * TRPmg))
             )),

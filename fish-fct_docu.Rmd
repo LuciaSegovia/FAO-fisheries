@@ -463,16 +463,18 @@ available carbohydates were analysed, we used the an iteration of the
 \Eq. 3.4a to calculate ash concentration (Eq.3.4b)
 
 2.  Retinol: For instance, when a food entry was missing the retinol
-    value (`RETOLmcg`) but it reported Vitamin A (RAE) (`VITA_RAEmcg`)
-    and Beta-Carotene eq. (`CARBEQmcg`), The retinol was calculated
-    using the [Eq.8.3a](\LINK). Additionally, when Vitamin A (RAE)
-    (`VITA_RAEmcg`) and Vitamin A (RAE) (`VITAmcg`) was provided,
-    retinol as calculated by the [Eq.8.3b](LINK). This function
-    added a comment (see `comment`) with information about the
-    components that were used to impute the final `RETOLmcg` value. If
-    no comment was provided, then it was provided by the original food
-    composition source. More information about the development of the
-    function is provided in Issue #46
+value (`RETOLmcg`) but it reported Vitamin A (RAE) (`VITA_RAEmcg`)
+and Beta-Carotene eq. (`CARBEQmcg`), The retinol was calculated
+using the [Eq.8.3a](\LINK). Additionally, when Vitamin A (RAE)
+(`VITA_RAEmcg`) and Vitamin A (RAE) (`VITAmcg`) was provided,
+retinol as calculated by the [Eq.8.3b](LINK). This function
+added a comment (see `comment`) with information about the
+components that were used to impute the final `RETOLmcg` value. If
+no comment was provided, then it was provided by the original food
+composition source. More information about the development of the
+function is provided in Issue #46.
+
+3. Beta-carotene equivalent: 
     
     
 
@@ -821,8 +823,6 @@ fish_fct %>% filter(is.na(ICS.FAOSTAT.SUA.Current.Code)) %>% count(source_fct)
 
 #### 3.4. Combined variables (standardised) <br>
 
-## REVIEW
-
 This was done after merging all the dataset together, and it's reported
 on the `merging_all.R`.
 
@@ -874,7 +874,6 @@ will be used to generate the columns: `ENERCkJ_standardized` and
 `ENERCkcal_standardized` for the FAO fishery products database and for
 MAPS to calculate energy used.
 
-
 ##### 3.4.4. Carbohydrates by difference
 
 Carbohydrates by difference were calculated using the Eq.6a. In NO21, the value of ash (g/100g EP) used were calculated. In addition, we found `r round(sum(str_detect(fao_fish_fct$comment, "CHOAVLDFg_std assumed zero"), na.rm = T)/length(fao_fish_fct$CHOAVLDFg_std)*100)`% of negative values of carbohydrates by difference which were converted to zero and added a comment "CHOAVLDFg_std assumed zero" for documentation. 
@@ -899,7 +898,6 @@ from the carbohydrate by difference equation (Eq.3.4b). Full information was
 reported elsewhere (NO21_docu.Rmd). We combined `ASHg` (reported in the
 FCTs) and `ASHg_bydiff` into one variable `ASHg_std`.
 
-
 ##### 3.4.3. Fibre
 
 The value of fibre standardised was calculated using only values from the dietary fibre (`FIBTGg`), as no other fractions provided information when dietary fibre  was missing values. Fibre, crude (FIBCg) could not be used to complete missing values in FIBTGg, as FIBCg did not added information on any missing (FIBGTg). For more details, check the section 4.2.8.
@@ -908,6 +906,38 @@ The value of fibre standardised was calculated using only values from the dietar
 
 These two variables were re-calculated using the function `VITAmcg_std_creator()` and `VITA_RAEmcg_std_creator()` which used the variables `RETOLmcg` and `CARTBEQmcg_std` as inputs.
 
+##### 3.4.3. Beta-Carotene equivalents
+
+This was a calculated variable, hence when possible (i.e, when the
+carotenoids were reported), re-calculation was preformed using the function `CARTBEQmcg_std_creator()` and stored in the variable `CARTEBEQmcg_std`. This ensures that we
+avoid propagation of error across data sources. However, this was not
+always possible hence some values were extracted from the Beta-Carotent Eq. (`CARTEBEQmcg`) from the FCTs, and other were back calculated from the retinol and Vitamin A (RAE) as described
+in the method section 3.4.
+
+Some constrains of using this back-calculation was that there were
+some cases where retinol was greater that Vitamin RAE, this affected to
+19 fisheries entries, but were only 7 unique fisheries entries. We then
+transformed negative values to zero, assuming that if Vitamin A was
+smaller than the retinol value, then no carotene would be presented.
+
+##### 3.4.3. Retinol
+
+Retinol should be provided by the FCT, and ideally it would be analyised. However, there were some cases that retinol was missing, however values for Vitamin A and Beta-Carotene eq. were provide. Therefore, we used the function `RETOLmcg_Recalculator()` to re-calculate the
+missing values. Additionally, the function add the documentation (i.e., "RETOLmcg value re-calulated from VITA_RAEmcg and CARTBEQmcg" or "RETOLmcg value re-calulated from VITA_RAEmcg and VITAmcg" in the `comment`). Again, this is important to 1) identify data gaps, and 2) flagging potential issues with the data. 
+
+##### 3.4.3. Vitamin B6 
+
+Similarly as it was performed with the fat, we combined three Tagnames into `VITB6_mg_standardised` as reported in the method section 3.4. 
+
+##### 3.4.3. Thiamine
+
+Thiamine was combined into the Thiamine standardised variable (`THIAmg_std`) using the function `THIAmg_std_creator()` as reported in the method section 3.4.
+
+##### 3.4.3. Niacin 
+
+Niacin was combined into the Niacin standardised variable (`NIAmg_std`) using the fucntion:`nia_conversion_creator` as reported in the method section 3.4.
+
+## REVIEW
 
 ##### 4. Visualising food components for decision-making
 
@@ -936,7 +966,7 @@ reported in the WA19, `NIAmg` was re-calculated into a new variable
 I and Vit. D were reported only in six FCTs, and DHA and EPA were in
 seven.
 
-```{r fig-1, fig.cap= "Figure 1: Percentage of missing values per component and food composition table."}
+```{r fig-1, fig.cap= "Figure 1: Percentage of missing values per component and food composition table.", echo=FALSE}
 
 #├ Plot (heat map): % of missing values per FCT ----
 
@@ -1421,6 +1451,29 @@ Individual `NA` values (i.e., per fish entry) were assumed zero for energy and S
 
 - Vitamin A (RE): This variable was reported in X datasets, and it was re-caluclated using the function `VITAmcg_std_creator()` into the vitamin A (retinol eq.) standardised variable (`VITAmcg_std`). 
 
+- Beta-Carotene Eq.: Around 9 SUA fishery categories has high amount of missing values (over
+80%), see in the missing values plots reported in `QC.R`.
+
+- Retinol: It was provided in most of the FCTs, with only 115 entries having a
+missing value which were mainly reported in BA13 followed by US19.
+However, it was particularly problematic for Aquatic mammals (see Figure \@ref(fig:miss-retol)), for which led to between high
+proportion of missing values (\>60%).
+
+```{r miss-retol, fig.cap="Missing values for retinol by ICS SUA fisheries code.", echo=FALSE}
+
+##├├ Plot: Missing values for retinol by ICS code 
+
+fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code <- as.factor(fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code)
+
+fao_fish_fct[,c( "RETOLmcg", "ICS.FAOSTAT.SUA.Current.Code")] %>%  #selecting variables
+  naniar::gg_miss_fct(., fct = ICS.FAOSTAT.SUA.Current.Code) +
+  coord_flip() +
+  scale_x_discrete(guide = guide_axis(n.dodge = 3))
+
+
+```
+
+
 
 ### Final Quality Checks
 
@@ -1624,6 +1677,8 @@ US21 - Using data embeded in US21 to allocate the Tagnames for all NVs.
 ##### Functions improvement for the future:
 
 For the future development, check FAO/INFOODS to identify food group that certain components (e.g., fibre, alcohol, etc.) may be "assumed" zero when calculating Carbohydrate by difference and Energy, otherwise it should flag it as "missing value" need attention (see also "Assumed zero").
+
+For the function that re-calculate NIA, THIA and VITB6, documentation of the Tagname and/or re-calcuated value used should be added to the the documentation (`comment`). 
 
 ###### Dealing with missing nutrient values
 

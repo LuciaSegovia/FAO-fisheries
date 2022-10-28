@@ -75,7 +75,7 @@ fao_fish_fct$comment[n1] <- ifelse(is.na(fao_fish_fct$comment[n1]),
                                    "CHOAVLDFg_std assumed zero", paste(fao_fish_fct$comment, "| CHOAVLDFg_std assumed zero") )
 fao_fish_fct$CHOAVLDFg_std[fao_fish_fct$CHOAVLDFg_std< 0] <- 0
 
-#├ ) Energy  ----
+#├ ) Energy - standardised ----
 
 #Energy in kcal
 fao_fish_fct$ENERCkcal_std <- ENERCKcal_standardised(
@@ -93,15 +93,29 @@ fao_fish_fct$ENERCkJ_std <-  ENERCKj_standardised(
 
 fao_fish_fct  <- fao_fish_fct %>% SOP_std_creator() 
 
-#├ )  Vitamin A  ----  
+#├ ) Retinol - recalculated ---- 
+
+fao_fish_fct <- RETOLmcg_Recalculator(fao_fish_fct)
+
+
+#├ ) Beta - Carotene eq. - standardised ---- 
+
+fao_fish_fct <- fao_fish_fct %>% 
+  CARTBEQmcg_std_creator() %>% # Calculate CARTBEQmcg & store it in CARTBEQmcg_std
+  CARTBEQmcg_std_imputer_with_CARTBEQmcg() %>% # New imputer of CARTBEQmcg into CARTBEQmcg_std when they are NAs.
+  CARTBEQmcg_std_back_calculator_VITA_RAEmcg() %>% # This requires values created in RETOLmcg_Recalculator
+  CARTBEQmcg_std_to_zero()   # changing negative values to zero # This handles better and adds comments
+
+#├ )  Vitamin A - standardised ----  
 
 fao_fish_fct  <- fao_fish_fct %>%
 VITA_RAEmcg_std_creator() %>%  #This function recalculate VITA_RAEmcg_std (standardised)
   VITAmcg_std_creator()   #This function recalculate VITAmcg_std (standardised)
   
 
-##├ ) VITB6_mg_standardised  ----
-#This function combine all the Tagnames for VITB6
+#├ ) Vitamin B6 - standardised  ----
+
+#This loop combine all the Tagnames for VITB6
 
 for(i in 1:nrow(fao_fish_fct)){
   print(i)
@@ -120,3 +134,14 @@ for(i in 1:nrow(fao_fish_fct)){
   }
   print(fao_fish_fct$VITB6_mg_standardised[i])
 }
+
+#├ ) Thiamine - standardised  ----
+
+fao_fish_fct  <- fao_fish_fct %>%
+  THIAmg_std_creator() 
+
+
+#├ )  Niacin - standardised  ----
+
+fao_fish_fct <- fao_fish_fct %>% 
+  nia_conversion_creator()
