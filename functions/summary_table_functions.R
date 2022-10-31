@@ -253,14 +253,23 @@ THIAmg_std_creator <- function(dataset) {
     )
 }
 
-# # TODO: Function needs testing CHOAVLDFg.calculation <- function(WATERg, PROTg,
-# FATg_standardised, FBGTg, ASHg, ALCg) { ALCg <- ALCg %>% replace_na(0)
-# CHOAVLDFg_std <- 100 - (WATERg + PROTg + FATg_standardised + FBGTg + ASHg + ALCg)
-# return(CHOAVLDFg_std) }
-# ! Modified Lucia's function to perform additional checks and throw warnings
-# TODO: Create documentation. Function works. Most fileds
+
+
 CHOAVLDFg_std_creator <- function(dataset) {
-    # Check presence of required columns
+    #' @title CHOAVLDFg_std_creator
+    #' @description Calculates CHOAVLDFg_std = (100 - (WATERg + PROTg + FATg_standardised + FBGTg + ASHg + ALCg)).
+    #' Column names are case sensitive and error is thrown if not found.
+    #' @param dataset :Required (FCT dataset to be checked)
+    #' @param CHOAVLDFg_std Available carbohydrates calculated by difference
+    #' @param WATERg Water/ moisture content in g per 100g of EP
+    #' @param PROCNTg Protein in g per 100g of EP, as reported in the original FCT and assumed to be calculated from nitrogen (NTg) content
+    #' @param FAT_g_standardised fat content unknown method of calculation in g per 100g of EP
+    #' @param FIBTGg Total dietary fibre by AOAC Prosky method expressed in g per 100g of EP
+    #' @param ALCg Alcohol in g per 100g
+    #' @param ASHg_std Ashes in g per 100g of EP
+    #' @return Original FCT dataset with SOP_std column added
+    #' @examples
+
     columns <- c(
         "WATERg",
         "PROCNTg",
@@ -275,17 +284,13 @@ CHOAVLDFg_std_creator <- function(dataset) {
         dataset %>%
             as_tibble() %>%
             mutate_at(.vars = columns, .funs = as.numeric) %>%
-            # ! I the original function only ALCg had NAs replaced. Is this
-            # right then? TODO: future dev should check food group before
-            # changing NAs to Zero ! Create a temp row with the number of NAs
-            # across the required column
+            # ! Create a temp row with a count of number of NAs in req columns
             mutate(temp = rowSums(is.na(
                 dataset %>%
                     select(all_of(columns))
             ))) %>%
             rowwise() %>%
-            # ! Check if all the rows are NA then output NA else do the
-            # calculation and omit NAs
+            # ! Check if all the rows are NA then output NA else do the calculation and omit NAs
             mutate(CHOAVLDFg_std = ifelse(
                 temp == length(columns),
                 NA,
