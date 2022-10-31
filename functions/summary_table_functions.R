@@ -279,7 +279,6 @@ CHOAVLDFg_std_creator <- function(dataset) {
         "ALCg"
     )
     check_columns(dataset = dataset, columns = columns)
-    # Try the calculation
     tryCatch(
         dataset %>%
             as_tibble() %>%
@@ -316,15 +315,19 @@ CHOAVLDFg_std_creator <- function(dataset) {
     )
 }
 
-# #! Is this required as well? #Working but introduced extra values - Eg. US19 =
-# 818 instead of 808 nia.conversion <- function(x, var1 = "NIAEQmg", var2 =
-# "TRPmg", var3 = "NIAmg"){ if(is.na(var3)){ var3 <- as.numeric(var1) -
-# 1/60*as.numeric(var2) }else{var3} print(var3) } }
+
+
 nia_conversion_creator <- function(dataset) {
-    # Check presence of required columns
+    #' @title nia_conversion_creator
+    #' @description Calculates NIAmg_std if based on presence of NIAmg. i.e. NIAmg_std = case_when(!is.na(NIAmg) ~ NIAmg,is.na(NIAmg) ~ (NIAEQmg - (1 / 60 * TRPmg)))
+    #' @param NIAmg_std Niacin was combined into the Niacin standardised variable (`NIAmg_std`)
+    #' @param NIAEQmg Niacin equivalents, total. Preformed niacin plus niacin equivalents from tryptophan (TRP) in mg per 100g EP
+    #' @param TRPmg Tryptophan in mg per 100g of EP (includes only L-tryptophan)
+    #' @param NIAmg Niacin, prefrormed in mg per 100g EP
+    #' @return Original FCT dataset with additional column
+
     columns <- c("NIAEQmg", "TRPmg", "NIAmg")
     check_columns(dataset = dataset, columns = columns)
-    # Try the calculation
     tryCatch(
         dataset %>%
             as_tibble() %>%
