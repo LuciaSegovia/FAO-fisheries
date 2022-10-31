@@ -1,6 +1,3 @@
-# TODO: Universal column checker. All functions need to be refactored to make
-# then more succinct. Currenctly only used in RETOLmcg_Recalculator
-
 check_columns <- function(dataset, columns) {
     #' Check presence of columns required for a calculation in a given dataset.
     #' Column names are case sensitive and error is thrown if not found.
