@@ -461,12 +461,17 @@ CARTBEQmcg_std_back_calculator_VITA_RAEmcg <- function(dataset) {
 
 
 
-# Imputes values of CARTBEQmcg into CARTBEQmcg_std when they are NAs.
+
 CARTBEQmcg_std_imputer_with_CARTBEQmcg <-
     function(dataset) {
+        #' @title CARTBEQmcg_std_imputer_with_CARTBEQmcg
+        #' @description Imputes values of CARTBEQmcg into CARTBEQmcg_std when they are NAs. then adds a comment
+        #' @param CARTBEQmcg_std Beta-carotene equivalents, expressed in mcg per 100g of EP
+        #' @param CARTBEQmcg Beta-carotene equivalents, is the sum of the beta-carotene + 1/2 quantity of other carotenoids with vitamin A activity, expressed in mcg per 100g of EP
+        #' @return Original FCT with the imputed values
+
         columns <- c("CARTBEQmcg_std", "CARTBEQmcg")
         check_columns(dataset = dataset, columns = columns)
-        # Try the calculation
         tryCatch(
             dataset %>%
                 as_tibble() %>%
