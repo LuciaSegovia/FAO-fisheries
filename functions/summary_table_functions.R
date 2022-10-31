@@ -1,6 +1,10 @@
-# TODO: Universal column checker. All functions need to be refactored to make
-# then more succinct. Currenctly only used in RETOLmcg_Recalculator
 check_columns <- function(dataset, columns) {
+    #' Check presence of columns required for a calculation in a given dataset.
+    #' Column names are case sensitive and error is thrown if not found.
+    #' @param dataset :Required (FCT dataset to be checked)
+    #' @param columns (Columns to be checked)
+    #' @return dataset
+    #' @examples
     for (column in columns) {
         if (column %in% names(dataset)) {
 
@@ -16,48 +20,46 @@ check_columns <- function(dataset, columns) {
     }
 }
 
-# TODO: Documenting this function. But its works. # change some variables !
-# SOP_std = (WATERg + PROCNTg + FAT_g_standardised + CHOAVLg + FIBTGg + ALCg
-# +ASHg)
+
+
 SOP_std_creator <- function(dataset) {
+    #' @description Calculates SOP_std = (WATERg + PROCNTg + FAT_g_standardised + CHOAVLg + #` FIBTGg + ALCg +ASHg).
+    #' Column names are case sensitive and error is thrown if not found.
+    #' @param dataset :Required (FCT dataset to be checked)
+    #' @param SOP_std Sum of Proximate in g per 100g EP as reported in the original FCT
+    #' @param WATERg Water/ moisture content in g per 100g of EP
+    #' @param PROCNTg Protein in g per 100g of EP, as reported in the original FCT and assumed to be calculated from nitrogen (NTg) content
+    #' @param FAT_g_standardised fat content unknown method of calculation in g per 100g of EP
+    #' @param CHOAVLg Available carbohydrates calculated by weight in g per 100g of EP
+    #' @param FIBTGg Total dietary fibre by AOAC Prosky method expressed in g per 100g of EP
+    #' @param ALCg Alcohol in g per 100g
+    #' @param ASHg_std Ashes in g per 100g of EP
+    #' @return Original FCT dataset with SOP_std column added
+    #' @examples
     # Check presence of required columns
     columns <- c(
         "WATERg",
         "PROCNTg",
         "FAT_g_standardised",
-        # Change FAT_g to FAT_g_standardised
         "CHOAVLg",
         "FIBTGg",
         "ALCg",
-        "ASHg_std" # change ASHg to ASHg_std
+        "ASHg_std"
     )
-    for (column in columns) {
-        if (column %in% names(dataset)) {
-
-        } else {
-            stop(
-                paste0(
-                    "Error: variable ",
-                    column,
-                    " not found, halting execution. Please fix your input data and try again"
-                )
-            )
-        }
-    }
-    # Try the calculation
+    check_columns(dataset = dataset, columns = columns)
     tryCatch(
         dataset %>%
             as_tibble() %>%
             mutate_at(.vars = columns, .funs = as.numeric) %>%
-            # ! Create a temp row with the number of NAs across the required
-            # column
+            # ! Create a temp row with the count of NAs in the required columns
             mutate(temp = rowSums(is.na(
                 dataset %>%
                     select(all_of(columns))
             ))) %>%
+            # Rowwise allows for per row evaluations.
             rowwise() %>%
-            # ! Check if all the rows are NA then output NA else do the
-            # calculation and omit NAs
+            # ! If all the rows are NA then output is NA.
+            # ! Else do the calculation and omit NAs.
             mutate(SOP_std = ifelse(
                 temp == length(columns),
                 NA,
@@ -87,48 +89,39 @@ SOP_std_creator <- function(dataset) {
     )
 }
 
-#  Carotene Eq.
-# Weighted sum of the listed variables
-# CARTBEQmcg_std <- 1 * CARTBmcg + 0.5 * CARTAmcg + 0.5 * CRYPXBmcg
-# TODO: Create documentation. Function works. Most fileds
+
+
 CARTBEQmcg_std_creator <- function(dataset) {
+    #' @description Calculates a weighted sum of CARTBEQmcg_std = (1 * CARTBmcg + 0.5 * CARTAmcg + 0.5 * CRYPXBmcg)
+    #' @param CARTBEQmcg_std Beta-carotene equivalents, expressed in mcg per 100g of EP
+    #' @param CARTBmcg Beta-carotene in mcg per 100g of EP
+    #' @param CARTAmcg Alpha-carotene in mcg per 100g of EP
+    #' @param CRYPXBmcg Beta-cryptoxanthin in mcg per 100g of EP
+    #' @return dataset (Original FCT dataset with CARTBEQmcg_std column)
     # Check presence of required columns
     columns <- c("CARTBmcg", "CARTAmcg", "CRYPXBmcg")
-    for (column in columns) {
-        if (column %in% names(dataset)) {
-
-        } else {
-            stop(
-                paste0(
-                    "Error: variable ",
-                    column,
-                    " not found, halting execution. Please fix your input data and try again"
-                )
-            )
-        }
-    }
+    check_columns(dataset = dataset, columns = columns)
     # Try the calculation
     tryCatch(
         dataset %>%
             as_tibble() %>%
             mutate_at(.vars = columns, .funs = as.numeric) %>%
-            # ! Create a temp row with the number of NAs across the required
-            # column
+            # ! Create a temp row with the count of NAs in the required columns
             mutate(temp = rowSums(is.na(
                 dataset %>%
                     select(all_of(columns))
             ))) %>%
             rowwise() %>%
-            # ! Check if all the rows are NA then output NA else do the
-            # calculation and omit NAs
+            # ! Replace comment NAs with blank so that we can concatenate comments well.
             mutate(comment = ifelse(is.na(comment), "", comment)) %>%
-            # ! Replace comment NAs with blank so that we can concatenate
-            # comments well.
+            # ! If all inputs to the CARTBEQmcg_std calculation are NA return NA
+            # ! Else perform calculation ommiting NAs
             mutate(CARTBEQmcg_std = ifelse(
                 temp == length(columns),
                 NA,
                 sum(1 * CARTBmcg, 0.5 * CARTAmcg, 0.5 * CRYPXBmcg, na.rm = TRUE)
             )) %>%
+            # ! Use the same logic as above for comment appendage.
             mutate(comment = ifelse(
                 temp == length(columns),
                 comment,
@@ -137,6 +130,7 @@ CARTBEQmcg_std_creator <- function(dataset) {
                     " | CARTBEQmcg_std calculated from CARTBmcg, CARTAmcg and CRYPXBmcg"
                 )
             )) %>%
+            # ! Check which components of the calculation were used. If only CARTB was used. Append the comment to reflect that.
             mutate(comment = ifelse(
                 (
                     temp != length(columns) &
@@ -157,27 +151,18 @@ CARTBEQmcg_std_creator <- function(dataset) {
     )
 }
 
-#  Vitamin A, retinol activity eq.
-# Weighted sum of the listed variables
-# ! VITA_RAEmcg_std <- RETOLmcg + 1 / 12 * CARTBEQmcg_std
-# TODO: Create documentation. Function works. Most fileds
-VITA_RAEmcg_std_creator <- function(dataset) {
-    # Check presence of required columns
-    columns <- c("RETOLmcg", "CARTBEQmcg_std")
-    for (column in columns) {
-        if (column %in% names(dataset)) {
 
-        } else {
-            stop(
-                paste0(
-                    "Error: variable ",
-                    column,
-                    " not found, halting execution. Please fix your input data and try again"
-                )
-            )
-        }
-    }
-    # Try the calculation
+
+VITA_RAEmcg_std_creator <- function(dataset) {
+    #' @title Vitamin A, retinol activity
+    #' @description Calculates a wighted sum of VITA_RAEmcg_std - Vitamin A (Retinol Activity Eq. (RAE)) in mcg per 100g of EP using (RETOLmcg + 1 / 12 * CARTBEQmcg_std)
+    #' @param dataset - FCT dataset
+    #' @param VITA_RAEmcg_std - Vitamin A (Retinol Activity Eq. (RAE)) in mcg per 100g of EP
+    #' @param RETOLmcg Retinol in mcg per 100g of EP
+    #' @param CARTBEQmcg_std Beta-carotene equivalents, expressed in mcg per 100g of EP
+    #' @return Original dataset with the added column
+    columns <- c("RETOLmcg", "CARTBEQmcg_std")
+    check_columns(dataset = dataset, columns = columns)
     tryCatch(
         dataset %>%
             as_tibble() %>%
@@ -189,8 +174,7 @@ VITA_RAEmcg_std_creator <- function(dataset) {
                     select(all_of(columns))
             ))) %>%
             rowwise() %>%
-            # ! Check if all the rows are NA then output NA else do the
-            # calculation and omit NAs
+            # ! Check if all the rows are NA then output NA else do the calculation and omit NAs
             mutate(VITA_RAEmcg_std = ifelse(
                 temp == length(columns), NA, sum(RETOLmcg, (1 / 12 * CARTBEQmcg_std), na.rm = TRUE)
             )) %>% # ! remove the temp column
@@ -204,26 +188,18 @@ VITA_RAEmcg_std_creator <- function(dataset) {
     )
 }
 
-# Vitamin A, retinol eq.
-# Weighted sum of the listed variables
-# ! VITAmcg_std <- RETOLmcg + 1 / 6 * CARTBEQmcg_std
-# TODO: Create documentation. Function works. Most fileds
-VITAmcg_std_creator <- function(dataset) {
-    # Check presence of required columns
-    columns <- c("RETOLmcg", "CARTBEQmcg_std")
-    for (column in columns) {
-        if (column %in% names(dataset)) {
 
-        } else {
-            stop(
-                paste0(
-                    "Error: variable ",
-                    column,
-                    " not found, halting execution. Please fix your input data and try again"
-                )
-            )
-        }
-    }
+
+VITAmcg_std_creator <- function(dataset) {
+    #' @title Vitamin A, retinol calculator
+    #' @description Calculates weighted sum of VITAmcg_std (Vitamin A (Retinol Eq. (RE) in mcg per 100g of EP) using the eq. VITAmcg_std = RETOLmcg + 1 / 6 * CARTBEQmcg_std
+    #' @param VITAmcg_std Vitamin A (Retinol Eq. (RE) in mcg per 100g of EP
+    #' @param RETOLmcg Retinol in mcg per 100g of EP
+    #' @param CARTBEQmcg_std Beta-carotene equivalents, expressed in mcg per 100g of EP
+    #' @return Original dataset with the added column
+
+    columns <- c("RETOLmcg", "CARTBEQmcg_std")
+    check_columns(dataset = dataset, columns = columns)
     # Try the calculation
     tryCatch(
         dataset %>%
@@ -236,8 +212,7 @@ VITAmcg_std_creator <- function(dataset) {
                     select(all_of(columns))
             ))) %>%
             rowwise() %>%
-            # ! Check if all the rows are NA then output NA else do the
-            # calculation and omit NAs
+            # ! Check if all the rows are NA then output NA else do the calculation and omit NAs
             mutate(VITAmcg_std = ifelse(
                 temp == length(columns), NA, sum(RETOLmcg, (1 / 6 * CARTBEQmcg_std), na.rm = TRUE)
             )) %>%
@@ -253,25 +228,15 @@ VITAmcg_std_creator <- function(dataset) {
 }
 
 
-# Thiamin
-# Variable combinations: In absence of THIAmg, use values of THIAHCLmg
-# ! THIAmg_std = THIAmg OR THIAHCLmg
-THIAmg_std_creator <- function(dataset) {
-    # Check presence of required columns
-    columns <- c("THIAmg", "THIAHCLmg")
-    for (column in columns) {
-        if (column %in% names(dataset)) {
 
-        } else {
-            stop(
-                paste0(
-                    "Error: variable ",
-                    column,
-                    " not found, halting execution. Please fix your input data and try again"
-                )
-            )
-        }
-    }
+THIAmg_std_creator <- function(dataset) {
+    #' @title THIAmg_std_creator
+    #' @description Thiamin variable combinations: In absence of THIAmg, use values of THIAHCLmg i.e. THIAmg_std = THIAmg OR THIAHCLmg
+    #' @param THIAmg Thiamin, vitamin B1 analysed and expressed as thiamin in mg per 100g of EP
+    #' @param THIAHCLmg Thiamin hydrochloride, vitamin B1 analysed and expressed as thiamin hydrochloride in mg per 100g of EP
+
+    columns <- c("THIAmg", "THIAHCLmg")
+    check_columns(dataset = dataset, columns = columns)
     # Try the calculation
     tryCatch(
         dataset %>%
@@ -288,14 +253,23 @@ THIAmg_std_creator <- function(dataset) {
     )
 }
 
-# # TODO: Function needs testing CHOAVLDFg.calculation <- function(WATERg, PROTg,
-# FATg_standardised, FBGTg, ASHg, ALCg) { ALCg <- ALCg %>% replace_na(0)
-# CHOAVLDFg_std <- 100 - (WATERg + PROTg + FATg_standardised + FBGTg + ASHg + ALCg)
-# return(CHOAVLDFg_std) }
-# ! Modified Lucia's function to perform additional checks and throw warnings
-# TODO: Create documentation. Function works. Most fileds
+
+
 CHOAVLDFg_std_creator <- function(dataset) {
-    # Check presence of required columns
+    #' @title CHOAVLDFg_std_creator
+    #' @description Calculates CHOAVLDFg_std = (100 - (WATERg + PROTg + FATg_standardised + FBGTg + ASHg + ALCg)).
+    #' Column names are case sensitive and error is thrown if not found.
+    #' @param dataset :Required (FCT dataset to be checked)
+    #' @param CHOAVLDFg_std Available carbohydrates calculated by difference
+    #' @param WATERg Water/ moisture content in g per 100g of EP
+    #' @param PROCNTg Protein in g per 100g of EP, as reported in the original FCT and assumed to be calculated from nitrogen (NTg) content
+    #' @param FAT_g_standardised fat content unknown method of calculation in g per 100g of EP
+    #' @param FIBTGg Total dietary fibre by AOAC Prosky method expressed in g per 100g of EP
+    #' @param ALCg Alcohol in g per 100g
+    #' @param ASHg_std Ashes in g per 100g of EP
+    #' @return Original FCT dataset with SOP_std column added
+    #' @examples
+
     columns <- c(
         "WATERg",
         "PROCNTg",
@@ -304,35 +278,18 @@ CHOAVLDFg_std_creator <- function(dataset) {
         "ASHg_std",
         "ALCg"
     )
-    for (column in columns) {
-        if (column %in% names(dataset)) {
-
-        } else {
-            stop(
-                paste0(
-                    "Error: variable ",
-                    column,
-                    " not found, halting execution. Please fix your input data and try again"
-                )
-            )
-        }
-    }
-    # Try the calculation
+    check_columns(dataset = dataset, columns = columns)
     tryCatch(
         dataset %>%
             as_tibble() %>%
             mutate_at(.vars = columns, .funs = as.numeric) %>%
-            # ! I the original function only ALCg had NAs replaced. Is this
-            # right then? TODO: future dev should check food group before
-            # changing NAs to Zero ! Create a temp row with the number of NAs
-            # across the required column
+            # ! Create a temp row with a count of number of NAs in req columns
             mutate(temp = rowSums(is.na(
                 dataset %>%
                     select(all_of(columns))
             ))) %>%
             rowwise() %>%
-            # ! Check if all the rows are NA then output NA else do the
-            # calculation and omit NAs
+            # ! Check if all the rows are NA then output NA else do the calculation and omit NAs
             mutate(CHOAVLDFg_std = ifelse(
                 temp == length(columns),
                 NA,
@@ -358,27 +315,19 @@ CHOAVLDFg_std_creator <- function(dataset) {
     )
 }
 
-# #! Is this required as well? #Working but introduced extra values - Eg. US19 =
-# 818 instead of 808 nia.conversion <- function(x, var1 = "NIAEQmg", var2 =
-# "TRPmg", var3 = "NIAmg"){ if(is.na(var3)){ var3 <- as.numeric(var1) -
-# 1/60*as.numeric(var2) }else{var3} print(var3) } }
-nia_conversion_creator <- function(dataset) {
-    # Check presence of required columns
-    columns <- c("NIAEQmg", "TRPmg", "NIAmg")
-    for (column in columns) {
-        if (column %in% names(dataset)) {
 
-        } else {
-            stop(
-                paste0(
-                    "Error: variable ",
-                    column,
-                    " not found, halting execution. Please fix your input data and try again"
-                )
-            )
-        }
-    }
-    # Try the calculation
+
+nia_conversion_creator <- function(dataset) {
+    #' @title nia_conversion_creator
+    #' @description Calculates NIAmg_std if based on presence of NIAmg. i.e. NIAmg_std = case_when(!is.na(NIAmg) ~ NIAmg,is.na(NIAmg) ~ (NIAEQmg - (1 / 60 * TRPmg)))
+    #' @param NIAmg_std Niacin was combined into the Niacin standardised variable (`NIAmg_std`)
+    #' @param NIAEQmg Niacin equivalents, total. Preformed niacin plus niacin equivalents from tryptophan (TRP) in mg per 100g EP
+    #' @param TRPmg Tryptophan in mg per 100g of EP (includes only L-tryptophan)
+    #' @param NIAmg Niacin, prefrormed in mg per 100g EP
+    #' @return Original FCT dataset with additional column
+
+    columns <- c("NIAEQmg", "TRPmg", "NIAmg")
+    check_columns(dataset = dataset, columns = columns)
     tryCatch(
         dataset %>%
             as_tibble() %>%
@@ -394,14 +343,17 @@ nia_conversion_creator <- function(dataset) {
     )
 }
 
-# We need to generate a function to recalculate the values of RETOLmcg, when it
-# is not provided. It could be used as well when calculating CARTBEQmcg. Retinol
-# (RETOLmcg) can be re-calculated from Vitamin A: [(2*VITA_REAmcg) - VITAmcg] ,
-# add comment: "RETOLmcg value re-calulated from VITA_REAmcg and VITAmcg".
+
 
 RETOLmcg_Recalculator <- function(dataset) {
-    # Check presence of required columns
-    # TODO: Refactor all code to have the column checker as its own function.
+    #' @title RETOLmcg_Recalculator
+    #' @description Recalculates the values of RETOLmcg(Retinol in mcg per 100g of EP), when it is not provided. Works in 2 cases and in both cases an associated comment is added indicating how the value was derived.
+    #' @param RETOLmcg Retinol in mcg per 100g of EP
+    #' @param VITA_RAEmcg Vitamin A (Retinol Activity Eq. (RAE) = mcg retinol + 1/12 mcg ß- carotene + 1/24 mcg other provitamin A carotenoids) in mcg per 100g of EP
+    #' @param VITAmcg Vitamin A (Retinol Eq. (RE) = mcg retinol + 1/6 mcg ß- carotene + 1/12 mcg other pro-vitamin A carotenoids) in mcg per 100g of EP
+    #' @param CARTBEQmcg Beta-carotene equivalents, is the sum of the beta-carotene + 1/2 quantity of other carotenoids with vitamin A activity, expressed in mcg per 100g of EP
+    #' @return Original FCT with appended column
+
     columns <- c("RETOLmcg", "VITA_RAEmcg", "VITAmcg", "CARTBEQmcg")
     check_columns(dataset = dataset, columns = columns)
     tryCatch(
@@ -410,7 +362,7 @@ RETOLmcg_Recalculator <- function(dataset) {
             mutate_at(.vars = columns, .funs = as.numeric) %>%
             rowwise() %>%
             mutate(comment = ifelse(is.na(comment), "", comment)) %>%
-            # ! case 1
+            # ! case 1 If all three variables are not NA them calculate and add comment
             mutate(RETOLmcg = ifelse((is.na(RETOLmcg) &
                 !is.na(CARTBEQmcg) &
                 !is.na(VITA_RAEmcg)),
@@ -426,7 +378,7 @@ RETOLmcg_Recalculator <- function(dataset) {
             ),
             comment
             )) %>%
-            # ! Case 2
+            # ! Case 2: If RETOLmcg is not present and CARTBEQmcg also not present but both VITA_RAEmcg and VITAmcg are available then calculate with eq2 and add comment.
             mutate(RETOLmcg = ifelse((
                 is.na(RETOLmcg) &
                     is.na(CARTBEQmcg) &
@@ -458,9 +410,15 @@ RETOLmcg_Recalculator <- function(dataset) {
 }
 
 
+
 CARTBEQmcg_std_back_calculator_VITA_RAEmcg <- function(dataset) {
-    # nolint
-    # Check presence of required columns
+    #' @title CARTBEQmcg_std_back_calculator_VITA_RAEmcg
+    #' @description Recalculates CARTBEQmcg_std when they are NAs. It is used after running `CARTBEQmcg_std_creator(dataset)` first. It does the back calculation using sum(12 * VITA_RAEmcg, -12 * RETOLmcg).
+    #' @param CARTBEQmcg_std Beta-carotene equivalents, expressed in mcg per 100g of EP
+    #' @param VITA_RAEmcg Vitamin A (Retinol Activity Eq. (RAE)) in mcg per 100g of EP
+    #' @param RETOLmcg Retinol in mcg per 100g of EP
+    #' @return Original FCT with added column
+
     columns <- c("VITA_RAEmcg", "RETOLmcg")
     check_columns(dataset = dataset, columns = columns)
     # Try the calculation
@@ -501,72 +459,19 @@ CARTBEQmcg_std_back_calculator_VITA_RAEmcg <- function(dataset) {
     )
 }
 
-# TODO: Remove since this function is now deprecated
-# CARTBEQmcg_std_back_calculator_VITAmcg <- function(dataset) {
-#     # Check presence of required columns
-#     columns <- c("VITAmcg", "RETOLmcg")
-#     for (column in columns) {
-#         if (column %in% names(dataset)) {
 
-#         } else {
-#             stop(
-#                 paste0(
-#                     "Error: variable ",
-#                     column,
-#                     " not found, halting execution. Please fix your input data and try again"
-#                 )
-#             )
-#         }
-#     }
-#     # Try the calculation
-#     tryCatch(
-#         dataset %>%
-#             as_tibble() %>%
-#             mutate_at(.vars = columns, .funs = as.numeric) %>%
-#             # ! Create a temp row with the number of NAs across the required
-#             # column
-#             mutate(temp = rowSums(is.na(
-#                 dataset %>%
-#                     select(all_of(columns))
-#             ))) %>%
-#             rowwise() %>%
-#             # ! Check if all the rows are NA then output NA else do the
-#             # calculation and omit NAs
-#             # ? is one comment for both sufficient or
-#             # should we identify each component individually?
-#             mutate(comment = ifelse(is.na(comment), "", comment)) %>%
-#             # ! Replace comment NAs with blank so that we can concatenate
-#             # comments well.
-#             mutate(CARTBEQmcg_std = ifelse((is.na(CARTBEQmcg_std) &
-#                 temp == length(columns)),
-#             CARTBEQmcg_std,
-#             sum(6 * VITAmcg, -6 * RETOLmcg, na.rm = TRUE)
-#             )) %>%
-#             mutate(comment = ifelse((is.na(CARTBEQmcg_std) &
-#                 temp == length(columns)),
-#             comment,
-#             paste0(
-#                 comment,
-#                 " | CARTBEQmcg_std back calculated from VITAmcg and VITAmcg"
-#             )
-#             )) %>% # nolint
-#             # ! remove the temp column
-#             select(-temp) %>%
-#             ungroup(),
-#         error = function(e) {
-#             print("Error : Required columns not found i.e :")
-#             print(columns)
-#             print("The SOP_std will not be calculated")
-#         }
-#     )
-# }
 
-# Imputes values of CARTBEQmcg into CARTBEQmcg_std when they are NAs.
+
 CARTBEQmcg_std_imputer_with_CARTBEQmcg <-
     function(dataset) {
+        #' @title CARTBEQmcg_std_imputer_with_CARTBEQmcg
+        #' @description Imputes values of CARTBEQmcg into CARTBEQmcg_std when they are NAs. then adds a comment
+        #' @param CARTBEQmcg_std Beta-carotene equivalents, expressed in mcg per 100g of EP
+        #' @param CARTBEQmcg Beta-carotene equivalents, is the sum of the beta-carotene + 1/2 quantity of other carotenoids with vitamin A activity, expressed in mcg per 100g of EP
+        #' @return Original FCT with the imputed values
+
         columns <- c("CARTBEQmcg_std", "CARTBEQmcg")
         check_columns(dataset = dataset, columns = columns)
-        # Try the calculation
         tryCatch(
             dataset %>%
                 as_tibble() %>%
@@ -598,11 +503,13 @@ CARTBEQmcg_std_imputer_with_CARTBEQmcg <-
     }
 
 
-# Handling Implausible values of git fetch origin cartbeqmcg
+
+
 CARTBEQmcg_std_to_zero <- function(dataset) {
+    #' @title CARTBEQmcg_std_to_zero
+    #' @description Handling Implausible values of CARTBEQmcg_std (Beta-carotene equivalents, expressed in mcg per 100g of EP). i.e. if CARTBEQmcg_std < 0 replace it with zero and add comment.
     dataset %>%
         as_tibble() %>%
-        # mutate_at(.vars = columns, .funs = as.numeric) %>%
         rowwise() %>%
         mutate(comment = ifelse((CARTBEQmcg_std < 0), paste0(comment, "| Impausible value of CARTBEQmcg_std = ", CARTBEQmcg_std, " replaced with 0"), comment)) %>%
         mutate(CARTBEQmcg_std = ifelse(CARTBEQmcg_std < 0, 0, CARTBEQmcg_std)) %>%
