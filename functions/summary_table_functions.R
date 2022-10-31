@@ -151,12 +151,16 @@ CARTBEQmcg_std_creator <- function(dataset) {
     )
 }
 
-#  Vitamin A, retinol activity eq.
-# Weighted sum of the listed variables
-# ! VITA_RAEmcg_std <- RETOLmcg + 1 / 12 * CARTBEQmcg_std
-# TODO: Create documentation. Function works. Most fileds
+
+
 VITA_RAEmcg_std_creator <- function(dataset) {
-    # Check presence of required columns
+    #' @title Vitamin A, retinol activity
+    #' @description Calculates a wighted sum of VITA_RAEmcg_std - Vitamin A (Retinol Activity Eq. (RAE)) in mcg per 100g of EP using (RETOLmcg + 1 / 12 * CARTBEQmcg_std)
+    #' @param dataset - FCT dataset
+    #' @param VITA_RAEmcg_std - Vitamin A (Retinol Activity Eq. (RAE)) in mcg per 100g of EP
+    #' @param RETOLmcg Retinol in mcg per 100g of EP
+    #' @param CARTBEQmcg_std Beta-carotene equivalents, expressed in mcg per 100g of EP
+    #' @return Original dataset with the added column
     columns <- c("RETOLmcg", "CARTBEQmcg_std")
     check_columns(dataset = dataset, columns = columns)
     # Try the calculation
@@ -171,8 +175,7 @@ VITA_RAEmcg_std_creator <- function(dataset) {
                     select(all_of(columns))
             ))) %>%
             rowwise() %>%
-            # ! Check if all the rows are NA then output NA else do the
-            # calculation and omit NAs
+            # ! Check if all the rows are NA then output NA else do the calculation and omit NAs
             mutate(VITA_RAEmcg_std = ifelse(
                 temp == length(columns), NA, sum(RETOLmcg, (1 / 12 * CARTBEQmcg_std), na.rm = TRUE)
             )) %>% # ! remove the temp column
