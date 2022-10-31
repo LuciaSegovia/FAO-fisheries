@@ -228,11 +228,13 @@ VITAmcg_std_creator <- function(dataset) {
 }
 
 
-# Thiamin
-# Variable combinations: In absence of THIAmg, use values of THIAHCLmg
-# ! THIAmg_std = THIAmg OR THIAHCLmg
+
 THIAmg_std_creator <- function(dataset) {
-    # Check presence of required columns
+    #' @title THIAmg_std_creator
+    #' @description Thiamin variable combinations: In absence of THIAmg, use values of THIAHCLmg i.e. THIAmg_std = THIAmg OR THIAHCLmg
+    #' @param THIAmg Thiamin, vitamin B1 analysed and expressed as thiamin in mg per 100g of EP
+    #' @param THIAHCLmg Thiamin hydrochloride, vitamin B1 analysed and expressed as thiamin hydrochloride in mg per 100g of EP
+
     columns <- c("THIAmg", "THIAHCLmg")
     check_columns(dataset = dataset, columns = columns)
     # Try the calculation
