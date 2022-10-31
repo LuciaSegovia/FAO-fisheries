@@ -503,11 +503,13 @@ CARTBEQmcg_std_imputer_with_CARTBEQmcg <-
     }
 
 
-# Handling Implausible values of git fetch origin cartbeqmcg
+
+
 CARTBEQmcg_std_to_zero <- function(dataset) {
+    #' @title CARTBEQmcg_std_to_zero
+    #' @description Handling Implausible values of CARTBEQmcg_std (Beta-carotene equivalents, expressed in mcg per 100g of EP). i.e. if CARTBEQmcg_std < 0 replace it with zero and add comment.
     dataset %>%
         as_tibble() %>%
-        # mutate_at(.vars = columns, .funs = as.numeric) %>%
         rowwise() %>%
         mutate(comment = ifelse((CARTBEQmcg_std < 0), paste0(comment, "| Impausible value of CARTBEQmcg_std = ", CARTBEQmcg_std, " replaced with 0"), comment)) %>%
         mutate(CARTBEQmcg_std = ifelse(CARTBEQmcg_std < 0, 0, CARTBEQmcg_std)) %>%
