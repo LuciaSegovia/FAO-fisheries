@@ -38,19 +38,7 @@ SOP_std_creator <- function(dataset) {
         "ALCg",
         "ASHg_std" # change ASHg to ASHg_std
     )
-    for (column in columns) {
-        if (column %in% names(dataset)) {
-
-        } else {
-            stop(
-                paste0(
-                    "Error: variable ",
-                    column,
-                    " not found, halting execution. Please fix your input data and try again"
-                )
-            )
-        }
-    }
+    check_columns(dataset = dataset, columns = columns)
     # Try the calculation
     tryCatch(
         dataset %>%
@@ -101,19 +89,7 @@ SOP_std_creator <- function(dataset) {
 CARTBEQmcg_std_creator <- function(dataset) {
     # Check presence of required columns
     columns <- c("CARTBmcg", "CARTAmcg", "CRYPXBmcg")
-    for (column in columns) {
-        if (column %in% names(dataset)) {
-
-        } else {
-            stop(
-                paste0(
-                    "Error: variable ",
-                    column,
-                    " not found, halting execution. Please fix your input data and try again"
-                )
-            )
-        }
-    }
+    check_columns(dataset = dataset, columns = columns)
     # Try the calculation
     tryCatch(
         dataset %>%
@@ -171,19 +147,7 @@ CARTBEQmcg_std_creator <- function(dataset) {
 VITA_RAEmcg_std_creator <- function(dataset) {
     # Check presence of required columns
     columns <- c("RETOLmcg", "CARTBEQmcg_std")
-    for (column in columns) {
-        if (column %in% names(dataset)) {
-
-        } else {
-            stop(
-                paste0(
-                    "Error: variable ",
-                    column,
-                    " not found, halting execution. Please fix your input data and try again"
-                )
-            )
-        }
-    }
+    check_columns(dataset = dataset, columns = columns)
     # Try the calculation
     tryCatch(
         dataset %>%
@@ -218,19 +182,7 @@ VITA_RAEmcg_std_creator <- function(dataset) {
 VITAmcg_std_creator <- function(dataset) {
     # Check presence of required columns
     columns <- c("RETOLmcg", "CARTBEQmcg_std")
-    for (column in columns) {
-        if (column %in% names(dataset)) {
-
-        } else {
-            stop(
-                paste0(
-                    "Error: variable ",
-                    column,
-                    " not found, halting execution. Please fix your input data and try again"
-                )
-            )
-        }
-    }
+    check_columns(dataset = dataset, columns = columns)
     # Try the calculation
     tryCatch(
         dataset %>%
@@ -266,19 +218,7 @@ VITAmcg_std_creator <- function(dataset) {
 THIAmg_std_creator <- function(dataset) {
     # Check presence of required columns
     columns <- c("THIAmg", "THIAHCLmg")
-    for (column in columns) {
-        if (column %in% names(dataset)) {
-
-        } else {
-            stop(
-                paste0(
-                    "Error: variable ",
-                    column,
-                    " not found, halting execution. Please fix your input data and try again"
-                )
-            )
-        }
-    }
+    check_columns(dataset = dataset, columns = columns)
     # Try the calculation
     tryCatch(
         dataset %>%
@@ -311,19 +251,7 @@ CHOAVLDFg_std_creator <- function(dataset) {
         "ASHg_std",
         "ALCg"
     )
-    for (column in columns) {
-        if (column %in% names(dataset)) {
-
-        } else {
-            stop(
-                paste0(
-                    "Error: variable ",
-                    column,
-                    " not found, halting execution. Please fix your input data and try again"
-                )
-            )
-        }
-    }
+    check_columns(dataset = dataset, columns = columns)
     # Try the calculation
     tryCatch(
         dataset %>%
@@ -372,19 +300,7 @@ CHOAVLDFg_std_creator <- function(dataset) {
 nia_conversion_creator <- function(dataset) {
     # Check presence of required columns
     columns <- c("NIAEQmg", "TRPmg", "NIAmg")
-    for (column in columns) {
-        if (column %in% names(dataset)) {
-
-        } else {
-            stop(
-                paste0(
-                    "Error: variable ",
-                    column,
-                    " not found, halting execution. Please fix your input data and try again"
-                )
-            )
-        }
-    }
+    check_columns(dataset = dataset, columns = columns)
     # Try the calculation
     tryCatch(
         dataset %>%
