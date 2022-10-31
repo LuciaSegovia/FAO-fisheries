@@ -459,65 +459,7 @@ CARTBEQmcg_std_back_calculator_VITA_RAEmcg <- function(dataset) {
     )
 }
 
-# TODO: Remove since this function is now deprecated
-# CARTBEQmcg_std_back_calculator_VITAmcg <- function(dataset) {
-#     # Check presence of required columns
-#     columns <- c("VITAmcg", "RETOLmcg")
-#     for (column in columns) {
-#         if (column %in% names(dataset)) {
 
-#         } else {
-#             stop(
-#                 paste0(
-#                     "Error: variable ",
-#                     column,
-#                     " not found, halting execution. Please fix your input data and try again"
-#                 )
-#             )
-#         }
-#     }
-#     # Try the calculation
-#     tryCatch(
-#         dataset %>%
-#             as_tibble() %>%
-#             mutate_at(.vars = columns, .funs = as.numeric) %>%
-#             # ! Create a temp row with the number of NAs across the required
-#             # column
-#             mutate(temp = rowSums(is.na(
-#                 dataset %>%
-#                     select(all_of(columns))
-#             ))) %>%
-#             rowwise() %>%
-#             # ! Check if all the rows are NA then output NA else do the
-#             # calculation and omit NAs
-#             # ? is one comment for both sufficient or
-#             # should we identify each component individually?
-#             mutate(comment = ifelse(is.na(comment), "", comment)) %>%
-#             # ! Replace comment NAs with blank so that we can concatenate
-#             # comments well.
-#             mutate(CARTBEQmcg_std = ifelse((is.na(CARTBEQmcg_std) &
-#                 temp == length(columns)),
-#             CARTBEQmcg_std,
-#             sum(6 * VITAmcg, -6 * RETOLmcg, na.rm = TRUE)
-#             )) %>%
-#             mutate(comment = ifelse((is.na(CARTBEQmcg_std) &
-#                 temp == length(columns)),
-#             comment,
-#             paste0(
-#                 comment,
-#                 " | CARTBEQmcg_std back calculated from VITAmcg and VITAmcg"
-#             )
-#             )) %>% # nolint
-#             # ! remove the temp column
-#             select(-temp) %>%
-#             ungroup(),
-#         error = function(e) {
-#             print("Error : Required columns not found i.e :")
-#             print(columns)
-#             print("The SOP_std will not be calculated")
-#         }
-#     )
-# }
 
 # Imputes values of CARTBEQmcg into CARTBEQmcg_std when they are NAs.
 CARTBEQmcg_std_imputer_with_CARTBEQmcg <-
