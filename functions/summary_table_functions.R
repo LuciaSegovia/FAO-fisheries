@@ -362,7 +362,7 @@ RETOLmcg_Recalculator <- function(dataset) {
             mutate_at(.vars = columns, .funs = as.numeric) %>%
             rowwise() %>%
             mutate(comment = ifelse(is.na(comment), "", comment)) %>%
-            # ! case 1 If all three variables are not NA them calculate
+            # ! case 1 If all three variables are not NA them calculate and add comment
             mutate(RETOLmcg = ifelse((is.na(RETOLmcg) &
                 !is.na(CARTBEQmcg) &
                 !is.na(VITA_RAEmcg)),
@@ -378,7 +378,7 @@ RETOLmcg_Recalculator <- function(dataset) {
             ),
             comment
             )) %>%
-            # ! Case 2
+            # ! Case 2: If RETOLmcg is not present and CARTBEQmcg also not present but both VITA_RAEmcg and VITAmcg are available then calculate with eq2 and add comment.
             mutate(RETOLmcg = ifelse((
                 is.na(RETOLmcg) &
                     is.na(CARTBEQmcg) &
