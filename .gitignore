@@ -44,8 +44,8 @@ vignettes/*.pdf
 .Renviron
 
 #raw-data
-data
-! data/copy-data-files-here.txt
+data/*
+!data/copy-data-files-here.txt
 *.accdb
 US19/SR-LEG_DB/
 *.xlsx
