@@ -343,14 +343,17 @@ nia_conversion_creator <- function(dataset) {
     )
 }
 
-# We need to generate a function to recalculate the values of RETOLmcg, when it
-# is not provided. It could be used as well when calculating CARTBEQmcg. Retinol
-# (RETOLmcg) can be re-calculated from Vitamin A: [(2*VITA_REAmcg) - VITAmcg] ,
-# add comment: "RETOLmcg value re-calulated from VITA_REAmcg and VITAmcg".
+
 
 RETOLmcg_Recalculator <- function(dataset) {
-    # Check presence of required columns
-    # TODO: Refactor all code to have the column checker as its own function.
+    #' @title RETOLmcg_Recalculator
+    #' @description Recalculates the values of RETOLmcg(Retinol in mcg per 100g of EP), when it is not provided. Works in 2 cases and in both cases an associated comment is added indicating how the value was derived.
+    #' @param RETOLmcg Retinol in mcg per 100g of EP
+    #' @param VITA_RAEmcg Vitamin A (Retinol Activity Eq. (RAE) = mcg retinol + 1/12 mcg ß- carotene + 1/24 mcg other provitamin A carotenoids) in mcg per 100g of EP
+    #' @param VITAmcg Vitamin A (Retinol Eq. (RE) = mcg retinol + 1/6 mcg ß- carotene + 1/12 mcg other pro-vitamin A carotenoids) in mcg per 100g of EP
+    #' @param CARTBEQmcg Beta-carotene equivalents, is the sum of the beta-carotene + 1/2 quantity of other carotenoids with vitamin A activity, expressed in mcg per 100g of EP
+    #' @return Original FCT with appended column
+
     columns <- c("RETOLmcg", "VITA_RAEmcg", "VITAmcg", "CARTBEQmcg")
     check_columns(dataset = dataset, columns = columns)
     tryCatch(
@@ -359,7 +362,7 @@ RETOLmcg_Recalculator <- function(dataset) {
             mutate_at(.vars = columns, .funs = as.numeric) %>%
             rowwise() %>%
             mutate(comment = ifelse(is.na(comment), "", comment)) %>%
-            # ! case 1
+            # ! case 1 If all three variables are not NA them calculate
             mutate(RETOLmcg = ifelse((is.na(RETOLmcg) &
                 !is.na(CARTBEQmcg) &
                 !is.na(VITA_RAEmcg)),
