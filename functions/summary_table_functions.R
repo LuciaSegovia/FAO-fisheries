@@ -20,36 +20,46 @@ check_columns <- function(dataset, columns) {
     }
 }
 
-# TODO: Documenting this function. But its works. # change some variables !
-# SOP_std = (WATERg + PROCNTg + FAT_g_standardised + CHOAVLg + FIBTGg + ALCg
-# +ASHg)
+
+
 SOP_std_creator <- function(dataset) {
+    #' Calculates SOP_std = (WATERg + PROCNTg + FAT_g_standardised + CHOAVLg + #` FIBTGg + ALCg +ASHg).
+    #' Column names are case sensitive and error is thrown if not found.
+    #' @param dataset :Required (FCT dataset to be checked)
+    #' @param SOP_std Sum of Proximate in g per 100g EP as reported in the original FCT
+    #' @param WATERg Water/ moisture content in g per 100g of EP
+    #' @param PROCNTg Protein in g per 100g of EP, as reported in the original FCT and assumed to be calculated from nitrogen (NTg) content
+    #' @param FAT_g_standardised fat content unknown method of calculation in g per 100g of EP
+    #' @param CHOAVLg Available carbohydrates calculated by weight in g per 100g of EP
+    #' @param FIBTGg Total dietary fibre by AOAC Prosky method expressed in g per 100g of EP
+    #' @param ALCg Alcohol in g per 100g
+    #' @param ASHg_std Ashes in g per 100g of EP
+    #' @return Original FCT dataset with SOP_std column added
+    #' @examples
     # Check presence of required columns
     columns <- c(
         "WATERg",
         "PROCNTg",
         "FAT_g_standardised",
-        # Change FAT_g to FAT_g_standardised
         "CHOAVLg",
         "FIBTGg",
         "ALCg",
-        "ASHg_std" # change ASHg to ASHg_std
+        "ASHg_std"
     )
     check_columns(dataset = dataset, columns = columns)
-    # Try the calculation
     tryCatch(
         dataset %>%
             as_tibble() %>%
             mutate_at(.vars = columns, .funs = as.numeric) %>%
-            # ! Create a temp row with the number of NAs across the required
-            # column
+            # ! Create a temp row with the count of NAs in the required columns
             mutate(temp = rowSums(is.na(
                 dataset %>%
                     select(all_of(columns))
             ))) %>%
+            # Rowwise allows for per row evaluations.
             rowwise() %>%
-            # ! Check if all the rows are NA then output NA else do the
-            # calculation and omit NAs
+            # ! If all the rows are NA then output is NA.
+            # ! Else do the calculation and omit NAs.
             mutate(SOP_std = ifelse(
                 temp == length(columns),
                 NA,
