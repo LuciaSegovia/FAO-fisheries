@@ -23,7 +23,7 @@ check_columns <- function(dataset, columns) {
 
 
 SOP_std_creator <- function(dataset) {
-    #' Calculates SOP_std = (WATERg + PROCNTg + FAT_g_standardised + CHOAVLg + #` FIBTGg + ALCg +ASHg).
+    #' @description Calculates SOP_std = (WATERg + PROCNTg + FAT_g_standardised + CHOAVLg + #` FIBTGg + ALCg +ASHg).
     #' Column names are case sensitive and error is thrown if not found.
     #' @param dataset :Required (FCT dataset to be checked)
     #' @param SOP_std Sum of Proximate in g per 100g EP as reported in the original FCT
@@ -89,11 +89,15 @@ SOP_std_creator <- function(dataset) {
     )
 }
 
-#  Carotene Eq.
-# Weighted sum of the listed variables
-# CARTBEQmcg_std <- 1 * CARTBmcg + 0.5 * CARTAmcg + 0.5 * CRYPXBmcg
-# TODO: Create documentation. Function works. Most fileds
+
+
 CARTBEQmcg_std_creator <- function(dataset) {
+    #' @description Calculates a weighted sum of CARTBEQmcg_std = (1 * CARTBmcg + 0.5 * CARTAmcg + 0.5 * CRYPXBmcg)
+    #' @param CARTBEQmcg_std Beta-carotene equivalents, expressed in mcg per 100g of EP
+    #' @param CARTBmcg Beta-carotene in mcg per 100g of EP
+    #' @param CARTAmcg Alpha-carotene in mcg per 100g of EP
+    #' @param CRYPXBmcg Beta-cryptoxanthin in mcg per 100g of EP
+    #' @return dataset (Original FCT dataset with CARTBEQmcg_std column)
     # Check presence of required columns
     columns <- c("CARTBmcg", "CARTAmcg", "CRYPXBmcg")
     check_columns(dataset = dataset, columns = columns)
@@ -102,23 +106,22 @@ CARTBEQmcg_std_creator <- function(dataset) {
         dataset %>%
             as_tibble() %>%
             mutate_at(.vars = columns, .funs = as.numeric) %>%
-            # ! Create a temp row with the number of NAs across the required
-            # column
+            # ! Create a temp row with the count of NAs in the required columns
             mutate(temp = rowSums(is.na(
                 dataset %>%
                     select(all_of(columns))
             ))) %>%
             rowwise() %>%
-            # ! Check if all the rows are NA then output NA else do the
-            # calculation and omit NAs
+            # ! Replace comment NAs with blank so that we can concatenate comments well.
             mutate(comment = ifelse(is.na(comment), "", comment)) %>%
-            # ! Replace comment NAs with blank so that we can concatenate
-            # comments well.
+            # ! If all inputs to the CARTBEQmcg_std calculation are NA return NA
+            # ! Else perform calculation ommiting NAs
             mutate(CARTBEQmcg_std = ifelse(
                 temp == length(columns),
                 NA,
                 sum(1 * CARTBmcg, 0.5 * CARTAmcg, 0.5 * CRYPXBmcg, na.rm = TRUE)
             )) %>%
+            # ! Use the same logic as above for comment appendage.
             mutate(comment = ifelse(
                 temp == length(columns),
                 comment,
@@ -127,6 +130,7 @@ CARTBEQmcg_std_creator <- function(dataset) {
                     " | CARTBEQmcg_std calculated from CARTBmcg, CARTAmcg and CRYPXBmcg"
                 )
             )) %>%
+            # ! Check which components of the calculation were used. If only CARTB was used. Append the comment to reflect that.
             mutate(comment = ifelse(
                 (
                     temp != length(columns) &
