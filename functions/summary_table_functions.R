@@ -410,9 +410,15 @@ RETOLmcg_Recalculator <- function(dataset) {
 }
 
 
+
 CARTBEQmcg_std_back_calculator_VITA_RAEmcg <- function(dataset) {
-    # nolint
-    # Check presence of required columns
+    #' @title CARTBEQmcg_std_back_calculator_VITA_RAEmcg
+    #' @description Recalculates CARTBEQmcg_std when they are NAs. It is used after running `CARTBEQmcg_std_creator(dataset)` first. It does the back calculation using sum(12 * VITA_RAEmcg, -12 * RETOLmcg).
+    #' @param CARTBEQmcg_std Beta-carotene equivalents, expressed in mcg per 100g of EP
+    #' @param VITA_RAEmcg Vitamin A (Retinol Activity Eq. (RAE)) in mcg per 100g of EP
+    #' @param RETOLmcg Retinol in mcg per 100g of EP
+    #' @return Original FCT with added column
+
     columns <- c("VITA_RAEmcg", "RETOLmcg")
     check_columns(dataset = dataset, columns = columns)
     # Try the calculation
