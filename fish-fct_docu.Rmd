@@ -9,7 +9,8 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   bookdown::html_document2
   html_document2: default
-  word_document: default
+  pdf_document: 
+   fig_caption: true
 editor_options:
   markdown:
     wrap: 72
@@ -823,8 +824,8 @@ fish_fct %>% filter(is.na(ICS.FAOSTAT.SUA.Current.Code)) %>% count(source_fct)
 
 #### 3.4. Combined variables (standardised) <br>
 
-This was done after merging all the dataset together, and it's reported
-on the `merging_all.R`.
+After merging and filtering the fishes, and before calculating the mean
+nutrient values of each ICS FAOSTAT fishery category some variables needed to be recalculated and/or standardised.
 
 Here's the list of the standardised variables as reported in the
 Fisheries Global NCT, 2022, the following:
@@ -927,7 +928,8 @@ missing values. Additionally, the function add the documentation (i.e., "RETOLmc
 
 ##### 3.4.3. Vitamin B6 
 
-Similarly as it was performed with the fat, we combined three Tagnames into `VITB6_mg_standardised` as reported in the method section 3.4. 
+Similarly as it was performed with the fat, Vit. B6 was reported separated into three Tagnames. Most of the FCTs used analytical values (`VITB6Amg`), followed by calculated (`VITB6Cmg`) and only the NO21 used a mixed of values (`VITB6_mg`).
+Then, the three Tagnames (variables) were combined into a new variable: `VITB6C_mg_standardised` as reported in the method section 3.4. 
 
 ##### 3.4.3. Thiamine
 
@@ -935,36 +937,27 @@ Thiamine was combined into the Thiamine standardised variable (`THIAmg_std`) usi
 
 ##### 3.4.3. Niacin 
 
-Niacin was combined into the Niacin standardised variable (`NIAmg_std`) using the fucntion:`nia_conversion_creator` as reported in the method section 3.4.
+Niacin (`NIAmg`) was reported in all FCTs but in WA19, in
+which niacin equivalent (`NIAEQmg`) was reported. Because tryptophan was
+reported in the WA19, `NIAmg` was re-calculated into a new variable and combined into the Niacin standardised variable (`NIAmg_std`) using the function:`nia_conversion_creator` as reported in the method section 3.4.
 
 ## REVIEW
 
 ##### 4. Visualising food components for decision-making
 
-After merging and filtering the fishes, and before calculating the mean
+After standardising and recalculating the variables, and before calculating the mean
 nutrient values of each ICS FAOSTAT fishery category, we visualised the
 data (e.g., data availability) and performed quality check for the
 nutrient values of interest (Cu, I, Se, Niacin, Vit.B6, Vit. B12, Vit.
 D, DHA, EPA). Visualisation scripts are reported in `visualisation.R`
 and quality check are reported in `QC.R`.
 
-###### 4.1. Data avaibility per each ICS FAOSTAT fish category
+###### 4.1. Nutrient avaibility for Fisheries Global NCT extension
 
-In figure 1 @fig-1, we can see that Cu and Vit. B6 was reported by all FCTs but
+We evaluated the availability of ten nutrients to extend the Fisheries Global NCT. In figure 1 @fig-1, we can see that Cu and Vit. B6 were reported by all FCTs but
 KE18, with overall very high data availability with very few missing
-values. Vit. B6 was reported separated into three Tagnames. Most of the
-FCTs used analytical values (`VITB6Amg`), followed by calculated
-(`VITB6Cmg`) and only the NO21 used a mixed of values (`VITB6_mg`).
-Then, as reported in section 3.4., the three variables were combined
-into a new variable: `VITB6C_mg_standardised`.
-
-Similarly, niacin (`NIAmg`) was reported in all FCTs but in WA19, in
-which niacin equivalent (`NIAEQmg`) was reported. Because tryptophan was
-reported in the WA19, `NIAmg` was re-calculated into a new variable
-`NIAmg_std`.
-
-I and Vit. D were reported only in six FCTs, and DHA and EPA were in
-seven.
+values. In contrast, I and Vit. D were reported only in six FCTs, and DHA and EPA were in
+seven. 
 
 ```{r fig-1, fig.cap= "Figure 1: Percentage of missing values per component and food composition table.", echo=FALSE}
 
@@ -975,7 +968,8 @@ components <- c( "WATERg", "F22D6N3g",
   "VITB6Amg",
   "VITB6Cmg",
   "VITB6_mg",
-#  "VITB6_mg_standardised",
+ "VITB6_mg_standardised",
+ "NIAmg_std",
   "NIAEQmg",
   "NIAmg",
   "NIATRPmg",
@@ -999,9 +993,7 @@ fao_fish_fct %>% select(components, source_fct) %>%
 
 **Figure 1: Percentage of missing values per component and FCT**
 
-We used figure 2 to identify those component that had more than 60% of
-coverage across all the FCTs to be included in the expansion of the
-Fisheries Global NCT, 2022.
+However, some FCTs contributed to the overal NCT with more fisheries entries, hence we checked the overall availability as percerentage of the overall fisheries entries. In figure 2, we can see that Cu, Vit. B6 and niacin had high coverage with more than 75% of the fisheries reporting a value. While for DHA, EPA and Se had a moderate coverage with over 60% of the fish entries reporting a value. Therefore, vitamin D and I were excluded from the extension. 
 
 ```{r, fig-1, fig.cap= "Figure 2: Coverage: Percentage of reported values per component.", message=FALSE}
 
@@ -1038,106 +1030,26 @@ fao_fish_fct %>% select(1:10, components) %>%
 
 **Figure 2: Coverage: Percentage of reported values per component**
 
+###### 4.2. Data avaibility per each ICS FAOSTAT fish category
+
+
 **Table 3: Count of values per component and SUA fish category**
 
-```{r, table data-available}
+```{r tab-4}
 
-# 5) Table: Identifying missing values for each SUA fish category.
-
-final_nv <-  c("WATERg"   ,   "F22D6N3g",     "F20D5N3g" , 
-               "VITB6_mg_standardised", 
-               "NIAmg","VITB12mcg" , "CUmg", "SEmcg")
-
-
-##├ Table: Data available (count) per fish category and nutrient ----
-
-x <- fao_fish_fct %>% select(-NDB_number) %>% 
-  mutate_at(final_nv, as.numeric) %>% 
-  group_by(ics_faostat_sua_english_description) %>% 
-  summarise_if(is.numeric,  
-               funs(
-                    n = sum(!is.na(.)))) 
-
-col_order <- sort(colnames(x), decreasing = T)
-
-fao_fish_summary <- x[, col_order]
-
-
-body_fct1 <- function(col, row){
-  cells_body(
-    columns = col,
-    rows = {{row}} == 0
-  )
-}
-
-body_fct2 <- function(col, row){
-  cells_body(
-    columns = col,
-    rows = {{row}} == 1
-  )
-}
-
-
-fao_fish_summary %>%
-  select(ics_faostat_sua_english_description, ends_with("_n")) %>% 
-  gt() %>% 
-  tab_spanner(
-    label = "Data available (count) per fish category and nutrient",
-    columns = c(2:9)
-  ) %>% 
-  cols_label(
-    ics_faostat_sua_english_description = "Fish categories",
-    WATERg_n = "Water",
-    VITB6_mg_standardised_n = "Vitamin B6",
-    VITB12mcg_n = "Vitamin B12", 
-    SEmcg_n = "Selenium", 
-    NIAmg_n = "Niacin", 
-    F22D6N3g_n = "DHA",
-    F20D5N3g_n = "EPA", 
-    CUmg_n = "Copper"
-  ) %>%
-  
-  tab_style(
-    style = list(
-      cell_fill(color = scales::alpha("red", 0.7)),
-      cell_text(color = "white", weight = "bold")
-    ),
-    locations = list(
-      body_fct1(2, WATERg_n),
-      body_fct1(3, VITB6_mg_standardised_n),
-      body_fct1(4, VITB12mcg_n),
-      body_fct1(5, SEmcg_n),
-      body_fct1(6, NIAmg_n),
-      body_fct1(7, F22D6N3g_n),
-      body_fct1(8, F20D5N3g_n),
-      body_fct1(9, CUmg_n)
-    )) %>%
-  tab_style(
-    style = list(
-      cell_fill(color = scales::alpha("yellow", 0.7)),
-      cell_text(color = "black", weight = "bold")
-    ),
-    locations = list(
-      body_fct2(2, WATERg_n),
-      body_fct2(3, VITB6_mg_standardised_n),
-      body_fct2(4, VITB12mcg_n),
-      body_fct2(5, SEmcg_n),
-      body_fct2(6, NIAmg_n),
-      body_fct2(7, F22D6N3g_n),
-      body_fct2(8, F20D5N3g_n),
-      body_fct2(9, CUmg_n)
-    )) %>%  
-  tab_options(
-    row_group.border.top.width = px(3),
-    row_group.border.top.color = "black",
-    row_group.border.bottom.color = "black",
-    table.border.top.color = "white",
-    table.border.top.width = px(3),
-    table.border.bottom.color = "white",
-    table.border.bottom.width = px(3),
-    column_labels.border.bottom.color = "black",
-    column_labels.border.bottom.width = px(2),
-  )
+fao_fish_summary %>% relocate(ics_faostat_sua_english_description, 
+                              .before = WATERg_n) %>%  arrange(desc(WATERg_n)) %>% 
+  rename("Fish categories" = ics_faostat_sua_english_description,
+   "Water" = WATERg_n,
+     "Vitamin B6" = VITB6_mg_standardised_n,
+    "Vitamin B12" = VITB12mcg_n, 
+   "Selenium" = SEmcg_n, 
+    "Niacin" = NIAmg_std_n, 
+    "DHA" = F22D6N3g_n,
+     "EPA" = F20D5N3g_n, 
+    "Copper" = CUmg_n) %>% 
+ 
+  knitr::kable()
 
   missing <- c("Cephalopods, cured", "Aquatic animals nei, cured", 
                "Aquatic animals nei, preparations nei", "Crustaceans, cured", 
@@ -1145,11 +1057,9 @@ fao_fish_summary %>%
 
 ```
 
-After we agreed on the components to be expanded, we evaluated the availability of data by ICS FAO fishery category. In \Table 4, we highlighted in red when no values were reported for a component in a
-SUA category and in yellow when less than three values were reported per
-SUA category.
+After we agreed on the components to be expanded, we evaluated the availability of data by ICS FAO fishery category. In \Table 4, the number of fisheries in each ICS SUA fish category and per each nutrient are shown. 
 
-As shown in red in table 4, four SUA fish categories had no values for
+As shown in table 4, four SUA fish categories had no values for
 Se concentration: `r toString(missing)`. Hence, we imputed some values
 from other fish entries reported. The scripts that impute the values are
 reported in `missing.R`, and the rationale is outline bellow.

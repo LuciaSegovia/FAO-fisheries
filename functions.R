@@ -2,17 +2,19 @@
 
 #Functions
 
-#WORKING  ----
 
+# Data transformation - #Issue #40
+## Variables recalculation
 
-#Issue #40
-# Energy calculation (kcal, kj) ----
+# Energy calculation (kcal, kj) 
 source(here::here("functions","Energy_Standardisation.R"))
 # ! Tom already generated this function so just incorporate it.
 #source("Standardizer_test.R")
 
 # Sum of proximate
+#RETOL - Issue  #46
 # Carotene Eq.
+#CARTBEQmcg (Carotene Eq.) Issue #44
 # Vitamin A, retinol activity eq.
 #Vitamin A, retinol eq.
 #Thiamin
@@ -23,13 +25,6 @@ source(here::here("functions","summary_table_functions.R"))
 source(here::here("functions","Group_Summariser.R"))
 source(here::here("functions", "Summarised_Row_Recalculator.R"))
 
-#Checking two dataset for differences 
-#source("compactability_checks_v2.R")
-
-#TO BE DEVELOPED  ----
-
-#RETOL - Issue  #46
-#CARTBEQmcg (Carotene Eq.) Issue #44
 
 
 #UNDER DEVELOPMENT ----
@@ -96,45 +91,6 @@ TraceToZero <- function(x){
   x <- gsub("Trace|trace|[tr]|Tr|tr", "0", x)
   return(x) 
 }
-
-
-#WORKING LOOPS ----
-
-#This function combine all the Tagnames for VITB6
-#
-#for(i in 1:nrow(fao_fish_fct)){
-#  print(i)
-#  if (!is.na(fao_fish_fct$VITB6Amg[i])) {
-#    print(!is.na(fao_fish_fct$VITB6Amg[i]))
-#    fao_fish_fct$VITB6_mg_standardised[i] <- fao_fish_fct$VITB6Amg[i]
-#  }  
-#  if (is.na(fao_fish_fct$VITB6Amg[i])) { 
-#    fao_fish_fct$VITB6_mg_standardised[i] <- fao_fish_fct$VITB6Cmg[i]
-#  } 
-#  if (is.na(fao_fish_fct$VITB6Amg[i]) & is.na(fao_fish_fct$VITB6Cmg[i])) {
-#    fao_fish_fct$VITB6_mg_standardised[i] <- fao_fish_fct$VITB6_mg[i]
-#  }
-#  if (is.na(fao_fish_fct$VITB6Amg[i]) & is.na(fao_fish_fct$VITB6Cmg[i]) & is.na(fao_fish_fct$VITB6_mg[i])) {
-#    fao_fish_fct$VITB6_mg_standardised[i] <- NA
-#  }
-#  print(fao_fish_fct$VITB6_mg_standardised[i])
-#}
-#
-
-#NOT WORKING ----
-
-#Funtion to add information on the genus_code (id2), and the confidence of the 
-#match (confidence), to the dataset (Tanzania_HCD), using the TZ HCD id (id1).
-#
-#adding.codes <-  function(Tanzania_HCD, id1, id2, confidence){
-#  
-#  Tanzania_HCD$dict_testsample_code[Tanzania_HCD$food_id %in% id1] <- id2
-#  Tanzania_HCD$Confidence[Tanzania_HCD$food_id %in% id1] <- confidence 
-#  
-#  return(Tanzania_HCD)
-#  
-#}
-#
 
 
 

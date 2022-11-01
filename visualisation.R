@@ -4,7 +4,7 @@
 #NOTE: For the images to be saved create a folder called "images"
 
 #If data is not loaded 
-#source("merging_all.R")
+source("variable_re-calculation.R")
 library(gt)
 #library(gtExtras)
 
@@ -18,12 +18,14 @@ colnames(fao_fish_fct)
 
 #├ List of components that we are interested in: ----
  
-components <- c( "WATERg", "F22D6N3g",
+components <- c( "WATERg",
+                 "F22D6N3g",
   "F20D5N3g",
   "VITB6Amg",
   "VITB6Cmg",
   "VITB6_mg",
-#  "VITB6_mg_standardised",
+  "VITB6_mg_standardised",
+  "NIAmg_std",
   "NIAEQmg",
   "NIAmg",
   "NIATRPmg",
@@ -44,7 +46,7 @@ components <- c( "WATERg", "F22D6N3g",
 
 #Plot: overall % of missing values
 
-fao_fish_fct %>% select(1:10, components) %>% vis_miss(sort_miss = T) 
+fao_fish_fct %>% select(components) %>% vis_miss(sort_miss = T) 
 
 #├ Plot (heat map): % of missing values per FCT ----
 
@@ -138,6 +140,7 @@ nv <- c("WATERg",
         "VITB6Amg",
         "VITB6Cmg",
         "VITB6_mg",
+        "NIAmg_std", 
         "NIAEQmg",
         "NIAmg",
         "NIATRPmg",
@@ -222,23 +225,48 @@ ggsave(paste0("images/count_", gsub(" ", "_", tolower(fish[i])),
 
 final_nv <-  c("WATERg"   ,   "F22D6N3g",     "F20D5N3g" , 
                "VITB6_mg_standardised", 
-               "NIAmg","VITB12mcg" , "CUmg", "SEmcg")
+               "NIAmg_std","VITB12mcg" , "CUmg", "SEmcg")
 
 
 ##├ Table: Data available (count) per fish category and nutrient ----
 
-x <- fao_fish_fct %>% select(-NDB_number) %>% 
+#Summary table
+
+col_order <- fao_fish_fct %>% select(-NDB_number) %>% 
   mutate_at(final_nv, as.numeric) %>% 
   group_by(ics_faostat_sua_english_description) %>% 
-  summarise_if(is.numeric,  
+  summarise_at(final_nv,  
                funs(
-                    n = sum(!is.na(.)))) %>% 
-  select(-ICS.FAOSTAT.SUA.Current.Code_n)
+                 n = sum(!is.na(.)),
+                 mean = mean(., na.rm =T),
+                 sd = sd(., na.rm =T))) %>% names() %>%
+   sort(. , decreasing = T)
 
-col_order <- sort(colnames(x), decreasing = T)
+fao_fish_summary <- fao_fish_fct %>% select(-NDB_number) %>% 
+  mutate_at(final_nv, as.numeric) %>% 
+  group_by(ics_faostat_sua_english_description) %>% 
+  summarise_at(final_nv,  
+               funs(
+                 n = sum(!is.na(.)),
+                 mean = mean(., na.rm =T),
+                 sd = sd(., na.rm =T))) 
 
-fao_fish_summary <- x[, col_order]
+fao_fish_summary <- fao_fish_summary[, col_order]
 
+
+## GT table: Good visualisation in html, it can't render in pdf
+fao_fish_summary <- fao_fish_fct %>% select(-NDB_number) %>% 
+  mutate_at(final_nv, as.numeric) %>% 
+  group_by(ics_faostat_sua_english_description) %>% 
+  summarise_at(final_nv,  
+               funs(
+                    n = sum(!is.na(.))))
+
+col_order <- sort(colnames(fao_fish_summary), decreasing = T)
+
+fao_fish_summary <- fao_fish_summary[, col_order]
+
+names(fao_fish_summary)
 
 body_fct1 <- function(col, row){
   cells_body(
@@ -255,7 +283,7 @@ body_fct2 <- function(col, row){
 }
 
 
-tab_1 <- fao_fish_summary %>%
+(tab_1 <- fao_fish_summary %>%
   select(ics_faostat_sua_english_description, ends_with("_n")) %>% 
   gt() %>% 
   tab_spanner(
@@ -268,7 +296,7 @@ tab_1 <- fao_fish_summary %>%
     VITB6_mg_standardised_n = "Vitamin B6",
     VITB12mcg_n = "Vitamin B12", 
     SEmcg_n = "Selenium", 
-    NIAmg_n = "Niacin", 
+    NIAmg_std_n = "Niacin", 
     F22D6N3g_n = "DHA",
     F20D5N3g_n = "EPA", 
     CUmg_n = "Copper"
@@ -284,7 +312,7 @@ tab_1 <- fao_fish_summary %>%
       body_fct1(3, VITB6_mg_standardised_n),
       body_fct1(4, VITB12mcg_n),
       body_fct1(5, SEmcg_n),
-      body_fct1(6, NIAmg_n),
+      body_fct1(6, NIAmg_std_n),
       body_fct1(7, F22D6N3g_n),
       body_fct1(8, F20D5N3g_n),
       body_fct1(9, CUmg_n)
@@ -300,7 +328,7 @@ tab_1 <- fao_fish_summary %>%
       body_fct2(3, VITB6_mg_standardised_n),
       body_fct2(4, VITB12mcg_n),
       body_fct2(5, SEmcg_n),
-      body_fct2(6, NIAmg_n),
+      body_fct2(6, NIAmg_std_n),
       body_fct2(7, F22D6N3g_n),
       body_fct2(8, F20D5N3g_n),
       body_fct2(9, CUmg_n)
@@ -315,7 +343,7 @@ tab_1 <- fao_fish_summary %>%
     table.border.bottom.width = px(3),
     column_labels.border.bottom.color = "black",
     column_labels.border.bottom.width = px(2),
-  )
+  ))
 
 
 # 6) Vis: by Fish preparation: Oils  ----- 

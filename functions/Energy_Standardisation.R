@@ -82,14 +82,14 @@ ENERCKj_standardised <- function(PROT, FAT, CHOAVLDF, FIBGT, ALC){
   
   ALC <- ALC %>% replace_na(0)
   FIBGT <- FIBGT %>% replace_na(0)
-  ENERCKj_std <- PROT*17 + FAT*37 + CHOAVLDF*17 + FIBGT*8 + ALC*29
+  ENERCKj_std <- as.numeric(PROT)*17 + as.numeric(FAT)*37 + as.numeric(CHOAVLDF)*17 + as.numeric(FIBGT)*8 + as.numeric(ALC)*29
   return(ENERCKj_std)
 }
 
 ENERCKcal_standardised <- function(PROTg, FATg_standardised, CHOAVLDFg, FIBGTg, ALCg){
   ALCg <- ALCg %>% replace_na(0)
   FIBGTg <- FIBGTg %>% replace_na(0)
-  ENERCKcal_std <- PROTg*4 + FATg_standardised*9 + CHOAVLDFg*4 + FIBGTg*2 + ALCg*7
+  ENERCKcal_std <- PROTg*4 + FATg_standardised*9 + CHOAVLDFg*4 + as.numeric(FIBGTg)*2 + ALCg*7
   return(ENERCKcal_std)
 }
 

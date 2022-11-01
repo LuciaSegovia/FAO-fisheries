@@ -15,12 +15,13 @@ fao_fish_fct %>%
 ##├ ) Fibre - standardised  ---- 
 
 # No other fibre fractions available (See "QC.R")
-df1$FIBTGg_std <- df1$FIBTGg 
+fao_fish_fct$FIBTGg_std <- fao_fish_fct$FIBTGg 
 
 
 ##├ ) Ash - standardised  ---- 
 
 subset(fao_fish_fct, !is.na(ASHg)) %>% count(source_fct)
+subset(fao_fish_fct, !is.na(ASHg_bydiff)) %>% count(source_fct)
 
 fao_fish_fct$ASHg_std <- ifelse(is.na(fao_fish_fct$ASHg), fao_fish_fct$ASHg_bydiff, fao_fish_fct$ASHg )
 fao_fish_fct$comment <- ifelse(!is.na(fao_fish_fct$ASHg_bydiff), "Ash values were calculated by difference, see documentation", NA)
