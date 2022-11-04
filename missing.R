@@ -4,7 +4,6 @@
 #Loading the data
 source("merging_all.R")
 
-# 1) Niacin ----
 
 # 7) SEmcg ---- 
 
@@ -54,6 +53,7 @@ source("merging_all.R")
   fao_fish_fct$comment <- NA
   
   squid <- c("10342", "10345")
+  unique(fao_fish_fct$source[fao_fish_fct %in% squid])
   
   fao_fish_fct %>% 
     filter( fdc_id %in% squid) %>%
@@ -77,8 +77,10 @@ source("merging_all.R")
     
     fao_fish_fct$SEmcg[i] <- x*(100-as.numeric(fao_fish_fct$WATERg[i]))/(100-y)
     
-    fao_fish_fct$comment[i] <- paste0("SEmcg value from water adjusted,
-                                  median values (", toString(squid), ")")
+    fao_fish_fct$comment[i] <- ifelse(is.na(fao_fish_fct$comment[i]), 
+                                      paste0("SEmcg value from water adjusted, median values (", toString(squid), ")"),
+                                      paste0(fao_fish_fct$comment[i],", ",
+                                             "SEmcg value from water adjusted, median values (", toString(squid), ")"))
     
   }
   
@@ -160,8 +162,11 @@ source("merging_all.R")
     
     fao_fish_fct$SEmcg[i] <- x*(100-as.numeric(fao_fish_fct$WATERg[i]))/(100-y)
     
-    fao_fish_fct$comment[i] <- paste0("SEmcg value from water adjusted value 
-                                        (10372)")
+    fao_fish_fct$comment[i] <- ifelse(is.na(fao_fish_fct$comment[i]), 
+                                      paste0("SEmcg value from water adjusted value JA15(10372)"),
+                                      paste0(fao_fish_fct$comment[i],",",
+                                             "SEmcg value from water adjusted value JA15(10372)"))
+    
     
   }
   
@@ -201,8 +206,13 @@ source("merging_all.R")
   fao_fish_fct$SEmcg[i] <- x*(100-as.numeric(fao_fish_fct$WATERg[i]))/(100-y)
   
   #Adding comment for source of Se for "Crustacean, Sakura shrimp, dried"
-  fao_fish_fct$comment[i] <- paste0("SEmcg value from water adjusted value 
-                                        (10325)")
+  fao_fish_fct$comment[i] <- ifelse(is.na(fao_fish_fct$comment[i]), 
+                                    paste0("SEmcg value from water adjusted value 
+                                       JA15 (10325)"),
+                                    paste0(fao_fish_fct$comment[i],",",
+                                           "SEmcg value from water adjusted value 
+                                       JA15 (10325)"))
+  
   
   #Shrimp (crayfish), whole, dried
   #Identifying values of Se to be used
@@ -238,7 +248,10 @@ source("merging_all.R")
   fao_fish_fct$SEmcg[i] <- x*(100-as.numeric(fao_fish_fct$WATERg[i]))/(100-y)
   
   #Adding comment for source of Se for "Shrimp (crayfish), whole, dried"
-  fao_fish_fct$comment[i] <- paste0("SEmcg value from water adjusted, median values (", toString(crayfish) ,")")
-  
-  
+  fao_fish_fct$comment[i] <- ifelse(is.na(fao_fish_fct$comment[i]), 
+                                    paste0("SEmcg value from water adjusted, median values (", 
+                                           toString(crayfish) ,")"),
+                                    paste0(fao_fish_fct$comment[i],",",
+                                           "SEmcg value from water adjusted, median values (",
+                                           toString(crayfish) ,")"))
   

@@ -186,6 +186,41 @@ fish <- fao_fish_fct %>% distinct(fish_type) %>% pull()
 #A empty list to store the plots
 plot <- list()
 
+#variables
+col_names <- c("fdc_id",
+               "food_desc",
+               "food_group",
+               "scientific_name",
+               "source_fct",
+               "nutrient_data_source",
+               "Edible_factor_in_FCT",
+               "ICS.FAOSTAT.SUA.Current.Code",
+               "ics_faostat_sua_english_description",
+               "fish_type",
+               "fish_prep",
+               "WATERg",
+               "F22D6N3g",
+               "F20D5N3g",
+               "VITB6Amg",
+               "VITB6Cmg",
+               "VITB6_mg",
+               "VITB6_mg_standardised",
+               "NIAmg_std", 
+               "NIAEQmg",
+               "NIAmg",
+               "NIATRPmg",
+               "TRPmg",
+               "VITB12mcg",
+               "VITDEQmcg",
+               "VITDmcg",
+               "CHOCALmcg",
+               "ERGCALmcg",
+               "CHOCALOHmcg",
+               "ERGCALOHmcg",
+               "CUmg",
+               "SEmcg",
+               "IDmcg")
+
 #A loop to generate mutiple plots (one per fish type)
 
 for(i in 1:length(fish)){
@@ -223,12 +258,15 @@ ggsave(paste0("images/count_", gsub(" ", "_", tolower(fish[i])),
 
 # 5) Table: Identifying missing values for each SUA fish category.
 
+
+##├ Table: Data available (count) per fish category and nutrient ----
+
+## ---- visual-tab4
+
 final_nv <-  c("WATERg"   ,   "F22D6N3g",     "F20D5N3g" , 
                "VITB6_mg_standardised", 
                "NIAmg_std","VITB12mcg" , "CUmg", "SEmcg")
 
-
-##├ Table: Data available (count) per fish category and nutrient ----
 
 #Summary table
 
@@ -253,6 +291,7 @@ fao_fish_summary <- fao_fish_fct %>% select(-NDB_number) %>%
 
 fao_fish_summary <- fao_fish_summary[, col_order]
 
+## ---- end-tab-4
 
 ## GT table: Good visualisation in html, it can't render in pdf
 fao_fish_summary <- fao_fish_fct %>% select(-NDB_number) %>% 
@@ -395,7 +434,7 @@ fao_fish_fct %>% filter(str_detect(fish_prep, "oils")) %>%
 #├ Plot (lollipop flip): Median concentration of compo in oils ----
 
 fao_fish_fct %>% filter(str_detect(fish_prep, "oils")) %>% 
-  select(nv, source_fct) %>% 
+  select(all_of(nv, source_fct)) %>% 
   naniar::gg_miss_fct(., fct = source_fct)
 
 fao_fish_fct %>% filter(str_detect(fish_prep, "oils")) %>% 

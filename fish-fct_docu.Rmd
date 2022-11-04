@@ -7,10 +7,9 @@ author:
 - "Louise Ander"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  bookdown::html_document2
-  html_document2: default
-  pdf_document: 
-   fig_caption: true
+  bookdown::html_document2: 
+   pdf_document: 
+    fig_caption: true
 editor_options:
   markdown:
     wrap: 72
@@ -22,6 +21,7 @@ bibliography: mylibrary.bib
 ```{r setup, include=FALSE}
 
 knitr::opts_chunk$set(echo = FALSE)
+knitr::read_chunk("visualisation.R")
 
 library(gt)
 
@@ -816,7 +816,7 @@ UK21 but some from [NO21](see NO21_docu.R) as well
 
 ```{r, loading-data, include=FALSE}
 
-source("merging_all.R")
+source("variable_re-calculation.R")
 
 fish_fct %>% filter(is.na(ICS.FAOSTAT.SUA.Current.Code)) %>% count(source_fct)
 
@@ -961,6 +961,7 @@ seven.
 
 ```{r fig-1, fig.cap= "Figure 1: Percentage of missing values per component and food composition table.", echo=FALSE}
 
+
 #├ Plot (heat map): % of missing values per FCT ----
 
 components <- c( "WATERg", "F22D6N3g",
@@ -993,9 +994,9 @@ fao_fish_fct %>% select(components, source_fct) %>%
 
 **Figure 1: Percentage of missing values per component and FCT**
 
-However, some FCTs contributed to the overal NCT with more fisheries entries, hence we checked the overall availability as percerentage of the overall fisheries entries. In figure 2, we can see that Cu, Vit. B6 and niacin had high coverage with more than 75% of the fisheries reporting a value. While for DHA, EPA and Se had a moderate coverage with over 60% of the fish entries reporting a value. Therefore, vitamin D and I were excluded from the extension. 
+However, some FCTs contributed to the overal NCT with more fisheries entries, hence we checked the overall availability as percentage of the overall fisheries entries. In figure 2, we can see that Cu, Vit. B6 and niacin had high coverage with more than 75% of the fish entries reporting a value for those components. While for DHA, EPA and Se had a moderate coverage with over 60% of the fish entries reporting a value. Finally, vitamin D and I were excluded from the extension. 
 
-```{r, fig-1, fig.cap= "Figure 2: Coverage: Percentage of reported values per component.", message=FALSE}
+```{r, fig-2, fig.cap= "Figure 2: Coverage: Percentage of reported values per component.", message=FALSE}
 
 #├ Plot (bar chart): Coverage ----
 
@@ -1035,8 +1036,12 @@ fao_fish_fct %>% select(1:10, components) %>%
 
 **Table 3: Count of values per component and SUA fish category**
 
-```{r tab-4}
+```{r, visual-tab4, echo=FALSE}
 
+```
+
+
+```{r tab-4, }
 fao_fish_summary %>% relocate(ics_faostat_sua_english_description, 
                               .before = WATERg_n) %>%  arrange(desc(WATERg_n)) %>% 
   rename("Fish categories" = ics_faostat_sua_english_description,
@@ -1057,11 +1062,9 @@ fao_fish_summary %>% relocate(ics_faostat_sua_english_description,
 
 ```
 
-After we agreed on the components to be expanded, we evaluated the availability of data by ICS FAO fishery category. In \Table 4, the number of fisheries in each ICS SUA fish category and per each nutrient are shown. 
-
-As shown in table 4, four SUA fish categories had no values for
+After we agreed on the components to be expanded in the Fisheries Global NCT, we evaluated the availability of data by ICS FAO fishery category. In \Table 4, the number of fisheries reporting a value in each ICS SUA fish category and per each nutrient are shown. Only four SUA fish categories had no values for
 Se concentration: `r toString(missing)`. Hence, we imputed some values
-from other fish entries reported. The scripts that impute the values are
+from other fish entries in the compiled NCT. The scripts that impute the values are
 reported in `missing.R`, and the rationale is outline bellow.
 
 For **Cephalopods, cured**, we used the water-adjusted Se mean
@@ -1497,7 +1500,7 @@ zero" in the Fisheries Global NCT, 2022.
 
 ```{r}
 
-hist(fao_fish_fct$CHOAVLDFg2[fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code == "1531"], main="Distribution of CHO values (including CHOAVLDFg and CHOAVLg) for pelagic fish, cured",
+hist(fao_fish_fct$CHOAVLDFg_std[fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code == "1531"], main="Distribution of CHO values (including CHOAVLDFg and CHOAVLg) for pelagic fish, cured",
 xlab = "Carbohydrates (g/100g) (including CHOAVLDFg and CHOAVLg)")
 
 ```

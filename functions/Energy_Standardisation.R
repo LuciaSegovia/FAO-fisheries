@@ -1,7 +1,7 @@
 library(tidyverse)
 library (docstring)
 
-ENERCKj_standardised <- function(PROT, FAT, CHOAVLDF, FIBGT, ALC){
+ENERCKj_standardised <- function(PROT, FAT, CHOAVLDF, FIBGTg, ALC){
   
   
   #' A function used to calculate standardized Energy values in kJ
@@ -18,7 +18,7 @@ ENERCKj_standardised <- function(PROT, FAT, CHOAVLDF, FIBGT, ALC){
   #' being examined.
   #' @param CHOAVLDF Required - The Total Available Carbohydrate value (in 
   #' grams) for the food item being examined.
-  #' @param FIBTG Required - The Total Dietary Fibre value (in grams) for the 
+  #' @param FIBTGg Required - The Total Dietary Fibre value (in grams) for the 
   #' food item being examined.
   #' @param ALC Optional - The Total Alcohol value (in grams) for the food item 
   #' being examined.
@@ -81,14 +81,14 @@ ENERCKj_standardised <- function(PROT, FAT, CHOAVLDF, FIBGT, ALC){
   
   
   ALC <- ALC %>% replace_na(0)
-  FIBGT <- FIBGT %>% replace_na(0)
-  ENERCKj_std <- as.numeric(PROT)*17 + as.numeric(FAT)*37 + as.numeric(CHOAVLDF)*17 + as.numeric(FIBGT)*8 + as.numeric(ALC)*29
+  FIBGTg <- replace_na(as.numeric(FIBGTg), 0)
+  ENERCKj_std <- as.numeric(PROT)*17 + as.numeric(FAT)*37 + as.numeric(CHOAVLDF)*17 + as.numeric(FIBGTg)*8 + as.numeric(ALC)*29
   return(ENERCKj_std)
 }
 
 ENERCKcal_standardised <- function(PROTg, FATg_standardised, CHOAVLDFg, FIBGTg, ALCg){
   ALCg <- ALCg %>% replace_na(0)
-  FIBGTg <- FIBGTg %>% replace_na(0)
+  FIBGTg <- replace_na(as.numeric(FIBGTg), 0)
   ENERCKcal_std <- PROTg*4 + FATg_standardised*9 + CHOAVLDFg*4 + as.numeric(FIBGTg)*2 + ALCg*7
   return(ENERCKcal_std)
 }
