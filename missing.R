@@ -2,7 +2,7 @@
 ##### Dealing with missing values ######
 
 #Loading the data
-source("merging_all.R")
+source("variable_re-calculation.R")
 
 
 # 7) SEmcg ---- 
@@ -50,10 +50,10 @@ source("merging_all.R")
   
   #Squid - calculating median water and Se
   
-  fao_fish_fct$comment <- NA
+ # fao_fish_fct$comment <- NA
   
   squid <- c("10342", "10345")
-  unique(fao_fish_fct$source[fao_fish_fct %in% squid])
+  squid_fct <- unique(fao_fish_fct$source_fct[fao_fish_fct$fdc_id %in% squid])
   
   fao_fish_fct %>% 
     filter( fdc_id %in% squid) %>%
@@ -78,9 +78,9 @@ source("merging_all.R")
     fao_fish_fct$SEmcg[i] <- x*(100-as.numeric(fao_fish_fct$WATERg[i]))/(100-y)
     
     fao_fish_fct$comment[i] <- ifelse(is.na(fao_fish_fct$comment[i]), 
-                                      paste0("SEmcg value from water adjusted, median values (", toString(squid), ")"),
+                                      paste0("SEmcg value from water adjusted, median values ", squid_fct, "(", toString(squid), ")"),
                                       paste0(fao_fish_fct$comment[i],", ",
-                                             "SEmcg value from water adjusted, median values (", toString(squid), ")"))
+                                             "SEmcg value from water adjusted, median values ", squid_fct, "(", toString(squid), ")"))
     
   }
   
@@ -236,6 +236,8 @@ source("merging_all.R")
            str_detect(food_desc, "crayfish|Crayfish" )) %>% pull(fdc_id)
   
   crayfish[4] <- "092004" #Adding this from the ref. list
+  #Storing FCT (source_fct)
+  crayfish_fct <- unique(fao_fish_fct$source_fct[fao_fish_fct$fdc_id %in% crayfish])
   
   #Storing mean Se (x) and mean Water (y) values of the list above
   x <- median(as.numeric(fao_fish_fct$SEmcg[fao_fish_fct$fdc_id %in% crayfish]))
@@ -249,9 +251,11 @@ source("merging_all.R")
   
   #Adding comment for source of Se for "Shrimp (crayfish), whole, dried"
   fao_fish_fct$comment[i] <- ifelse(is.na(fao_fish_fct$comment[i]), 
-                                    paste0("SEmcg value from water adjusted, median values (", 
+                                    paste0("SEmcg value from water adjusted, median values ",
+                                           crayfish_fct, "(", 
                                            toString(crayfish) ,")"),
                                     paste0(fao_fish_fct$comment[i],",",
-                                           "SEmcg value from water adjusted, median values (",
+                                           "SEmcg value from water adjusted, median values ",
+                                           crayfish_fct, "(",
                                            toString(crayfish) ,")"))
   

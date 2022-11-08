@@ -414,7 +414,7 @@ fao_fish_fct %>% filter(as.numeric(F22D6N3g)>0.695,
                         as.numeric(F22D6N3g)<4) %>% 
   select(source_fct, fdc_id, food_desc, WATERg, FAT_g_standardised,
          F22D6N3g) %>% 
- arrange(as.numeric(F22D6N3g))
+  arrange(as.numeric(F22D6N3g))
 
 #Checking variability in the values
 #By FCT
@@ -442,7 +442,7 @@ fao_fish_fct %>% filter(as.numeric(F22D6N3g)>5) %>%
 x1 <- fao_fish_fct %>% 
   group_by(ics_faostat_sua_english_description) %>% 
   summarise(mean_water = mean(as.numeric(WATERg), na.rm = T),
-           mean_fat = mean(as.numeric(FAT_g_standardised), na.rm = T),
+            mean_fat = mean(as.numeric(FAT_g_standardised), na.rm = T),
             mean = mean(as.numeric(F22D6N3g), na.rm = T),
             sd = sd(as.numeric(F22D6N3g), na.rm = T)) %>% 
   arrange(desc(ics_faostat_sua_english_description))
@@ -460,7 +460,7 @@ fao_fish_fct %>% filter(!is.na(F22D6N3g)) %>%
 #Calculating mean concentration by ics w/o "extreme values"
 
 x2 <- fao_fish_fct %>% 
-       filter(!is.na(F22D6N3g)) %>%
+  filter(!is.na(F22D6N3g)) %>%
   group_by(ics_faostat_sua_english_description)  %>% 
   summarise(mean_water = mean(as.numeric(WATERg), na.rm = T),
             mean_fat = mean(as.numeric(FAT_g_standardised), na.rm = T),
@@ -657,7 +657,7 @@ fao_fish_fct %>%
 
 fao_fish_fct %>% filter(str_detect(food_desc, "mackerel"), 
                         source_fct == "JA15"
-                        ) %>% 
+) %>% 
   select(source_fct, fdc_id, food_desc, WATERg, SEmcg ) %>% 
   arrange(desc(as.numeric(SEmcg)))
 
@@ -693,7 +693,7 @@ anti_join(x1, x2, by = "ics_faostat_sua_english_description")
 
 fao_fish_fct %>% 
   filter(ICS.FAOSTAT.SUA.Current.Code == "1520",
-                        FAT_g_standardised > 30) 
+         FAT_g_standardised > 30) 
 
 
 low_q <- c("35013", "35055", "35079", "15142", #US19
@@ -715,7 +715,7 @@ qc <- read.csv(here::here("data", "quality_check.csv")) %>%
 
 qc %>% filter(str_detect(fdc_id, "^0")) 
 qc <- qc %>% mutate(fdc_id = ifelse(source_fct == "KE18",
-            str_replace(fdc_id, "^0", ""), fdc_id))  %>%  #removing the 0 of the fdc_id
+                                    str_replace(fdc_id, "^0", ""), fdc_id))  %>%  #removing the 0 of the fdc_id
   mutate(fdc_id = ifelse(source_fct == "US19",
                          ndb_number , fdc_id)) #using NDB_number as the fdc_id
 
@@ -729,16 +729,16 @@ qc %>% filter(source_fct == "US19")
 fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code <- as.integer(fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code)
 
 fao_fish_fct <- fao_fish_fct %>% left_join(.,qc %>% 
-                             select(fdc_id, ics_faostat_sua_current_code, 
-                                    quality_rating_for_food_match),
-            by = c("fdc_id" , 
-        "ICS.FAOSTAT.SUA.Current.Code" = "ics_faostat_sua_current_code")) %>% 
+                                             select(fdc_id, ics_faostat_sua_current_code, 
+                                                    quality_rating_for_food_match),
+                                           by = c("fdc_id" , 
+                                                  "ICS.FAOSTAT.SUA.Current.Code" = "ics_faostat_sua_current_code")) %>% 
   mutate(
-  quality_rating_for_food_match = 
-    case_when(
-    ics_faostat_sua_english_description == "Cephalopods, canned" ~ "C2", 
-    is.na(quality_rating_for_food_match) ~ quality,
-     TRUE ~ quality_rating_for_food_match)) 
+    quality_rating_for_food_match = 
+      case_when(
+        ics_faostat_sua_english_description == "Cephalopods, canned" ~ "C2", 
+        is.na(quality_rating_for_food_match) ~ quality,
+        TRUE ~ quality_rating_for_food_match)) 
 
 fao_fish_fct %>% 
   filter(source_fct == "NO21") %>% 
