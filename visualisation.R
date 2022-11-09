@@ -465,3 +465,11 @@ fao_fish_fct %>% filter(str_detect(fish_prep, "oils")) %>%
 ggsave(here::here("images", "median-conc-oils_wo-outliers.png"), width = 12,
        height = 7)
 
+
+##├├ Plot: Missing values for nutients by ICS code ----
+fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code <- as.factor(fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code)
+
+fao_fish_fct[,c("CAmg", "SEmcg", "RETOLmcg", "ICS.FAOSTAT.SUA.Current.Code")] %>%  #selecting variables
+  naniar::gg_miss_fct(., fct = ICS.FAOSTAT.SUA.Current.Code) +
+  coord_flip() +
+  scale_x_discrete(guide = guide_axis(n.dodge = 3))

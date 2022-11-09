@@ -527,7 +527,7 @@ Vitamin B6 or total fat into a `_standardised` variable.
 
 #### 3.5. Imputing values <br>
 
-Data imputation was avoided whenever it was possible (i.e., when mean value for each ICS SUA fishery categories were available (n=>1). In the cases when this condition was not met, a case-by-case approach was taken and it was documented here (See Section XX) and in the final Fisheries Global NCT was docummented in the column `comment`. 
+Data imputation was avoided whenever it was possible (i.e., when mean value for each ICS SUA fishery categories were available (n=>1). In the cases when this condition was not met, a case-by-case approach was taken and it was documented here (See Section 4.2.1. Missing values) and in the final Fisheries Global NCT was docummented in the column `comment`. 
 
 ##### Generating functions for data transformation <br>
 
@@ -949,8 +949,6 @@ Niacin (`NIAmg`) was reported in all FCTs but in WA19, in
 which niacin equivalent (`NIAEQmg`) was reported. Because tryptophan was
 reported in the WA19, `NIAmg` was re-calculated into a new variable and combined into the Niacin standardised variable (`NIAmg_std`) using the function:`nia_conversion_creator` as reported in the method section 3.4.
 
-## REVIEW
-
 ##### 4. Visualising food components for decision-making
 
 After standardising and recalculating the variables, and before calculating the mean
@@ -1073,7 +1071,9 @@ fao_fish_summary %>% relocate(ics_faostat_sua_english_description,
 After we agreed on the components to be expanded in the Fisheries Global NCT, we evaluated the availability of data by ICS FAO fishery category. In \Table 4, the number of fisheries reporting a value in each ICS SUA fish category and per each nutrient are shown. Only four SUA fish categories had no values for
 Se concentration: `r toString(missing)`. Hence, we imputed some values
 from other fish entries in the compiled NCT. The scripts that impute the values are
-reported in `missing.R`, and in the `comment` variable in the Fisheries Global NCT (Oct, 2022) and the rationale is outline bellow.
+reported in `missing.R`, and in the `comment` variable in the Fisheries Global NCT (Oct, 2022) and the rationale is the following section. 
+
+###### 4.2.1 Missing values
 
 For **Cephalopods, cured**, we used the water-adjusted Se mean
 concentration of the items reported in table 5 to "complete" the Se
@@ -1206,9 +1206,11 @@ grilling) being 1.
 Information regarding the values used to impute/calculate the `SEmcg`
 for the items can be found in the column `comment`.
 
-###### 4.2. Data quality per each ICS FAOSTAT fish category
+###### 4.3. Data quality per each ICS FAOSTAT fish category
 
-###### 4.2.1. Niacin
+After the completion of mean values for ICS FAOSTAT fish categories for all the nutrient values of interest. We proceeded to check the individual values. Most of the check were done as "overall dataset" and then by category. The script used to check the nutrients can be found in "QC.R". 
+
+###### 4.3.1. Niacin
 
 We check for "extreme values", and after plotting the values, we
 identified some potential "extreme values". However after comparing
@@ -1219,13 +1221,17 @@ compared on dry-weight basis concentration with similar fresh items, the
 niacin concentration was similar.
 
 Note that for "Other pelagic fish, cured", one of the high values had a
-great influence in the final mean value. For instance, when we removed
+great influence in the final mean value
+`r mean(as.numeric(fao_fish_fct$NIAmg_std[fao_fish_fct$ics_faostat_sua_english_description == "Other pelagic fish, cured"]))` mg/100g(range:15-45mg/100g). For instance, when we excluded
 values that were higher than 40mg/100g, the mean of that SUA category
-was 15mg/100g instead of 30mg/100g (range:15-45mg/100g). This could be
+was `r mean(as.numeric(fao_fish_fct$NIAmg_std[fao_fish_fct$ics_faostat_sua_english_description == "Other pelagic fish, cured" & fao_fish_fct$NIAmg_std <40]))`mg/100g instead. This could be
 solved by including more fish entries (more values) for that fish
 category, as currently there are only two entries for that category.
 
-The rest of the SUA categories remained more or less the same.
+The rest of the SUA categories remained more or less within the same range of values.
+
+
+## REVIEW
 
 ###### 4.2.2. Copper
 

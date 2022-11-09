@@ -7,49 +7,13 @@ library(gt)
 source("missing.R") #added missing
 
 
-#1) Check that we have all FCTs merged
+#1) Checking the fisheries dataset
+
+dim(fao_fish_fct)
+names(fao_fish_fct)
 
 fao_fish_fct %>% 
   group_by(source_fct) %>% count()
-
-# 2) Checking missing values
-
-#List of info variables and NV that UoN are delivering:
-#generating a vector with selected variables
-
-col_names <- c("fdc_id",
-               "food_desc",
-               "food_group",
-               "scientific_name",
-               "source_fct",
-               "nutrient_data_source",
-               "Edible_factor_in_FCT",
-               "ICS.FAOSTAT.SUA.Current.Code",
-               "WATERg",
-               "F22D6N3g",
-               "F20D5N3g",
-               "VITB6Amg",
-               "VITB6Cmg",
-               "VITB6_mg",
-               "NIAEQmg",
-               "NIAmg",
-               "NIATRPmg",
-               "TRPmg",
-               "VITB12mcg",
-               "CHOCALmcg",
-               "ERGCALmcg",
-               "CHOCALOHmcg",
-               "ERGCALOHmcg",
-               "CUmg",
-               "SEmcg",
-               "IDmcg")
-
-
-
-#Plot: values to see overall % of missing values
-
-fao_fish_fct %>% select(col_names) %>% vis_miss(sort_miss = T) 
-
 
 #Checking NV references
 
@@ -69,14 +33,6 @@ fao_fish_fct %>% filter(is.na(NIAmg)) %>% count(source_fct)
 fao_fish_fct %>% filter(is.na(TRPmg)) %>% count(source_fct)
 fao_fish_fct %>% filter(is.na(NIAEQmg)) %>% count(source_fct)
 
-#├ 1.1) NIAmg_std calculated from NIAEQmg, and NIAmg ----
-
-fao_fish_fct <- fao_fish_fct %>% 
-  mutate(NIAmg_std =
-           ifelse(is.na(NIAmg) & !is.na(NIAEQmg), 
-                  as.numeric(NIAEQmg) - 1/60*as.numeric(TRPmg),
-                  NIAmg)) 
-
 fao_fish_fct %>% filter(is.na(NIAmg_std)) %>% count(source_fct)
 
 #Checking variability in the values
@@ -90,8 +46,8 @@ fao_fish_fct %>% ggplot(aes(as.numeric(NIAmg_std), source_fct)) +
   geom_boxplot()
 
 #Checking high end values
-fao_fish_fct %>% filter(as.numeric(NIAmg) >40) %>% 
-  select(source_fct, fdc_id, food_desc, WATERg, NIAmg)
+fao_fish_fct %>% filter(as.numeric(NIAmg_std) >40) %>% 
+  select(source_fct, fdc_id, food_desc, WATERg, NIAmg_std)
 
 #By fish type
 fao_fish_fct %>% ggplot(aes(as.numeric(NIAmg_std), fish_type)) +
