@@ -64,7 +64,7 @@ d.  *Removing summary stat from the table* --\> How can we keep/use that
     data?
 
 e.  Food name/ description standardisation: For instance, for fisheries
-    [ASFIS codes](https://www.fao.org/fishery/en/collection/asfis/en)
+    [ASFIS List of Species for Fishery Statistics Purposes](https://www.fao.org/fishery/en/collection/asfis/en)
     will be assigned according to their species and fishery products.
 
 f.  Food groups variable (row to column).
@@ -885,7 +885,7 @@ MAPS to calculate energy used.
 
 ##### 3.4.4. Carbohydrates by difference
 
-Carbohydrates by difference were calculated using the Eq.6a. In NO21, the value of ash (g/100g EP) used were calculated. In addition, we found `r round(sum(str_detect(fao_fish_fct$comment, "CHOAVLDFg_std assumed zero"), na.rm = T)/length(fao_fish_fct$CHOAVLDFg_std)*100)`% of negative values of carbohydrates by difference which were converted to zero and added a comment "CHOAVLDFg_std assumed zero" for documentation. 
+Carbohydrates by difference were calculated using the function `CHOAVLDFg_std_creator()` that was developed based on the Eq.6a. In NO21, the value of ash (g/100g EP) used were calculated. In addition, we found `r round(sum(str_detect(fao_fish_fct$comment, "CHOAVLDFg_std assumed zero"), na.rm = T)/length(fao_fish_fct$CHOAVLDFg_std)*100)`% of negative values of carbohydrates by difference which were converted to zero and added a comment "CHOAVLDFg_std assumed zero" for documentation. 
 
 The documentation of these changes are important as they would have an impact of the final estimates, particularly as this variable is used to calculate SOP, and more importantly the total energy. If total energy is calculated using negative values it would lead to a underestimation of the total energy supplied by the foods.
 
@@ -1210,6 +1210,20 @@ for the items can be found in the column `comment`.
 
 After the completion of mean values for ICS FAOSTAT fish categories for all the nutrient values of interest. We proceeded to check the individual values. Most of the check were done as "overall dataset" and then by category. The script used to check the nutrients can be found in "QC.R". 
 
+###### 4.3.1. Water
+
+We checked the water content of dried products and of `fish_prep == "cured"`, to make sure that the water content of the fishery products were in line with their description. There were some fish items that seemed to have a rather high water content for dried products. 
+
+```{r}
+subset(fao_fish_fct, 
+       str_detect(food_desc, " dry| dried")&
+       !str_detect(food_desc, "stewed|cooked")&
+         WATERg>30, select = c(WATERg, food_desc, source_fct)) %>% 
+  distinct()
+
+```
+
+
 ###### 4.3.1. Niacin
 
 We check for "extreme values", and after plotting the values, we
@@ -1235,9 +1249,9 @@ The rest of the SUA categories remained more or less within the same range of va
 
 ###### 4.2.2. Copper
 
-Similarly for Cu, we identified items that had the highest values:
-Octopus from IN17 (fdc_id = R003) which looked very high, even when
-compared with other octopus values. Double-check the value.
+Similarly for Cu, we identified food items that had the highest values:
+Octopus from IN17 (fdc_id = R003) which seemed very high, even when
+compared with other octopuses values. Double-check the value.
 
 Oyster from UF16 (fdc_id = 093013) also seems high compared with other
 oyster but seems plausible given the type of food. For instance, of the

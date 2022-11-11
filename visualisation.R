@@ -24,8 +24,8 @@ components <- c( "WATERg",
   "VITB6Amg",
   "VITB6Cmg",
   "VITB6_mg",
-  "VITB6_mg_standardised",
-  "NIAmg_std",
+ # "VITB6_mg_standardised",
+ # "NIAmg_std",
   "NIAEQmg",
   "NIAmg",
   "NIATRPmg",
@@ -41,6 +41,29 @@ components <- c( "WATERg",
   "SEmcg",
   "IDmcg" )
 
+components_longname <- c( "Water",
+                 "Docosahexaenoic acid (DHA)",
+                 "Eicosapentaenoic acid (EPA)",
+                 "Vitamin B6 determined by analysis",
+                 "Vitamin B6 determined by calculation",
+                 "Vitamin B6 by unknown method",
+                # "VITB6_mg_standardised",
+                # "NIAmg_std",
+                 "Niacin equivalents",
+                 "Niacin, prefrormed",
+                 "Niacin equivalents, from tryptophan",
+                 "Tryptophan",
+                 "Vitamin B12",
+                 "Vitamin D calculated (eq)",
+                 "Vitamin D calculated",
+                 "Cholecalciferol (D3)",
+                 "Ergocalciferol (D2)",
+                 "25-hydroxycholecalciferol",
+                 "25-hydroxyergocalciferol",
+                 "Copper",
+                 "Selenium",
+                 "Iodine" , 
+                "source_fct")
 
 #2) Plots of overall component counts and missing values ----
 
@@ -51,6 +74,7 @@ fao_fish_fct %>% select(components) %>% vis_miss(sort_miss = T)
 #├ Plot (heat map): % of missing values per FCT ----
 
 fao_fish_fct %>% select(components, source_fct) %>% 
+  rename_all(., ~components_longname) %>%  
   naniar::gg_miss_fct(., fct = source_fct)
 
 #Perfect for ppt (width = 12, height = 7)

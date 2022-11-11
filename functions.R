@@ -20,6 +20,11 @@ source(here::here("functions","Energy_Standardisation.R"))
 #Thiamin
 #Niacin (From niacin eq.)
 source(here::here("functions","summary_table_functions.R"))
+#SOP_std_creator()
+#CHOAVLDFg_std_creator()
+#CARTBEQmcg_std_creator()
+#VITA_RAEmcg_std_creator()
+#VITAmcg_std_creator()
 
 #Formatting
 source(here::here("functions","Group_Summariser.R"))

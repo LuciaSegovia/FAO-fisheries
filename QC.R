@@ -19,10 +19,27 @@ fao_fish_fct %>%
 
 fao_fish_fct %>% filter(is.na(nutrient_data_source))%>% count(source_fct)
 
+# 0) Water ----
+
 #Checking water is complete
 
 fao_fish_fct %>% filter(is.na(WATERg)) %>% count(source_fct)
 
+#Overall
+hist(as.numeric(fao_fish_fct$WATERg))
+
+#Checking dried products
+subset(fao_fish_fct, 
+       str_detect(food_desc, " dry| dried")&
+       !str_detect(food_desc, "stewed|cooked")&
+         WATERg>30, select = c(WATERg, food_desc, source_fct)) %>% 
+  distinct()
+
+#Checking dried products
+subset(fao_fish_fct, 
+        fish_prep == "cured" &
+         WATERg>60, select = c(WATERg, food_desc, source_fct)) %>% 
+  distinct() %>% arrange(desc(WATERg))
 
 #Checking NV for inclusion ####
 
