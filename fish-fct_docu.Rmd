@@ -175,9 +175,10 @@ included.
 Table 2. List of all the FCTs included, and description of their access,
 format and reviewing team.
 
-| BiblioID | Reference                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Link to access original data                                                                | Access                                                                                     |       Format       | Reviewer |
-|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|:------------------:|----------|
-| US19     | US Department of Agriculture (USDA), Agricultural Research Service, Nutrient Data Laboratory. USDA National Nutrient Database for Standard Reference, Legacy. Version Current: April 2019.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | <http://www.ars.usda.gov/nutrientdata>                                                      | Publicly available                                                                         |       Access       | FAO      |
+
+| BiblioID | Reference | Link to access original data | Access                                        |       Format       | Reviewer |
+| --- | --- | --- | --- | --- | --- |
+| US19     | US Department of Agriculture (USDA), Agricultural Research Service, Nutrient Data Laboratory. USDA National Nutrient Database for Standard Reference, Legacy. Version Current: April 2019. | <http://www.ars.usda.gov/nutrientdata>   | Publicly available                                                                         |       Access       | FAO      |
 | AU19     | Food Standards Australia New Zealand (FSANZ). 2019. The Australian Food Composition Database, release 1 \\[online\\]. Canberra.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | <http://www.foodstandards.gov.au>                                                           | Internal                                                                                   |       excel        | FAO      |
 | NZ18     | New Zealand Food Composition Database. 2019. New Zealand FOODfilesTM 2018 Manual. The New Zealand Institute for Plant and Food Research Limited and Ministry of Health.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | <http://www.foodcomposition.co.nz/foodfiles>                                                | Publicly available                                                                         |       excel        | FAO      |
 | UK21     | Food Standards Agency. 2021. McCance and Widdowson's The Composition of Foods Integrated Dataset (CoFID) 2021. London, Institute of Food Research, Public Health England.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |                                                                                             | <https://www.gov.uk/government/publications/composition-of-foods-integrated-dataset-cofid> | publicly available | excel    |
@@ -625,6 +626,32 @@ overall quality of the FCTs. One new FCT was added to the final selection of FCT
 Hence, we extracted information on all the components available in the 12 FCTs,
 however particular attention have been given to the following: Cu, I, Se, Vit. B6, Vit. B12, Vit. D, Niacin, DHA, EPA, as the were not reviewed in the previous version of the Fisheries Global NCT. 
 
+```{r}
+
+fao_fish_fct %>% count(source_fct) %>% 
+  mutate(perc = n/sum(n)*100,
+         fct_label = paste0(source_fct, " (",
+                            n, ")")) %>% 
+  arrange(desc(perc)) %>% 
+ggplot( aes(x=fct_label, y=perc)) +
+  geom_segment( aes(x=fct_label, xend=fct_label, 
+                  y=0, yend=perc), 
+                color="skyblue") +
+  geom_point( color="blue", size=4, alpha=0.6) +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.text.y = element_text(size=14),
+    axis.text.x = element_text(size=14),
+    axis.ticks.y = element_blank()) +
+  xlab("") +
+  ylab("%")
+
+```
+
+
 ### 2. Tidying the data
 
 The data cleaning operations were done by individual annotated R scripts for each FCT and were stored, together the raw data (raw FCT files), in a folder with its biblioID (See Table 2). Details on the operations and decisions made during the data cleaning are presented in subsequent sections. 
@@ -736,7 +763,7 @@ parentheses." (REF).
 In KE18, brackets ("[]") denoting not preferred values, as for the KE18
 reporting: "For alternative analytical method or lower quality. Data
 from non-preferred Tagnames were presented only where preferred Tagnames
-data was not available." (REF).
+data was not available." (REF). UF16 and WA19 reported "not preferred method" with brackets. 
 
 Bracket for low quality values were removed or generated a new column
 with the alternative analytical method for UF16, WA19 and KE18. In
@@ -932,7 +959,7 @@ smaller than the retinol value, then no carotene would be presented.
 ##### 3.4.3. Retinol
 
 Retinol should be provided by the FCT, and ideally it would be analysed. However, there were some cases that retinol was missing, however values for Vitamin A and Beta-Carotene eq. were provide. Therefore, we used the function `RETOLmcg_Recalculator()` to re-calculate the
-missing values. Additionally, the function add the documentation (i.e., "RETOLmcg value re-calulated from VITA_RAEmcg and CARTBEQmcg" or "RETOLmcg value re-calulated from VITA_RAEmcg and VITAmcg" in the `comment`). Again, this is important to 1) identify data gaps, and 2) flagging potential issues with the data. 
+missing values. Additionally, the function add the documentation (i.e., "RETOLmcg value re-calculated from VITA_RAEmcg and CARTBEQmcg" or "RETOLmcg value re-calulated from VITA_RAEmcg and VITAmcg" in the `comment`). Again, this is important to 1) identify data gaps, and 2) flagging potential issues with the data. 
 
 ##### 3.4.3. Vitamin B6 
 
@@ -947,7 +974,7 @@ Thiamine was combined into the Thiamine standardised variable (`THIAmg_std`) usi
 
 Niacin (`NIAmg`) was reported in all FCTs but in WA19, in
 which niacin equivalent (`NIAEQmg`) was reported. Because tryptophan was
-reported in the WA19, `NIAmg` was re-calculated into a new variable and combined into the Niacin standardised variable (`NIAmg_std`) using the function:`nia_conversion_creator` as reported in the method section 3.4.
+reported in the WA19, `NIAmg` was re-calculated into a new variable and combined into the Niacin standardised variable (`NIAmg_std`) using the function:`nia_conversion_creator()` as reported in the method section 3.4.
 
 ##### 4. Visualising food components for decision-making
 
@@ -970,31 +997,53 @@ seven.
 
 #├ Plot (heat map): % of missing values per FCT ----
 
-components <- c( "WATERg", "F22D6N3g",
-  "F20D5N3g",
-  "VITB6Amg",
-  "VITB6Cmg",
-  "VITB6_mg",
- "VITB6_mg_standardised",
- "NIAmg_std",
-  "NIAEQmg",
-  "NIAmg",
-  "NIATRPmg",
-  "TRPmg",
-  "VITB12mcg",
-  "VITDEQmcg",
-  "VITDmcg",
-  "CHOCALmcg",
-  "ERGCALmcg",
-  "CHOCALOHmcg",
-  "ERGCALOHmcg",
-  "CUmg",
-  "SEmcg",
-  "IDmcg" )
+components <- c("WATERg",
+        "F22D6N3g",
+        "F20D5N3g",
+        "VITB6Amg",
+        "VITB6Cmg",
+        "VITB6_mg",
+        "NIAEQmg",
+        "NIAmg",
+        "NIATRPmg",
+        "TRPmg",
+        "VITB12mcg",
+        "VITDEQmcg",
+        "VITDmcg",
+        "CHOCALmcg",
+        "ERGCALmcg",
+        "CHOCALOHmcg",
+        "ERGCALOHmcg",
+        "CUmg",
+        "SEmcg",
+        "IDmcg")
+components_longname <- c( "Water",
+                 "Docosahexaenoic acid (DHA)",
+                 "Eicosapentaenoic acid (EPA)",
+                 "Vitamin B6 determined by analysis",
+                 "Vitamin B6 determined by calculation",
+                 "Vitamin B6 by unknown method",
+                # "VITB6_mg_standardised",
+                # "NIAmg_std",
+                 "Niacin equivalents",
+                 "Niacin, prefrormed",
+                 "Niacin equivalents, from tryptophan",
+                 "Tryptophan",
+                 "Vitamin B12",
+                 "Vitamin D calculated (eq)",
+                 "Vitamin D calculated",
+                 "Cholecalciferol (D3)",
+                 "Ergocalciferol (D2)",
+                 "25-hydroxycholecalciferol",
+                 "25-hydroxyergocalciferol",
+                 "Copper",
+                 "Selenium",
+                 "Iodine" )
 
-fao_fish_fct %>% select(components, source_fct) %>% 
-  naniar::gg_miss_fct(., fct = source_fct)  +
-  labs( x= "", y= "", title = "Data Gaps: Percentage (%) of missing values of selected components in each FCT")
+fao_fish_fct[, c(components ,"source_fct")] %>% 
+  rename_all(., ~c(components_longname,  "source_fct")) %>%  
+  naniar::gg_miss_fct(., fct = source_fct)   +
+  labs( x= "", y= "")
 
 ```
 
@@ -1004,11 +1053,13 @@ However, some FCTs contributed to the overal NCT with more fisheries entries, he
 
 ```{r, fig-2, fig.cap= "Figure 2: Coverage: Percentage of reported values per component.", message=FALSE}
 
-#├ Plot (bar chart): Coverage ----
+#├ Plot (bar chart): Coverage ---
 
-fao_fish_fct %>% select(1:10, components) %>% 
-  mutate_at(components, as.numeric) %>% 
-  pivot_longer(cols = all_of(components),
+#Coverage: Percentage of reported values per component
+
+fao_fish_fct %>% select(components) %>% rename_all(., ~components_longname) %>% 
+  mutate_at(components_longname, as.numeric) %>% 
+  pivot_longer(cols = all_of(components_longname),
                names_to = "NV", 
                values_to = "n") %>% 
   filter(!is.na(n)) %>% 
@@ -1024,6 +1075,8 @@ fao_fish_fct %>% select(1:10, components) %>%
   geom_bar(stat = "identity") +
   theme_light() +
   coord_flip() +
+  geom_hline(aes(yintercept = 60), linetype = "dashed") +
+  annotate(geom = "text", x=0.7, y=62.5, label="60%") +
   scale_fill_manual("Coverage",
   values=c("darkolivegreen3","lightgoldenrod2", "red4"), 
   labels = c("High (> 75%)", "Medium (75-45%)", "Poor (<45%)")) +
@@ -1031,7 +1084,9 @@ fao_fish_fct %>% select(1:10, components) %>%
     panel.grid.major.y = element_blank(),
     panel.border = element_blank(),
     axis.ticks.y = element_blank()) +
-  labs( x= "", y= "", title = "Availability of data: Percentage (%) of fish entries with values of selected components")
+   labs( x= "", y= "") + 
+  guides(x = guide_axis(n.dodge = 2))
+
 
 ```
 
@@ -1244,14 +1299,21 @@ category, as currently there are only two entries for that category.
 
 The rest of the SUA categories remained more or less within the same range of values.
 
-
-## REVIEW
-
 ###### 4.2.2. Copper
 
 Similarly for Cu, we identified food items that had the highest values:
 Octopus from IN17 (fdc_id = R003) which seemed very high, even when
-compared with other octopuses values. Double-check the value.
+compared with other octopuses values. 
+
+```{r}
+
+subset(fao_fish_fct, str_detect(food_desc, "octopus|Octopus") &
+         !str_detect(food_desc, "boiled|grilled|cooked"), 
+       select = c(source_fct, fdc_id, food_desc, WATERg, CUmg )) %>% 
+  distinct()
+
+```
+
 
 Oyster from UF16 (fdc_id = 093013) also seems high compared with other
 oyster but seems plausible given the type of food. For instance, of the
@@ -1259,20 +1321,21 @@ oyster but seems plausible given the type of food. For instance, of the
 
 Another item from the JA15 (fdc_id = 10350) was also extremely high,
 however when we compared it with the "fresh" values, it was still in
-line with the water content of that item. However, because the item was
-driving the very high mean for the category "Cephalopods, cured", (mean
+line with the water content of that item. However, the Cu value of this fish item is influencing heavily the the very high mean for the category "Cephalopods, cured", (mean
 =
 `r mean(as.numeric(fao_fish_fct$CUmg[fao_fish_fct$ics_faostat_sua_english_description == "Cephalopods, cured"]))`)
-we decided to remove it from the final mean, which yielded more nuanced
-value (mean =
+
+In the future, we may decide to exclude it from the final mean, which would yield more "sensible" mean
+value for the category (mean =
 `r round(mean(as.numeric(fao_fish_fct$CUmg[fao_fish_fct$ics_faostat_sua_english_description == "Cephalopods, cured" & fao_fish_fct$fdc_id != "10350"])),2)`).
-For future, and in order to minimise the influence of this type of food
-items, more values should be sought for each category.
+Moreover, in the future, in order to minimise the influence of one value, more values should be sought for each category.
 
 ###### 4.2.3. Vitamin B6
 
 After combining the values of the three Tagnames into one Vitamin B6 (standardised), it was reported in all but one FCT (KE18). Overall, values were within plausible values. The highest values reported were for Tuna and
 they were still within normal ranges.
+
+## REVIEW
 
 ###### 4.2.4. Vitamin B12
 
@@ -1468,7 +1531,7 @@ F22D6N3g/FAT_g\_standardised\*100)
 There were major differences between the two datasets, particularly for
 16 SUAs categories that reported \>10% difference in total fat between
 values with DHA and EPA and those without. The main reason were that
-those SUA category were were very broad, and hence the composition was
+those SUA category were very broad, and hence the composition was
 highly variable. Also, the number of entries were very small as they
 were rare species (i.e., aquatic mammals, or aquatic plants).
 

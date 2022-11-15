@@ -138,6 +138,12 @@ fao_fish_fct %>% filter(as.numeric(CUmg)>0.12) %>%
   select(source_fct, fdc_id, food_desc, WATERg, CUmg ) %>% 
   arrange(desc(as.numeric(CUmg)))
 
+### octopus outlier ----
+subset(fao_fish_fct, str_detect(food_desc, "octopus|Octopus") &
+         !str_detect(food_desc, "boiled|grilled|cooked"), 
+       select = c(source_fct, fdc_id, food_desc, WATERg, CUmg )) %>% 
+  distinct()
+
 #By FCTs
 fao_fish_fct %>% ggplot(aes(as.numeric(CUmg), source_fct)) +
   geom_boxplot()

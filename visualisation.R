@@ -7,14 +7,48 @@
 source("variable_re-calculation.R")
 library(gt)
 #library(gtExtras)
-
+colnames(fao_fish_fct)
 
 #1) Check that we have all FCTs merged ----
 
 fao_fish_fct %>% count(source_fct)
 
-colnames(fao_fish_fct)
 
+#Total count of the no. of food entries (not only fish)
+#Harmonised per FCT
+
+fct_cover %>% ggplot(aes(source_fct)) + 
+  geom_bar() + 
+  theme_light() +
+  coord_flip() 
+
+# Basic piechart
+fao_fish_fct %>% count(source_fct) %>% 
+  ggplot( aes(x="", y=n, fill=source_fct)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)
+
+#├ Plot (lollipop-flip) ----  
+#Percentage of the fish items from each FCT
+
+fao_fish_fct %>% count(source_fct) %>% 
+  mutate(perc = n/sum(n)*100,
+         fct_label = paste0(source_fct, " (",
+                            n, ")")) %>% 
+  arrange(desc(perc)) %>% 
+ggplot( aes(x=fct_label, y=perc)) +
+  geom_segment( aes(x=fct_label, xend=fct_label, 
+                  y=0, yend=perc), 
+                color="skyblue") +
+  geom_point( color="blue", size=4, alpha=0.6) +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank()) +
+  xlab("") +
+  ylab("%")
 
 #├ List of components that we are interested in: ----
  
@@ -74,8 +108,14 @@ fao_fish_fct %>% select(components) %>% vis_miss(sort_miss = T)
 #├ Plot (heat map): % of missing values per FCT ----
 
 fao_fish_fct %>% select(components, source_fct) %>% 
-  rename_all(., ~components_longname) %>%  
-  naniar::gg_miss_fct(., fct = source_fct)
+#  rename_all(., ~components_longname) %>%  
+  naniar::gg_miss_fct(., fct = source_fct) +
+  geom_rect(aes(xmin = 0.5, ymin = -Inf, xmax = 1.5, ymax =Inf), #AU19
+            linetype = "dotted",alpha = 0, colour = "red", size = 2.5) +
+  geom_rect(aes(xmin = 0.5, ymin = 5.5, xmax = Inf, ymax =7.5), #DHA & EPA
+            linetype = "dotted",alpha = 0, colour = "red", size = 2.5) +
+    labs( x= "", y= "",
+        title = "Data Gaps: Percentage (%) of missing values of selected components in each FCT")
 
 #Perfect for ppt (width = 12, height = 7)
 # ggsave(here::here("images", "missing-values-fct.png"), width = 12, height = 7)
@@ -329,6 +369,9 @@ col_order <- sort(colnames(fao_fish_summary), decreasing = T)
 
 fao_fish_summary <- fao_fish_summary[, col_order]
 
+saveRDS(fao_fish_summary,
+        here::here("..", "summary_fct_missingSe.rds"))
+
 names(fao_fish_summary)
 
 body_fct1 <- function(col, row){
@@ -346,7 +389,7 @@ body_fct2 <- function(col, row){
 }
 
 
-(tab_1 <- fao_fish_summary %>%
+(tab_1 <- fao_fish_summary %>% 
   select(ics_faostat_sua_english_description, ends_with("_n")) %>% 
   gt() %>% 
   tab_spanner(
@@ -494,6 +537,16 @@ ggsave(here::here("images", "median-conc-oils_wo-outliers.png"), width = 12,
 fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code <- as.factor(fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code)
 
 fao_fish_fct[,c("CAmg", "SEmcg", "RETOLmcg", "ICS.FAOSTAT.SUA.Current.Code")] %>%  #selecting variables
+  naniar::gg_miss_fct(., fct = ICS.FAOSTAT.SUA.Current.Code) +
+  coord_flip() +
+  scale_x_discrete(guide = guide_axis(n.dodge = 3))
+
+
+##├├ Plot: Missing values for nutients by ICS code ----
+fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code <- as.factor(fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code)
+
+fao_fish_fct[,c("FAT_g_standardised", "F22D6N3g",
+                "F20D5N3g", "ICS.FAOSTAT.SUA.Current.Code")] %>%  #selecting variables
   naniar::gg_miss_fct(., fct = ICS.FAOSTAT.SUA.Current.Code) +
   coord_flip() +
   scale_x_discrete(guide = guide_axis(n.dodge = 3))
