@@ -470,7 +470,7 @@ subset(fat_check, fat_diff>10 | fat_diff< -10,
 #Aquatic animals nei, fresh
 #Aquatic plants, dried
 
-test <- "Aquatic plants, dried"
+test <- "Aquatic mammals, meat"
 
 fao_fish_fct %>% 
   filter(ics_faostat_sua_english_description %in% test) %>% 
@@ -479,7 +479,10 @@ fao_fish_fct %>%
   arrange(desc(as.numeric(F22D6N3g)))
 
 hist(as.numeric(fao_fish_fct$F22D6N3g[fao_fish_fct$ics_faostat_sua_english_description %in% test]))
+hist(as.numeric(fao_fish_fct$FAT_g_standardised[fao_fish_fct$ics_faostat_sua_english_description %in% test]))
 
+fao_fish_fct %>% filter(ics_faostat_sua_english_description %in% test) %>% 
+  ggplot(aes(FAT_g_standardised)) + geom_dotplot() + theme_classic()
 
 #6) EPA (20:5 n-3) ----
 
@@ -779,3 +782,31 @@ fao_fish_fct %>% filter(!is.na(ALCg)) %>% select(source_fct, ALCg)
 fao_fish_fct %>% filter(is.na(ASHg)) %>% count(source_fct)
 fao_fish_fct %>% filter(is.na(ASHg)) %>% count(source_fct)
 
+## Checking Sum of Proximate  ----
+
+n <- length(fao_fish_fct$food_desc[fao_fish_fct$SOP_std <95|fao_fish_fct$SOP_std >105])
+hist(fao_fish_fct$SOP_std, main = "Sum of Proximate",
+     xlab = paste0("There are ", n, " fish items outside range (95-105g)"))
+abline(v = 95, col = 2, lwd=3, lty =2)
+abline(v = 105, col = 2, lwd=3, lty =2)
+
+
+##├├ Plot: Missing values for retinol by ICS code ----
+
+fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code <- as.factor(fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code)
+
+fao_fish_fct[,c( "RETOLmcg", "ICS.FAOSTAT.SUA.Current.Code")] %>%  #selecting variables
+  naniar::gg_miss_fct(., fct = ICS.FAOSTAT.SUA.Current.Code) +
+  coord_flip() +
+  scale_x_discrete(guide = guide_axis(n.dodge = 3))
+
+subset(fao_fish_fct,
+       ICS.FAOSTAT.SUA.Current.Code %in% c("1580", "1582", "1583"), 
+       select = c("ICS.FAOSTAT.SUA.Current.Code", "source_fct","food_desc", "RETOLmcg")) 
+
+boxplot(as.numeric(RETOLmcg) ~ ICS.FAOSTAT.SUA.Current.Code, 
+        data = fao_fish_fct, 
+        ylab = "Retinol (mcg)",
+        xlab = "ICS FAOSTAT SUA Fisheries Code") 
+
+sd(as.numeric(fao_fish_fct$RETOLmcg), na.rm = T)

@@ -545,8 +545,29 @@ fao_fish_fct[,c("CAmg", "SEmcg", "RETOLmcg", "ICS.FAOSTAT.SUA.Current.Code")] %>
 ##├├ Plot: Missing values for nutients by ICS code ----
 fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code <- as.factor(fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code)
 
-fao_fish_fct[,c("FAT_g_standardised", "F22D6N3g",
+fao_fish_fct[,c("FAT_g_standardised","F22D6N3g",
                 "F20D5N3g", "ICS.FAOSTAT.SUA.Current.Code")] %>%  #selecting variables
   naniar::gg_miss_fct(., fct = ICS.FAOSTAT.SUA.Current.Code) +
   coord_flip() +
   scale_x_discrete(guide = guide_axis(n.dodge = 3))
+
+
+## Table 4.
+
+fao_fish_summary %>% relocate(ics_faostat_sua_english_description, 
+                              .before = WATERg_n) %>%  arrange(desc(WATERg_n)) %>% 
+  rename("Fish categories" = ics_faostat_sua_english_description,
+         "Water" = WATERg_n,
+         "Vitamin B6" = VITB6_mg_standardised_n,
+         "Vitamin B12" = VITB12mcg_n, 
+         "Selenium" = SEmcg_n, 
+         "Niacin" = NIAmg_std_n, 
+         "DHA" = F22D6N3g_n,
+         "EPA" = F20D5N3g_n, 
+         "Copper" = CUmg_n) %>% 
+  
+  knitr::kable()
+
+missing <- c("Cephalopods, cured", "Aquatic animals nei, cured", 
+             "Aquatic animals nei, preparations nei", "Crustaceans, cured", 
+             "Cephalopods, canned")

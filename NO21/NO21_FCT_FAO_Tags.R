@@ -136,12 +136,13 @@ which(no21$fdc_id == "4")
 which(no21$fdc_id == "5")
 
 #Selecting only fish
-no21_fish <- no21 %>% slice(484:734) %>% filter(!is.na( Edible_factor_in_FCT))
+no21_fish <- no21 %>% slice(484:734) %>%
+  filter(!is.na(WATERg)) # To remove food category & sub-category rows.
 
 #Checking the result
 colnames(no21_fish)
 head(sci_no21)
-dim(no21_fish)
+dim(no21_fish) #232
 
 #├ Tidying the scientific names dataset (NO21)  ----
 
@@ -205,6 +206,7 @@ no21_fish <- no21_fish %>% left_join(., sci_no21, by = c("fdc_id" = "x1")) %>%
 #checking results
 head(no21_fish)
 dim(no21_fish) #shouldn't add/remove any obs (rows) but add 2 variables (cols)
+subset(no21_fish, !is.na(Scientific_name)) #No of fish w/ scientifc name
 
 #4) Merging the corresponding ISSCAAP to Scientific names ----
 
@@ -234,20 +236,20 @@ fish.name <- no21_fish  %>% filter(!is.na(Scientific_name), is.na(ISSCAAP)) %>%
   distinct(Scientific_name) %>% pull()
 
 #Identifying the ISSCAAP of the fish by fist name of the fish w/o ISSCAAP
-#fish.isscaap <- isscaap %>% 
-# filter(str_detect(Scientific_name, "Theragra")) %>%
-#distinct(ISSCAAP) %>% pull()
-fish.isscaap <-  isscaap %>% 
+fish.isscaap <- isscaap %>% 
+ filter(str_detect(Scientific_name, "Theragra")) %>%
+ distinct(ISSCAAP) %>% pull()
+fish.isscaap[2] <-  isscaap %>% 
   filter(str_detect(Scientific_name, "Anarhichas")) %>% 
   distinct(ISSCAAP) %>% pull()
-#fish.isscaap[3] <- isscaap %>%
-# filter(str_detect(Scientific_name, "Pangasius")) %>% 
-#  distinct(ISSCAAP) %>% pull()
-fish.isscaap[2] <- isscaap %>% 
+fish.isscaap[3] <- isscaap %>%
+ filter(str_detect(Scientific_name, "Pangasius")) %>% 
+  distinct(ISSCAAP) %>% pull()
+fish.isscaap[4] <- isscaap %>% 
   filter(str_detect(Scientific_name, "Sebastes")) %>% 
   distinct(ISSCAAP) %>% pull()
 #isscaap %>% filter(str_detect(Scientific_name, "maxima")) 
-fish.isscaap[3] <- isscaap %>%
+fish.isscaap[5] <- isscaap %>%
   filter(str_detect(English_name, "Turbot")) %>% 
   distinct(ISSCAAP) %>% pull()
 
@@ -255,6 +257,10 @@ fish.isscaap[3] <- isscaap %>%
 for(i in 1:length(fish.name)){
   no21_fish$ISSCAAP[grep(fish.name[i], no21_fish$Scientific_name)] <- fish.isscaap[i]
   print(i)}
+
+#checking results
+head(no21_fish)
+dim(no21_fish) #shouldn't add/remove any obs (rows) but add 4 variables (cols)
 
 # Checking results:  all entries w/ scientific name have an ISSCAAP code
 no21_fish %>% filter(!is.na(Scientific_name), is.na(ISSCAAP)) %>% 
@@ -284,6 +290,9 @@ no21_fish <-  no21_fish %>%
     str_detect(food_desc, "Shrimp|shrimp") ~ "45", 
     TRUE ~ ISSCAAP), ISSCAAP))
 
+# Checking results:  entries w/  ISSCAAP code
+no21_fish %>% filter(!is.na(ISSCAAP)) 
+dim(no21_fish)
 #Saving into csv to inspect the ISSCAAP code allocations. 
 # no21_fish %>% select(fdc_id:ref_116) %>% 
 #  write.csv(., here::here("inter-output", "NorwegianFCBD_fish_isscaap.csv"),
@@ -331,7 +340,7 @@ ics_code <- ics_code %>% mutate(
 ) %>% relocate(product_type, .before = "ics_faostat_sua_english_description")
 
 #├ Identification of the ICS fish category in the NO21  ----
-
+dim(no21_fish)
 #Raw  (1)
 no21_fish  %>% 
   filter(str_detect(food_desc, " raw")) %>% 
@@ -389,6 +398,7 @@ no21_fish  <- no21_fish   %>% mutate(
   )) %>%
   mutate(product_type = ifelse(product_type == "NA", "7", product_type))
 
+dim(no21_fish)
 #Adding the fillet
 no21_fish$product_type[no21_fish$food_desc == "Cod, slices, raw"] <- "3"
 
@@ -642,6 +652,7 @@ no21_fish <- no21_fish %>%
       ISSCAAP %in% cepha & product_type == 7 ~ "15740", 
       TRUE ~ ICS_FAOSTAT_future)) 
 
+dim(no21_fish)
 #Checking the results - All items w/ ISSCAAP and product_type has a ICS code
 no21_fish %>% filter(!is.na(ISSCAAP), !is.na(product_type),
                      ICS_FAOSTAT_future == "NA")
@@ -669,7 +680,7 @@ no21_fish <- no21_fish %>% mutate(
 
 #Adding the ICS FAOSTAT description for the "current" and "Future" code
 #And tidying the columns
-
+dim(no21_fish)
 no21_fish <- no21_fish  %>%
   left_join(., ics_code %>% select(1,ics_faostat_sua_english_description) %>%
               mutate_at("ics_faostat_sua_current_code", as.character), 
@@ -702,7 +713,7 @@ no21_fish <- no21_fish %>%
 #Dividing the NO21 into two dataset:
 #1) Nutrient values
 #2) References for each fish and NV (biblio)
-
+dim(no21_fish)
 NO_FCT_Sources <- no21_fish
 
 for(i in 11:137){
@@ -756,6 +767,8 @@ NO_FCT_Data$ASHg_bydiff <-  100-(NO_FCT_Data$WATERg + NO_FCT_Data$PROCNTg +
 #Final checks
 head(NO_FCT_Data) #First 6 rows of the data
 dim(NO_FCT_Data) #No. of rows and columns
+
+subset(NO_FCT_Data, !is.na(ics_faostat_sua_english_description))
 
 #7) Saving NO21 fish ----
 

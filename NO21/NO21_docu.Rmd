@@ -104,6 +104,9 @@ Additionally, fish names were identified using the FAO fisheries database and so
 
 Finally, we identified ["Stockfish"](https://en.wikipedia.org/wiki/Stockfish) as cod fish.
 
+That lead to a total of 175 fish entries with a scientific name. 
+
+
 ### Fishery products matching
 
 ---Load flow diagram---
@@ -114,7 +117,7 @@ We need to match each fishery product in the NO21 to one of the 95 ICS FAOSTAT f
 
 ###### Identifying fishery products by ISSCAAP codes
 
-The ISSCAAP codes will be allocated using the scientific name of the fishery products, when possible. We used the scientific names merged into the dataset in the previous step to allocate the ISSCAAP code, and the dataset that FAO team provided to allocate the ISSCAAP codes, which can also be downloaded from the FAO fisheries division [website](LINK).
+The ISSCAAP codes were allocated using the scientific name of the fishery products, when possible. We used the scientific names merged into the dataset in the previous step, and the dataset that FAO team provided to allocate the ISSCAAP codes, which can also be downloaded from the FAO fisheries division [website](LINK).
 
 After merging the two datasets, there were 144 of 232 fish-related entries with ISSCAAP code. We investigated the fishery products without ISSCAAP codes.
 
@@ -124,7 +127,7 @@ From the list of fishery products, we have 78 entries without a Scientific name 
 
 *Fixing by fish name*: Similarly, we checked the fish name description with out scientific names and using information on the FAO fisheries division [website] (LINK), we identified three fishery products and assigned a ISSCAAP code. This apprach was used when no scientific name was available, however a clear ISSCAAP could be allocated, for example: - Crabs = 42 - King prawn = 45 - Shrimps = 45
 
-Finally, we saved it and exported into a csv file and manually checked. We also shared it with the Norwegian FCDB team and the FAO team, so we could quality check that the ISSCAAP codes were correctly assigned to the fishery products.
+Finally, we could allocate the ISSCAAP code to 183 fish entries, 174 from the scientific names plus 7 using th fish name and description. Then, we saved it and exported into a csv file and manually checked. We also shared it with the Norwegian FCDB team and the FAO team, so we could quality check that the ISSCAAP codes were correctly assigned to the fishery products.
 
 **This step is an iterative process as follow (Diagram)**
 
@@ -177,6 +180,8 @@ Some other fish entries needed further clarification: Excluded for now:
 -   04.100 - "Cod roe, compressed, canned"
 -   04.318 - "Cod roe, canned, fried in fat" I.e., inconsistency w/ canned description
 -   Sushi
+
+Finally, ICS SUA fishery category were allocated using the scientific name and food description (e.g., “cured”) leading to 234 fish and fishery products to be used in the NCT.
 
 #### Quality Assessment
 
