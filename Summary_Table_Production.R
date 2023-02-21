@@ -20,18 +20,18 @@ names(edible_ics)[1] <- "ICS.FAOSTAT.SUA.Current.Code"
 
 # Adding new columns (with the new variables generated using the functions)
 # ! I have inserted my code here as discussed
-df1 <- fao_fish_fct %>%
-  SOP_std_creator() %>%
-  # CARTBEQmcg_std_creator() %>% #This variable was already generated in "QC.R"
-  #CARTBEQmcg_std_imputer_with_CARTBEQmcg() %>% ##This variable was already generated in "QC.R"
-  # RETOLmcg_Recalculator() %>% #This variable was already generated in "QC.R"
-  #  CARTBEQmcg_std_back_calculator_VITA_RAEmcg() %>%  #This variable was already generated in "QC.R"
-  # CARTBEQmcg_std_to_zero() %>%  #This variable was already generated in "QC.R"
-  VITA_RAEmcg_std_creator() %>%
-  VITAmcg_std_creator() %>%
-  THIAmg_std_creator() # %>%
-# CHOAVLDFg_std_creator() # %>%  #This variable was already generated in "QC.R"
-# nia_conversion_creator() #This variable was already generated in "QC.R"
+df1 <- fao_fish_fct # %>%
+  # SOP_std_creator() %>% #This variable was already generated in "variable_re-calculation.R"
+  # CARTBEQmcg_std_creator() %>% #This variable was already generated in "variable_re-calculation.R"
+  #CARTBEQmcg_std_imputer_with_CARTBEQmcg() %>% ##This variable was already generated in "variable_re-calculation.R"
+  # RETOLmcg_Recalculator() %>% #This variable was already generated in "variable_re-calculation.R"
+  #  CARTBEQmcg_std_back_calculator_VITA_RAEmcg() %>%  #This variable was already generated in "variable_re-calculation.R"
+  # CARTBEQmcg_std_to_zero() %>%  #This variable was already generated in "variable_re-calculation.R"
+ # VITA_RAEmcg_std_creator() %>% #This variable was already generated in "variable_re-calculation.R"
+#  VITAmcg_std_creator() %>% #This variable was already generated in "variable_re-calculation.R"
+#  THIAmg_std_creator() # %>% #This variable was already generated in "variable_re-calculation.R"
+# CHOAVLDFg_std_creator() # %>%  #This variable was already generated in "variable_re-calculation.R"
+# nia_conversion_creator() #This variable was already generated in "variable_re-calculation.R"
 
 # Formatting - matching columns to original excel Fisheries Global NCT, 2022
 # Extra variables: ASHg_std, ASHg_bydiff, etc. from the original dataset.
