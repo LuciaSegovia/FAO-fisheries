@@ -3,8 +3,12 @@
 
 # library(tidyverse)
 
+# Only running if first time running the scripts.
+# source(here::here("supporting-datasets.R")) 
+
 source(here::here("QC.R"))
 source(here::here("functions.R"))
+
 # source(here::here("summary_table_functions.R")) # TODO I have created a separate file with my functions for testing. Once all other functions are tested then we can merge.
 # source(here::here("Summarised_Row_Recalculator.R"))
 
@@ -31,7 +35,7 @@ df1 <- fao_fish_fct # %>%
 #  VITAmcg_std_creator() %>% #This variable was already generated in "variable_re-calculation.R"
 #  THIAmg_std_creator() # %>% #This variable was already generated in "variable_re-calculation.R"
 # CHOAVLDFg_std_creator() # %>%  #This variable was already generated in "variable_re-calculation.R"
-# nia_conversion_creator() #This variable was already generated in "variable_re-calculation.R"
+# nia_conversion_creator() # This variable was already generated in "variable_re-calculation.R"
 
 # Formatting - matching columns to original excel Fisheries Global NCT, 2022
 # Extra variables: ASHg_std, ASHg_bydiff, etc. from the original dataset.
@@ -44,7 +48,7 @@ df1$Edible_factor_desc <- NA
 df1$FOLDFEmcg_std <- NA
 df1$NIAEQmg_std <- NA
 df1$NIATRIPmg_std <- NA
-df1$FIBTGg_std <- df1$FIBTGg # This one should be reviewed
+#df1$FIBTGg_std <- df1$FIBTGg # This variable was already generated in "variable_re-calculation.R"
 df1$VITEmg_std <- NA
 
 n <- ncol(df1) + 1
@@ -83,11 +87,12 @@ df1 <- left_join(df1, ics,
     "F22D6N3g", "F20D5N3g", "NIAmg_std", "IDmcg", "ASHg_std",
     "ASHg_bydiff",
     "comment"
-  ), .after = "ISSCAAP Group...6") %>%
+  ), .after = "ISSCAAP Group") %>%
   select(-c(
     ics_faostat_sua_english_description,
     Food.description, Scientific.name, ICS_FAOSTAT, quality,
-    fish_type, fish_prep, food_group, CHOg, ALCg_100mL
+    fish_type, fish_prep, food_group, #CHOg, 
+    ALCg_100mL
   ))
 
 
@@ -138,7 +143,7 @@ fisheries[, c(ncol(fisheries):(ncol(fisheries) + 12))] <- NA
 
 # Reorganising columns in our dataset
 
-recalculated_results_table <- recalculated_results_table %>% relocate(c(V117:V139), .after = "ISSCAAP Group...6")
+recalculated_results_table <- recalculated_results_table %>% relocate(c(V117:V139), .after = "ISSCAAP Group")
 
 # Combining variable names
 #names(recalculated_results_table)[1:122] <- names(fisheries)[1:122]
