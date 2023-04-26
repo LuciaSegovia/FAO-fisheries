@@ -15,6 +15,31 @@ names(fao_fish_fct)
 fao_fish_fct %>% 
   group_by(source_fct) %>% count()
 
+# Checking n of fish per category
+
+fao_fish_fct %>% count(fao_fish_fct) %>% 
+  arrange(desc(n))
+
+# Checking n of fish per category
+#mean which is equal to nrow(fao_fish_fct)/95
+fao_fish_fct %>% count(ics_faostat_sua_english_description) %>% pull(n) %>% mean()
+
+  fao_fish_fct %>% count(ics_faostat_sua_english_description) %>%   
+  mutate(perc = n/nrow(fao_fish_fct)) %>% 
+  #ggplot(aes(x=reorder(ics_faostat_sua_english_description, perc), y = perc*100)) +
+  ggplot(aes(x=reorder(ics_faostat_sua_english_description, n), y = n)) +
+  geom_bar(stat = "identity") +
+  theme_light() +
+  coord_flip() +
+  geom_hline(aes(yintercept = nrow(fao_fish_fct)/95), linetype = "dashed") + #mean
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank()) +
+  labs( x= "", y= "") + 
+  guides(x = guide_axis(n.dodge = 2))
+
+
 #Checking NV references
 
 fao_fish_fct %>% filter(is.na(nutrient_data_source))%>% count(source_fct)
@@ -40,6 +65,8 @@ subset(fao_fish_fct,
         fish_prep == "cured" &
          WATERg>60, select = c(WATERg, food_desc, source_fct)) %>% 
   distinct() %>% arrange(desc(WATERg))
+
+
 
 #Checking NV for inclusion ####
 
@@ -745,6 +772,26 @@ fao_fish_fct %>% filter(is.na(CHOAVLDFg), !is.na(CHOAVLMg)) %>% count(source_fct
 #CHOCSMg - Not available
 #fao_fish_fct %>% filter(is.na(CHOAVLDFg), !is.na(CHOCSMg)) %>% count(source_fct)
 
+# Checking values that the CHOAVLDFg calculated was assumed zero, but fractions
+#of were higher than zero. 
+
+subset(fao_fish_fct, #str_detect(comment, "CHOAVLDFg_std assumed zero") &
+       CHOAVLDFg_std == 0 &  
+       (CHOCDFg > 0 & FIBTGg == 0| CHOAVLg >0), 
+       select = c(fdc_id, source_fct, CHOAVLDFg_std,
+                  CHOAVLDFg, CHOCDFg, FIBTGg, CHOAVLg, CHOAVLMg)) %>% distinct() %>% View()
+
+id_to_check <- subset(fao_fish_fct, str_detect(comment, "CHOAVLDFg_std assumed zero") &
+         (CHOCDFg > 0  | CHOAVLg >0), 
+       select = c(fdc_id, source_fct, CHOAVLDFg_std,
+                  CHOAVLDFg, CHOCDFg, CHOAVLg, CHOAVLMg)) %>% distinct() %>% 
+  pull(fdc_id)
+
+
+subset(fao_fish_fct, fdc_id %in% id_to_check, 
+       select = c(WATERg, PROCNTg, FAT_g_standardised, FIBTGg, ALCg, ASHg, CHOCDFg))
+
+
 #├ 2) Proteins ----
 
 fao_fish_fct %>% filter(is.na(PROCNTg)) %>% count(source_fct)
@@ -791,22 +838,79 @@ abline(v = 95, col = 2, lwd=3, lty =2)
 abline(v = 105, col = 2, lwd=3, lty =2)
 
 
-##├├ Plot: Missing values for retinol by ICS code ----
+# 3.4.3. Retinol & 5.2.3. Retinol ----
 
+variables <- c("RETOLmcg", "VITA_RAEmcg", "VITAmcg", "CARTBEQmcg", "ICS.FAOSTAT.SUA.Current.Code")
 fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code <- as.factor(fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code)
 
-fao_fish_fct[,c( "RETOLmcg", "ICS.FAOSTAT.SUA.Current.Code")] %>%  #selecting variables
-  naniar::gg_miss_fct(., fct = ICS.FAOSTAT.SUA.Current.Code) +
-  coord_flip() +
-  scale_x_discrete(guide = guide_axis(n.dodge = 3))
 
-subset(fao_fish_fct,
-       ICS.FAOSTAT.SUA.Current.Code %in% c("1580", "1582", "1583"), 
-       select = c("ICS.FAOSTAT.SUA.Current.Code", "source_fct","food_desc", "RETOLmcg")) 
+subset(fao_fish_fct, is.na(RETOLmcg) & is.na(CARTBEQmcg) & 
+         (!is.na(VITA_RAEmcg)| !is.na(VITAmcg)), 
+       select = variables)
+
+fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code <- as.factor(fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code)
 
 boxplot(as.numeric(RETOLmcg) ~ ICS.FAOSTAT.SUA.Current.Code, 
         data = fao_fish_fct, 
         ylab = "Retinol (mcg)",
         xlab = "ICS FAOSTAT SUA Fisheries Code") 
 
+
+## Suppl. Figure X - Back-calculation of retinol. (use with Plot (1)).
+
+# Checking missing values 
+subset(fao_fish_fct, is.na(RETOLmcg)) %>% count(ICS.FAOSTAT.SUA.Current.Code) %>% 
+  arrange(desc(n))
+
+#Checking missing values by category and the perc. of each
+fao_fish_fct %>%  group_by(ICS.FAOSTAT.SUA.Current.Code, ics_faostat_sua_english_description) %>% 
+  summarise(retol = sum(is.na(RETOLmcg)), 
+            VitARAE = sum(is.na(VITA_RAEmcg)), 
+            total = length(RETOLmcg),
+            perc = retol/total*100) %>% 
+  arrange(desc(perc))
+
+# Checking fish entries for that codes
+
+subset(fao_fish_fct,
+       ICS.FAOSTAT.SUA.Current.Code %in% c("1580", "1582", "1583"), 
+       select = variables) 
+
+
+##├├ Plot (1): Missing values by ICS code ----
+fao_fish_fct[, variables ] %>%  #selecting variables
+  naniar::gg_miss_fct(., fct = ICS.FAOSTAT.SUA.Current.Code) +
+  coord_flip() +
+  scale_x_discrete(guide = guide_axis(n.dodge = 3))
+
+
+
+
+
+
+
 sd(as.numeric(fao_fish_fct$RETOLmcg), na.rm = T)
+
+
+
+# 3.4.3. Beta-Carotene equivalents ----
+
+subset(fao_fish_fct, !grepl("CARTBEQmcg_std calculated from", comment) &
+                !grepl("CARTBEQmcg_std back", comment) &
+         grepl("CARTBEQmcg_std", comment),
+       select = comment)
+
+# Checking:
+# CARTBEQmcg_std imputed with CARTBEQmcg
+# CARTBEQmcg_std calculated from CARTBmcg, CARTAmcg and CRYPXBmcg but only CARTB was used
+# CARTBEQmcg_std back calculated from VITA_RAEmcg and VITAmcg
+
+subset(fao_fish_fct, 
+         grepl("CARTBEQmcg_std calculated from CARTBmcg, CARTAmcg and CRYPXBmcg but only CARTB was used", comment),
+       select = comment)
+
+
+subset(fao_fish_fct, 
+       grepl("RETOLmcg value re-calulated from VITA_RAEmcg and VITAmcg", comment),
+       select = comment)
+

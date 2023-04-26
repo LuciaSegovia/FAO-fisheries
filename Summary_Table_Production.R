@@ -22,24 +22,14 @@ names(fao_fish_fct)
 names(fisheries)[1] <- "ï..GLOBAL.TABLE.OF.NUTRIENT.VALUES"
 names(edible_ics)[1] <- "ICS.FAOSTAT.SUA.Current.Code"
 
-# Adding new columns (with the new variables generated using the functions)
-# ! I have inserted my code here as discussed
-df1 <- fao_fish_fct # %>%
-  # SOP_std_creator() %>% #This variable was already generated in "variable_re-calculation.R"
-  # CARTBEQmcg_std_creator() %>% #This variable was already generated in "variable_re-calculation.R"
-  #CARTBEQmcg_std_imputer_with_CARTBEQmcg() %>% ##This variable was already generated in "variable_re-calculation.R"
-  # RETOLmcg_Recalculator() %>% #This variable was already generated in "variable_re-calculation.R"
-  #  CARTBEQmcg_std_back_calculator_VITA_RAEmcg() %>%  #This variable was already generated in "variable_re-calculation.R"
-  # CARTBEQmcg_std_to_zero() %>%  #This variable was already generated in "variable_re-calculation.R"
- # VITA_RAEmcg_std_creator() %>% #This variable was already generated in "variable_re-calculation.R"
-#  VITAmcg_std_creator() %>% #This variable was already generated in "variable_re-calculation.R"
-#  THIAmg_std_creator() # %>% #This variable was already generated in "variable_re-calculation.R"
-# CHOAVLDFg_std_creator() # %>%  #This variable was already generated in "variable_re-calculation.R"
-# nia_conversion_creator() # This variable was already generated in "variable_re-calculation.R"
+#Starting with formatting
+
+df1 <- fao_fish_fct 
 
 # Formatting - matching columns to original excel Fisheries Global NCT, 2022
 # Extra variables: ASHg_std, ASHg_bydiff, etc. from the original dataset.
 # We are putting them at the end, to keep the structure consistent.
+
 dim(df1)
 df1$ICS.FAOSTAT.SUA.Current.Code <- as.character(df1$ICS.FAOSTAT.SUA.Current.Code)
 ics$`ICS FAOSTAT SUA Current Code` <- as.character(ics$`ICS FAOSTAT SUA Current Code`)
@@ -48,7 +38,6 @@ df1$Edible_factor_desc <- NA
 df1$FOLDFEmcg_std <- NA
 df1$NIAEQmg_std <- NA
 df1$NIATRIPmg_std <- NA
-#df1$FIBTGg_std <- df1$FIBTGg # This variable was already generated in "variable_re-calculation.R"
 df1$VITEmg_std <- NA
 
 n <- ncol(df1) + 1

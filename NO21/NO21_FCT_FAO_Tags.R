@@ -47,7 +47,7 @@ isscaap <- readxl::read_excel(here::here("data",
 readxl::excel_sheets(here::here( "NO21",
                                  "NorwegianFCT.xlsx"))
 
-#loading the data
+#Importing the data
 no21 <- readxl::read_excel(here::here("NO21",
                                       "NorwegianFCT.xlsx"),
                            sheet = "Foods", skip = 2) %>% 

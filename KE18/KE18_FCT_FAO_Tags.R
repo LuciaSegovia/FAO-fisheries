@@ -147,6 +147,26 @@ colnames(KE18_Raw_FCT)[8] <- "ENERCkJ" #Renames the Energy columns
 colnames(KE18_Raw_FCT)[9] <- "ENERCkcal"
 
 
+#Scientific names "issues"
+#Eggplant (4017) scientific name is "Solalum melongena", instead of 
+#"Solanum melongena"
+
+#The scientific name of Coriander, leaves, fresh, raw is wrong!
+KE18_Raw_FCT$scientific_name[KE18_Raw_FCT$code == "13011"] <- "Coriandrum sativum"
+
+#The scientific name of coconut (3 entries) is wrong
+KE18_Raw_FCT$scientific_name[KE18_Raw_FCT$code %in% c("10002", "10003", "10004")] <- "Cocos nucifera"
+
+#The scientific name of Arrowroot, peeled, raw is wrong!
+KE18_Raw_FCT$scientific_name[KE18_Raw_FCT$code == "2002"] <- "Maranta arundinacea"
+
+# Adding scientific name for a NA 
+KE18_Raw_FCT$scientific_name[KE18_Raw_FCT$code == "5030"] <- "Ananas comosus"
+
+#There is a typo in "Roti"
+KE18_Raw_FCT$fooditem[KE18_Raw_FCT$code == "15003"] <- "Roti (Indian Chapati)"
+
+
 #Detecting FOLAC (folic acid used in fortified food)
 #15065 - Fortified. Misreported in excel but reported in pdf
 #15019 - It seems fortified, although it's not reported as such. 

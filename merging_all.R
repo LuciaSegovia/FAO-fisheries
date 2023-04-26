@@ -298,3 +298,7 @@ fao_fish_fct %>% count(fish_type, fish_prep) %>% arrange(desc(n))
 #Check ISSCAAP code and groups
 colnames(fao_fish_fct)
 subset(fao_fish_fct, is.na(ISSCAAP.Group))
+
+#Checking scientific names
+subset(fao_fish_fct, !is.na(scientific_name)) %>% 
+  group_by(source_fct) %>% count()

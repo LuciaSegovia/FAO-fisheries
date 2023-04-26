@@ -216,13 +216,13 @@ table 3).
 
 ### 2. Tidying the data
 
-In order to merge all data from various FCTs into one common FCT data library, we needed to harmonise the information in each dataset. The steps that were taken are explained
+In order to merge all data from various FCTs into one common FCT data library, we needed to harmonise the format and data structure in each dataset. The steps that were taken are explained
 below and annotated scripts for each FCTs can be found in this
 repository in each corresponding folder, as previously mentioned.
 
 #### 2.1. Renaming variable names
 
-Each FCT has its own variable names, including for simiar food components. Some
+Each FCT has its own variable names, including for similar food components. Some
 FCTs included information related to the FAO/ INFOODS food components
 identifiers
 [(Tagnames)](https://www.fao.org/infoods/infoods/standards-guidelines/food-component-identifiers-tagnames/en/)
@@ -456,14 +456,14 @@ All the steps were done and documented in the `merging_all.R` script.
 #### 3.4. Re-calculating variables <br>
 
 Some variables were calculated from other variables, some of those were: Sum of proximate, Energy (kcal, kJ), or carbohydrates available, by difference among others (See Eq.3.2-6.3) according to the FAO/ INFOODS guidelines (REF). There were special cases were back calculation from one or more
-food components were used to complete missing values. For example:
+food components were used for avoiding missing values. For example:
 
 
 1. Ash: These values which are needed to calculate Available carbohydrate by
 difference. In the NO21, ash values were not reported, however, because
 available carbohydrates were analysed, we used an iteration of the **Eq. 3.4a** to calculate ash concentration (Eq.3.4b).
 
-3. Beta-carotene equivalent: For instance, when all the carotenoids were not available in the FCTs to re-calculate Beta-carotene equivalent, two approach were taken for avoiding missing values. First, if Beta-carotene equivalent was reported in the FCT, it was used. Otherwise, if retinol and Vitamin A were reported, Beta-carotene equivalent was back calculated from those values using the Eq. 7b. 
+3. **Beta-carotene equivalent** is used to calculate Vitamin A (both REA and RE), and it should be, when possible, calculated using the carotenoids values (Eq.7a). Despite that, sometimes all the carotenoids values were not available/reported in the FCTs. Hence, to re-calculate beta-carotene equivalent, two approach were taken. First, if Beta-carotene equivalent was reported in the FCT, it was used. Otherwise, if retinol and Vitamin A were reported, Beta-carotene equivalent was back calculated from those values using the Eq. 7b. 
 
 2. Retinol: For instance, when a food entry was missing the retinol
 value (`RETOLmcg`) but it reported Vitamin A (RAE) (`VITA_RAEmcg`)
@@ -912,6 +912,18 @@ Carbohydrates by difference were calculated using the function `CHOAVLDFg_std_cr
 
 The documentation of these changes are important as they would have an impact of the final estimates, particularly as this variable is used to calculate SOP, and more importantly the total energy. If total energy is calculated using negative values it would lead to a underestimation of the total energy supplied by the foods.
 
+In addition, when we compared the assumed zero and other fractions, particularly those that are analytical values, we can see that there is a small underestimation of the available carbohydrates when using the "by difference" and assumed zero, as we can see that there were 95 unique food entries with carbohydrates > than zero, in those assumed zero. 
+
+```{r CHO,  echo=FALSE}
+
+subset(fao_fish_fct, str_detect(comment, "CHOAVLDFg_std assumed zero") &
+         (CHOCDFg > 0 & FIBTGg == 0| CHOAVLg >0), 
+       select = c(fdc_id, source_fct, CHOAVLDFg_std,
+                  CHOAVLDFg, CHOCDFg, FIBTGg, CHOAVLg, CHOAVLMg)) %>% distinct() %>% View()
+
+```
+
+
 ##### 3.4.3. Fat
 
 We combined three Tagnames into `FAT_g_standardised` as reported in section 3.4. We checked the contribution from each of the fractions Table x(tab:fat).
@@ -933,7 +945,9 @@ FCTs) and `ASHg_bydiff` into one variable `ASHg_std`.
 
 ##### 3.4.3. Fibre
 
-The value of fibre standardised was calculated using only values from the dietary fibre (`FIBTGg`), as no other fractions provided information when dietary fibre was missing values. For example, fibre, crude (FIBCg) could not be used to complete missing values in FIBTGg, as FIBCg did not added information on any missing (FIBGTg). For more details, check the section 4.2.8.
+The value of fibre standardised was calculated using only values from the dietary fibre (`FIBTGg`), as no other fractions provided information when dietary fibre was missing values. For example, fibre, crude (FIBCg) could not be used to complete missing values in FIBTGg, as FIBCg did not added information on any missing (FIBGTg). For more details, check the section 5.2.1.
+
+
 
 ##### 3.4.3. Vitamin A (RE) and (RAE)
 
@@ -953,6 +967,9 @@ some cases where retinol was greater that Vitamin RAE, this affected to
 transformed negative values to zero, assuming that if Vitamin A was
 smaller than the retinol value, then no carotene would be presented.
 
+
+
+
 ##### 3.4.3. Retinol
 
 Retinol should be provided by the FCT, and ideally it would be analysed. However, there were some cases that retinol was missing, however values for Vitamin A and Beta-Carotene eq. were provide. Therefore, we used the function `RETOLmcg_Recalculator()` to re-calculate the
@@ -963,9 +980,25 @@ missing values. Additionally, the function add the documentation (i.e., "RETOLmc
 Similarly as it was performed with the fat, Vit. B6 was reported separated into three Tagnames. Most of the FCTs used analytical values (`VITB6Amg`), followed by calculated (`VITB6Cmg`) and only the NO21 used a mixed of values (`VITB6_mg`).
 Then, the three Tagnames (variables) were combined into a new variable: `VITB6C_mg_standardised` as reported in the method section 3.4. 
 
+```{r vitb6,  echo=FALSE}
+
+fao_fish_fct %>% select(starts_with("VITB6")) %>% mutate_all(as.numeric) %>% 
+  summarise_all(., ~sum(!is.na(.))/sum(!is.na(fao_fish_fct$VITB6_mg_standardised))*100) %>% round(.,2) %>% knitr::kable(., caption = "The table present the percentage of each vitamin B6 tagname contribution to the total.")
+
+
+```
+
 ##### 3.4.3. Thiamine
 
 Thiamine was combined into the Thiamine standardised variable (`THIAmg_std`) using the function `THIAmg_std_creator()` as reported in the method section 3.4.
+
+```{r thia,  echo=FALSE}
+
+fao_fish_fct %>% select(starts_with("THIA")) %>% mutate_all(as.numeric) %>% 
+  summarise_all(., ~sum(!is.na(.))/sum(!is.na(fao_fish_fct$THIAmg_std))*100) %>% round(.,2) %>% knitr::kable(., caption = "The table present the percentage of each thiamine tagname contribution to the total.")
+
+
+```
 
 ##### 3.4.3. Niacin 
 
@@ -1005,7 +1038,7 @@ KE18, with overall very high data availability with very few missing
 values. In contrast, I and Vit. D were reported only in six FCTs, and DHA and EPA were in
 seven. 
 
-```{r fig-1, fig.cap= "Figure 1: Percentage of missing values per component and food composition table.", echo=FALSE}
+```{r fig-1, fig.cap= "Percentage of missing values per component and food composition table.", echo=FALSE}
 
 
 #├ Plot (heat map): % of missing values per FCT ----
@@ -1060,11 +1093,9 @@ fao_fish_fct[, c(components ,"source_fct")] %>%
 
 ```
 
-**Figure 1: Percentage of missing values per component and FCT**
-
 However, some FCTs contributed to the overal NCT with more fisheries entries, hence we checked the overall availability as percentage of the overall fisheries entries. In figure 2, we can see that Cu, Vit. B6 and niacin had high coverage with more than 75% of the fish entries reporting a value for those components. While for DHA, EPA and Se had a moderate coverage with over 60% of the fish entries reporting a value. Finally, vitamin D and I were excluded from the extension. 
 
-```{r fig-2, fig-2, fig.cap= "Figure 2: Coverage: Percentage of reported values per component.", message=FALSE}
+```{r fig-2, fig-2, fig.cap= "Coverage: Percentage of reported values per component.", message=FALSE}
 
 #├ Plot (bar chart): Coverage ---
 
@@ -1103,12 +1134,10 @@ fao_fish_fct %>% select(components) %>% rename_all(., ~components_longname) %>%
 
 ```
 
-**Figure 2: Coverage: Percentage of reported values per component**
-
 ###### 4.2. Data avaibility per each ICS FAOSTAT fish category
 
 
-**Table 3: Count of values per component and SUA fish category**
+**Table 5: Count of values per component and SUA fish category**
 
 
 ```{r list-missing, echo=F}
@@ -1120,7 +1149,7 @@ missing <- c("Cephalopods, cured", "Aquatic animals nei, cured",
 ```
 
 
-**Missing table 4**
+**Missing table 5**
 
 After we agreed on the components to be expanded in the Fisheries Global NCT, we evaluated the availability of data by ICS FAO fishery category. In Table 4, the number of fisheries reporting a value in each ICS SUA fish category and per each nutrient are shown. Only four SUA fish categories had no values for
 Se concentration: `r toString(missing)`. Hence, we imputed some values
@@ -1274,13 +1303,11 @@ values. This was only study in detailed for Carbohydrates by difference, Retinol
 
 After the completion of mean values for ICS FAOSTAT fish categories for all the nutrient values of interest. We proceeded to check the individual values. Most of the check were done as "overall dataset" and then by category. The script used to check the nutrients can be found in "QC.R". 
 
-
+`r names(fao_fish_fct)[c(13:33, 39:40, 43:49, 58:63, 69:72, 74:75,  83:93, 101:102, 104:113)]`
 
 ##### 5.1. Non-transformed components
 
 We checked the components that were not transformed or calculated. This components were also complete or almost complete for all the FCTs, and hence they are good to check the quality of the importing and to confirm that the method (i.e., using R to generate the NCT) is robust and did not introduce any bias. 
-
- 
 
 
 ###### 5.1.1. Water
@@ -1337,13 +1364,12 @@ among the large number of records".
 
 ###### 5.2.1. Fibre
 
-Fibre concentration of fish and other aquatic animals were mostly zero
-and/or `NA` when raw whereas preparations and canned were below 1g per
+Fibre concentration of fish and other aquatic animals were mostly zero `r length(fao_fish_fct$FIBTGg[fao_fish_fct$FIBTGg==0])/dim(fao_fish_fct)[1]*100`, then smaller proportion were >0 (`r  length(fao_fish_fct$FIBTGg[fao_fish_fct$FIBTGg>0])`)
+and/or `NA` (`r sum(is.na(fao_fish_fct$FIBTGg))`) when raw whereas preparations and canned were below 1g per
 100g. Then, aquatic plants were on average higher than 1g up to 41g per
 100g for aquatic plants preparations.
 
-Current mean of FIBTGg =
-`r fao_fish_fct %>% filter(!is.na(FIBTGg)) %>% pull(FIBTGg) %>% as.numeric() %>% mean(., na.rm = T)`.
+Current mean of FIBTGg was `r mean(fao_fish_fct$FIBTGg, na.rm = TRUE)`, SD `r sd(fao_fish_fct$FIBTGg, na.rm = TRUE)`.
 
 Fibre, crude (FIBCg) could not be used to complete missing values in
 FIBTGg, thus the "standardised" value were only values from the FIBTGg,
@@ -1362,16 +1388,20 @@ Individual `NA` values (i.e., per fish entry) were not assumed zero, but
 they were "ignored" when calculating the category mean.
 
 In the original Fisheries Global NCT,2022 there were some manually added
-"zero" as assumed values. These values were not imported in our dataset,
+"zero" as assumed values. These values were not imported/imputed in our dataset,
 as we decided to not impute values as much as we could.\
+
 For the future development, check FAO/INFOODS to identify food group
 that may be "assumed" zero when calculating Carbohydrate by difference
 and Energy.(see Next steps: Assumed zero section).
 
+
+
 ###### 5.2.2. Alcohol
 
-Of the twelve FCTs, 10 did not report `ALCg`, of the three that did report it,
-    the mean value was zero. Hence, we could assume alcohol was zero for fish and products.
+Of the twelve FCTs, 10 did not report `ALCg`, hence in contrast with fibre, most of the values were `NA` (`r sum(is.na(fao_fish_fct$ALCg))/dim(fao_fish_fct)[1]*100`, n=`r sum(is.na(fao_fish_fct$ALCg))`.  
+Of the three that did report it, the mean value was `r mean(fao_fish_fct$ALCg, na.rm = TRUE)`. Hence, we could assume alcohol was zero for fish and products.
+
     
 ###### 5.2.3. Carbohydates and other re-calculated variables
 

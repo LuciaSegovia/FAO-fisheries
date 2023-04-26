@@ -970,13 +970,20 @@ justify it when compared with the limitations of imputing values.
 
 **3) Typos**
 
+```{r}
+
+results <- mean(as.numeric(fao_fish$`RETOL(µg)`[fao_fish$`ICS FAOSTAT
+SUA Current Code`== "1541"][c(1:154)]), na.rm = T)
+
+```
+
+
 Due to the nature of the manually processed data in excel, some human
 error were introduced. For example, for the SUA fishery category (code
 1541), the value shown in the "mean" of the Feb., 2022 is 19mcg however
 only took in count 63 entries of the 154 values included in that
 category. When taking into account all the fish entries we see that the
-mean is `r mean(as.numeric(fao_fish$`RETOL(µg)`[fao_fish$`ICS FAOSTAT
-SUA Current Code`== "1541"][c(1:154)]), na.rm = T)` in comparison with
+mean is `r print(results)` in comparison with
 the
 `r mean(recalculated_results_table$RETOLmcg[recalculated_results_table$ICS.FAOSTAT.SUA.Current.Code == "1541"])`.
 

@@ -5,7 +5,7 @@ library(tidyverse)
 # Data Import ----
 
 wafct <- readxl::read_excel(here::here('WA19', 'INFOODS-WAFCT_2019.xlsx'), sheet = 5) %>%  #Reads the excel document and assigns the relevant sheet to an R data frame
-  mutate(source_fct = 'WA19_FCT')  #Creates the source_fct column and fills it with "WA19_FCT"
+  mutate(source_fct = 'WA19')  #Creates the source_fct column and fills it with "WA19_FCT"
 
 
 

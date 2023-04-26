@@ -1,5 +1,5 @@
 library(tidyverse)
-
+source("functions.R")
 
 
 # Data Import ----
@@ -55,7 +55,7 @@ for (i in 3:15){ #Used to check for duplicate entries before a merge/left join, 
     Output_table <- sliced_table_data #If the third table is being examined, this sets the output table to that table
   } else{
     stripped_table_data <- sliced_table_data[,-c(2:7)] #Otherwise, the other tables are stripped of metadata
-    Output_table <- left_join(Output_table, stripped_table_data, by.all = "Food Code") #And then joined to the newly formed output table by the Food Code
+    Output_table <- left_join(Output_table, stripped_table_data, by = "Food Code") #And then joined to the newly formed output table by the Food Code
   }
   
 }
@@ -180,18 +180,13 @@ fct_tagname <- header_data %>% mutate(V4 = ifelse(is.na(V4),
 
 Output_table <- Output_table %>% rename_all(~pull(fct_tagname[4])) #Uses these fct_tagnames to rename the Output_table
 
-Output_table$source_fct <- "UK21_FCT" #Creates and sets the source_fct column
+Output_table$source_fct <- "UK21" #Creates and sets the source_fct column
 
 Output_table <- Output_table %>%
   relocate(source_fct, .after = food_desc) #Moves the source_fct column to the start, with other metadata columns
 
 #Check "N" vs "Tr"
 #Changing "Tr" to zero
-
-TraceToZero <- function(x){
-  x <- gsub("Trace|trace|Tr|tr", "0", x)
-  return(x) 
-}
 
 Output_table[Output_table == "N"] <- NA # Sets all N values, defined as "where a nutrient is present in significant quantities, but there is no reliable information on the amount", to NA
 

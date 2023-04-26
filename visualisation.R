@@ -58,22 +58,27 @@ components <- c( "WATERg",
   "VITB6Amg",
   "VITB6Cmg",
   "VITB6_mg",
- # "VITB6_mg_standardised",
- # "NIAmg_std",
+  "VITB6_mg_standardised",
+  "NIAmg_std",
   "NIAEQmg",
   "NIAmg",
   "NIATRPmg",
   "TRPmg",
   "VITB12mcg",
-  "VITDEQmcg",
-  "VITDmcg",
-  "CHOCALmcg",
-  "ERGCALmcg",
-  "CHOCALOHmcg",
-  "ERGCALOHmcg",
-  "CUmg",
-  "SEmcg",
-  "IDmcg" )
+ # "VITDEQmcg",
+ # "VITDmcg",
+ # "CHOCALmcg",
+ # "ERGCALmcg",
+ # "CHOCALOHmcg",
+ # "ERGCALOHmcg",
+   "CUmg",
+   "SEmcg",
+ # "IDmcg",
+   "VITA_RAEmcg", 
+  "VITAmcg",
+ "CARTBmcg",
+ "CARTBEQmcg",
+ "RETOLmcg")
 
 components_longname <- c( "Water",
                  "Docosahexaenoic acid (DHA)",
@@ -110,9 +115,9 @@ fao_fish_fct %>% select(components) %>% vis_miss(sort_miss = T)
 fao_fish_fct %>% select(components, source_fct) %>% 
 #  rename_all(., ~components_longname) %>%  
   naniar::gg_miss_fct(., fct = source_fct) +
-  geom_rect(aes(xmin = 0.5, ymin = -Inf, xmax = 1.5, ymax =Inf), #AU19
-            linetype = "dotted",alpha = 0, colour = "red", size = 2.5) +
-  geom_rect(aes(xmin = 0.5, ymin = 5.5, xmax = Inf, ymax =7.5), #DHA & EPA
+ # geom_rect(aes(xmin = 0.5, ymin = -Inf, xmax = 1.5, ymax =Inf), #AU19
+  #          linetype = "dotted",alpha = 0, colour = "red", size = 2.5) +
+  geom_rect(aes(xmin = 0.5, ymin = 3.5, xmax = Inf, ymax =5.5), #DHA & EPA
             linetype = "dotted",alpha = 0, colour = "red", size = 2.5) +
     labs( x= "", y= "",
         title = "Data Gaps: Percentage (%) of missing values of selected components in each FCT")
@@ -552,6 +557,43 @@ fao_fish_fct[,c("FAT_g_standardised","F22D6N3g",
   scale_x_discrete(guide = guide_axis(n.dodge = 3))
 
 
+##├├ Plot: Missing values for nutients by ICS category ----
+fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code <- as.factor(fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code)
+
+fish <- unique(fao_fish_fct$fish_type)[1]
+
+subset(fao_fish_fct, fish_type %in% fish, 
+       select = c("FAT_g_standardised","F22D6N3g",
+                "F20D5N3g", "ics_faostat_sua_english_description")) %>%  #selecting variables
+  naniar::gg_miss_fct(., fct = ics_faostat_sua_english_description) +
+  scale_fill_gradientn(colors = rainbow(5), limits = c(0, 100)) +
+    coord_flip() #+
+#  scale_x_discrete(guide = guide_axis(n.dodge = 3))
+
+subset(fao_fish_fct, ics_faostat_sua_english_description == "Aquatic animals nei, fresh", 
+       select = c("FAT_g_standardised","F22D6N3g",
+                  "F20D5N3g", "ics_faostat_sua_english_description"))
+       
+# Perc. of missing values per ICS cat. 
+var <- c("F22D6N3g",  "F20D5N3g")
+per <- 60
+
+fao_fish_fct %>%
+ # group_by(fish_type) %>%
+  naniar::miss_var_summary() %>%
+  filter(variable %in% var) %>% 
+  arrange(desc(pct_miss))
+
+fao_fish_fct %>%
+  group_by(ics_faostat_sua_english_description) %>%
+  naniar::miss_var_summary() %>%
+  filter(variable %in% var ,
+         pct_miss >per) %>% 
+  arrange(desc(pct_miss))# %>% pull(ics_faostat_sua_english_description)
+
+
+
+
 ## Table 4.
 
 fao_fish_summary %>% relocate(ics_faostat_sua_english_description, 
@@ -571,3 +613,24 @@ fao_fish_summary %>% relocate(ics_faostat_sua_english_description,
 missing <- c("Cephalopods, cured", "Aquatic animals nei, cured", 
              "Aquatic animals nei, preparations nei", "Crustaceans, cured", 
              "Cephalopods, canned")
+
+# Count and perc. imputed values for 
+# SE
+# CARTBEQmcg_std imputed
+# Ash
+# CHOAVLDFg_std assumed zero
+# Impausible value of CARTBEQmcg_std
+subset(fao_fish_fct, grepl("Impausible value of CARTBEQmcg_std", comment)) %>% 
+  count() /nrow(fao_fish_fct)*100
+  
+
+# Supplementary figures -----------
+
+##├ Suppl. Fig X - Back-calculation of retinol ----
+
+fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code <- as.factor(fao_fish_fct$ICS.FAOSTAT.SUA.Current.Code)
+
+fao_fish_fct[,c("RETOLmcg", "VITA_RAEmcg", "VITAmcg", "CARTBEQmcg", "ICS.FAOSTAT.SUA.Current.Code")] %>%  #selecting variables
+  naniar::gg_miss_fct(., fct = ICS.FAOSTAT.SUA.Current.Code) +
+  coord_flip() +
+  scale_x_discrete(guide = guide_axis(n.dodge = 3))

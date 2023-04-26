@@ -1,0 +1,75 @@
+---
+title: "Developing a reproducible approach for generating FCTs & NCTs"
+format: 
+    revealjs:
+        logo: MAPS-logo.png
+        css: logo.css
+editor: source
+---
+
+## Agenda (1) {.smaller}
+
+-   **Introduction**
+
+-   **Objectives**
+
+-   **Development of a framework for compiling NCTs.** The Extended Fisheries Global NCT (2022) as case study
+
+    -   Background and starting point for the NCT
+    -   Harmonising Food Composition Tables and Databases
+    -   Visualisation for nutrient evaluation and missing values identification
+
+## Agenda (2) {.smaller}
+
+-   **The Extended Fisheries Global NCT (2022)**
+
+    -   Food composition data for fishery products: Overview
+    -   Visualisation for decision making (missing values and outliers)
+    -   How scripted approach allow for fast update and re-use of the FCT for new purposes
+    -   How collaborative coding and GitHub increases efficiency and transparency of the approach
+
+-   **Conclusions & Recommendation for the future**
+
+    -   What has been completed -- what needs to be further advanced?
+    -   The need of better nutrition data for decision-making
+    -   New data skills and statistical approach for better food and nutrition data.
+
+-   **Q&A:** Discussion & Next Steps
+
+::: notes
+Speaker notes go here.
+:::
+
+## Introduction
+
+<br/> Meet the team! <br/>
+
+:::{.fragment}
+-&nbsp;Lucia Segovia de la Revilla <br/>
+-&nbsp;Thomas Codd <br/>
+-&nbsp;Liberty Mlambo <br/>
+-&nbsp;Louise Ander <br/>
+:::
+
+
+
+::: {style="color:#18194f; position: absolute; top: 20px; right: 50px;"}
+ School of Biosciences
+:::
+
+![](UoN_Logo.jpg){.absolute top=60 right=80 width=250px}
+
+
+
+## Objective
+
+<br/> Applying MAPS framework: <br/> <br/>
+
+to expand the Fisheries Global Nutrient Conversion Table (NCT)
+
+::: notes
+
+This piece of work was done in collaboration with:
+Bridget, Fernanda, Ana, and other members of the team at FAO. 
+
+:::

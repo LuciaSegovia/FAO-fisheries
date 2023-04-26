@@ -1,0 +1,922 @@
+---
+title: "Developing a reproducible approach for generating FCTs & NCTs"
+subtitle: "Technical webinar on dietary data for FAOSTAT food and diet domain. November, 2022"
+format: pptx
+always_allow_html: true
+editor: visual
+---
+
+```{r}
+
+library(tidyverse)
+library(gt)
+library(kableExtra)
+
+fao_fish_fct <- readRDS(file = here::here("inter-output",
+                      "fao-fish-df.rds"))
+
+```
+
+## Agenda (1) {.smaller}
+
+-   **Introduction**
+
+-   **Objectives**
+
+-   **Development of a framework for compiling NCTs.** The Extended Fisheries Global NCT (2022) as case study.
+
+    -   Background and starting point for the NCT
+    -   Harmonising Food Composition Tables and Databases
+    -   Visualisation for nutrient evaluation and missing values identification.
+    -   Function approach for nutrient recalculation & NCT formatting
+    -   Documentation, Reproducibility & GitHub
+
+## Agenda (2) {.smaller}
+
+-   **The Extended Fisheries Global NCT (2022)**
+
+    -   Food composition data for fishery products: Overview
+    -   Visualisation for decision making (missing values and outliers)
+    -   How scripted approach allow for fast update and re-use of the FCT for new purposes
+    -   How collaborative coding and GitHub increases efficiency and transparency of the approach
+
+-   **Conclusions & Recommendation for the future**
+
+    -   What has been completed -- what needs to be further advanced?
+    -   The need of better nutrition data for decision-making
+    -   New data skills and statistical approach for better food and nutrition data.
+
+-   **Q&A:** Discussion & Next Steps
+
+::: notes
+Speaker notes go here.
+:::
+
+# Development of a the framework for compiling NCTs
+
+## Why a framework was needed?
+
+<br/>
+
+1.  FCTs are available in multiple data formats
+2.  Data harmonisation requires effort, expertise, and time\
+3.  Increasing the standardisation of the FCTs would...
+
+::: fragment
+\... Lower cost of updating & generating new NCTs
+:::
+
+::: fragment
+\... Increase reproducibility of NCTs and their survey outputs
+:::
+
+::: fragment
+\... Increase re-usability & dissemination of FCTs
+:::
+
+## Overview of the NCT framework
+
+```{r}
+
+DiagrammeR::grViz("digraph { graph [layout = dot, rankdir = TB]
+              
+node [shape = box]
+          
+rec1 [label = 'Step 1. Identify and obtain data'] 
+rec2 [label = 'Step 2. Importing the data into the tool (R)']
+rec3 [label = 'Step 3. Data standardisation']
+rec4 [label = 'Step 4. Data harmonisation'] 
+rec5 [label = 'Step 5. Visual & Statistic QC'] 
+rec6 [label = 'Step 6. Exporting data & metadata']
+
+#node [shape = circle]
+#QC1; QC2; QC3
+
+# edge definitions with the node IDs 
+rec1 -> rec2 -> rec3 -> rec4 -> rec5 -> rec6; 
+rec5 -> rec1 ; rec5 -> rec4; 
+#QC1 -> rec1; QC2 -> rec2;
+#QC3 -> rec4
+
+}")
+   
+                  
+```
+
+## Steps 1 & 2: Data Sources & Importing
+
+<br/>
+
+-   Downloading and storing original 11 FCTs [^1] + Norwegian FCT (2021)
+
+-   FCTs were imported into R(Studio) & independent scripts were generated for each FCT
+
+-   All the data operations (from Step 2 to Step 6) were done in R(Studio)
+
+[^1]: FCTs and food components that were already identified & compiled in the Fisheries Global NCT.
+
+::: notes
+Thirteen FCTs were selected for the Food Global NCT, of which two were excluded, and one new was added for its relevance to the Fisheries Global NCT (i.e. to fill some data gaps for DHA and EPA).
+:::
+
+## Step 3: Data cleaning and standardisation of FCTs (1)
+
+<br/>
+
+-   Food component names/ description standardisation using Tagnames[^2].<br/> For example, "Vitamin B12 (mcg/100g)" -\> VITB12mcg
+
+-   Removing special characters ("\[\]", "()", "\*").
+
+-   Food name/ description standardisation:
+
+    -   [ASFIS List of Species for Fishery Statistics Purposes](https://www.fao.org/fishery/en/collection/asfis/en)
+
+    -   [ICS SUA Fisheries codes & categories]()
+
+[^2]: FAO/INFOODS, 2013. https://www.fao.org/infoods/infoods/standards-guidelines/food-component-identifiers-tagnames/en/
+
+::: notes
+We focused on the 10 fish-relevant food components for inclusion + 21 food components. For the future, a way of keeping that information should be found (e.g, how can we record and account for those low quality values within the dataset?, can we generate a score with the number of "low quality" values per food item?).
+:::
+
+## Step 3: Data cleaning and standardisation of FCTs (2)
+
+<br/>
+
+-   Food name/ description standardisation:
+
+    -   [ASFIS List of Species for Fishery Statistics Purposes](https://www.fao.org/fishery/en/collection/asfis/en)
+
+    -   [ICS SUA Fisheries codes & categories]()
+
+## Step 3: Food name/ description standardisation
+
+<br/>
+
+Fisheries categories matching in Norwegian FCT (2021)
+
+-   Scientific names were used to allocate the 'International Standard Statistical Classification for Aquatic Animals and Plants' (ISSCAAP) codes
+
+-   ISSCAAP codes and text pattern identification were used to allocate ICS SUA Fisheries codes.
+
+-   Review and final allocation of unidentified fish items were performed.
+
+::: notes
+For example, fish description mentioning "cured, smoked, salted or dried" were allocated to the fish preparation type "cured" Therefore, a fish entry that was matched to the ISSCAAP code == "39" and to the fish preparation type "cured" would be assigned to the ICS SUA category "1544", which corresponds to "Marine fish, other, cured".
+:::
+
+## Step 4a: Data harmonisation and compilation of FCTs {.smaller}
+
+<br/>
+
+-   **Character values standardisation.** For example, trace ("tr") or below detection limit ("\<LOD") will be converted into zero (0).
+
+-   **Unit of measure standardisation.** For example from mg/100g to g/100g.[^3]
+
+-   **Harmonising Food Composition Tables and Databases.** From 12 individual FCTs to a compiled FCT data library.
+
+[^3]: FAO/INFOODS, 2012. Guidelines for Converting Units, Denominators and Expressions Version 1.0
+
+::: notes
+The data library used for the Fisheries Global NCT. The steps outlined thus far were performed by individual script for each FCT, and were performed not only for fisheries but for the whole FCT. This is important as the burden of compilation of any other commodity from those data sources would be significantly decreased. As, we would see later in the presentation.
+:::
+
+## Step 4b: Variable recalculation and missing values {.smaller}
+
+Other data transformation were performed in the harmonised data library.
+
+-   **Re-calculation of food components.** For example, Energy, Carbohydrates by difference or Vitamin A (RAE).
+
+-   **Back-calculation from other components.** For example, Niacin, preformed was back-calculated from Niacin, equivalents and Tryptophan.
+
+-   **Combining food components.** For example, Vitamin B6 included: Vitamin B6 determined by analysis, determined by calculation and by unknown method.
+
+-   **Data imputation**: For example,if a ICS SUA fishery category did not provided data for one nutrient.
+
+::: notes
+-Food components were recalculated using functions generated based on FAO/ INFOODS equations standards. For example, Energy, Carbohydrates by difference or Vitamin A (RAE). -Food components with different definitions were combined to increase availability of the data. For example: Total fats, dietary fibre, thiamine, and Vitamin B6. -Food components were back-calculated using adaptation of standard equations. For example, Ash, B-Carotene eq., Retinol, or Niacin.
+:::
+
+## Step 4b: Back-calculation
+
+1.  Ash by difference (g/100g)
+
+2.  Beta-carotene equivalents (mcg/100g)
+
+3.  Retinol (mcg/100g)
+
+## Back-calculation: Ash by difference
+
+::: fragment
+**Eq.1a** Carbohydrates available by difference (g/100g) = 100 - (sum of water + protein + fat + ash + alcohol + dietary fibre)
+:::
+
+::: fragment
+**Eq.2b** Ash by difference (g/100g) = 100 - (sum of water + protein + fat + *available carbohydrate* + alcohol + dietary fibre)
+:::
+
+## Back-calculation: Beta-carotene equivalents
+
+::: fragment
+**Eq.6a.** Beta-Carotene eq. (mcg/100g) = 1\*Beta-carotene (mcg/100g) + 0.5\* Alpha-carotene (mcg/100g) + 0.5\* Beta-cryptoxanthin (mcg/100g)
+:::
+
+::: fragment
+**Eq.6b.** Beta-Carotene eq. (mcg/100g) = Beta-Carotene eq. (mcg/100g)
+:::
+
+::: fragment
+**Eq.6c.** Beta-Carotene eq. (mcg/100g) = 12\*(Vitamin A, retinol activity eq. (RAE) (mcg/100g EP) - Retinol (mcg/100g EP))
+
+**Eq.8.1** Vitamin A, retinol activity eq. (RAE) (mcg/100g EP) = Retinol (mcg/100g EP) + **1/12\* Beta-Carotene eq. (mcg/100g EP)**
+:::
+
+::: fragment
+When implausible value (Retinol \> Vitamin A)
+
+**Eq.6c.** Beta-Carotene eq. (mcg/100g) = 0
+:::
+
+## Back-calculation: Retinol
+
+::: fragment
+**Eq.9a.** Retinol (mcg/100g EP) = Vitamin A, retinol activity eq. (RAE) (mcg/100g) - 1/12\* Beta-Carotene eq. (mcg/100g EP)
+
+**Eq.8.1** Vitamin A, retinol activity eq. (RAE) (mcg/100g EP) = **Retinol (mcg/100g EP)** + 1/12\* Beta-Carotene eq. (mcg/100g EP)
+:::
+
+::: fragment
+**Eq.9b** Retinol (mcg/100g EP) = Vitamin A, retinol eq. (RE) (mcg/100g EP) + 2\*Vitamin A, retinol activity eq. (RAE) (mcg/100g EP)
+
+**Eq.8.1** Vitamin A, retinol activity eq. (RAE) (mcg/100g EP) = **Retinol (mcg/100g EP)** + 1/12\* Beta-Carotene eq. (mcg/100g EP)
+
+**Eq.8.2** Vitamin A, retinol eq. (RE) (mcg/100g EP) = **Retinol (mcg/100g EP)** + 1/6\* Beta-Carotene eq. (mcg/100g EP)
+:::
+
+## Step 5: Visual and statistical quality checks {.smaller}
+
+Visualisation was performed in the harmonised data library for nutrient evaluation and missing values identification. <br/> Including:
+
+-   **Identification of data gaps & errors.** Systematically non-reported fishery products and/or food components
+-   **Identification of missing values.** For example, fishery products and food components were reported but high number of missing values were found.
+-   **Outliers.** Values were extremely low or high compared within the same ICS SUA fishery category.
+
+::: notes
+We checked the number of missing values per food component using data visualisation packages. We used the *package naniar*(@ref-naniar) for visualising missing values by ICS SUA fishery category and by FCT. This allowed us to identify any typos or mistakes when renaming the food components, and also to identify potential food components that could be excluded due to the high number of missing values Similarly, we used visuals to identify data gaps and completeness for final inclusion of nutrients. Histograms and boxplots were used to check the data variability and identify outliers.
+:::
+
+## Step 6: Data formatting & exporting
+
+<br/>
+
+-   Food component values were calculated for each ICS SUA fishery category.
+
+-   Mean or re-calculation of food components were computed & evaluated
+
+-   Fishery data library was exported to excel.
+
+::: aside
+Formatting and re-calculation were done using functions.
+:::
+
+::: notes
+1)  SOP own
+2)  Energy (kcal)
+3)  Energy (kJ)
+4)  Carbohydrates by difference (g)
+5)  Vitamin A RAE (mcg)
+6)  Vitamin A RA (mcg)
+:::
+
+## Generating functions for data transformation
+
+## Functions: Re-calculation
+
+Functions were developed to re-calculate: <br/>
+
+::: {.fragment .semi-fade-out}
+`SOP_std_creator()` - Sum of Proximate <br/>
+:::
+
+`ENERCKcal_standardised()` - Energy (kcal)
+
+::: {.fragment .semi-fade-out}
+`CHOAVLDFg_std_creator()` - Carbohydrates by difference <br/> `VITA_RAEmcg_std_creator()` - Vitamin A (REA)<br/> `CARTBEQmcg_std_creator()` - Beta-Carotene Eq. <br/>
+:::
+
+## Functions: Energy
+
+Code
+
+## Functions: Re-calculation
+
+Functions were developed to re-calculate: <br/>
+
+::: {.fragment .semi-fade-out}
+`SOP_std_creator()` - Sum of Proximate <br/> `ENERCKcal_standardised()` - Energy (kcal)<br/> `CHOAVLDFg_std_creator()` - Carbohydrates by difference <br/> `VITA_RAEmcg_std_creator()` - Vitamin A (REA)<br/>
+:::
+
+`CARTBEQmcg_std_creator()` - Beta-Carotene Eq. <br/>
+
+## Functions
+
+::: panel-tabset
+### Back-calculation
+
+Examples of back-calculation functions
+
+`nia_conversion_creator()` - Niacin from Tryptophan `RETOLmcg_Recalculator()` - Retinol from Vitamin A and Beta-Carotene Eq.
+
+### Combination
+
+Combining variables
+
+`THIAmg_std_creator()` - Thiamin and Thiamin hydrochloride
+
+::: notes
+In our FCT data library the following variables were recombined: FAT_g\_standardised, FIBTGg_standardised\*, THIAmg_standardised and VITB6_mg_standardised
+:::
+:::
+
+## Documentation, Reproducibility & GitHub {.smaller}
+
+<br/>
+
+-   **Fully reproducible data & documentation** is provided within the repository. Available in [GitHub](https://github.com/LuciaSegovia/FAO-fisheries){preview-link="true"}
+
+-   A **report** covering: data curation steps, variable description, reference to external resources used, and describing any assumptions and challenges.(Available also in pdf)
+
+::: {.fragment style="text-align: center; margin-top: 1em"}
+All these steps would allow to replicate the process and to re-generate the table with the same format for future updates.
+:::
+
+::: notes
+As proof of concept, after we expanded the Fisheries Global NCT for the 6 food components, due to some discrepancies, we agreed to compile the previous 20 food components from all the FCTs. This was done in a much more efficient way, as FCTs were already cleaned and ready to be checked and formatted.
+:::
+
+# The Extended Fisheries Global NCT (2022)
+
+## Food composition data for fishery products: Overview {.smaller}
+
+::: columns
+::: {.column width="40%"}
+<br/>
+
+-   4824\* fish and fishery products were compiled from 12FCTs.
+
+-   9 FCTs were open and freely accessible and cleaned for all foods.
+
+-   20 food components were reported from more than 100 compiled variables.
+
+::: aside
+\*including duplicated items
+:::
+:::
+
+::: {.column width="60%"}
+**Fishery products per FCT**
+
+```{r}
+
+fao_fish_fct %>% count(source_fct) %>% 
+  mutate(perc = n/sum(n)*100,
+         fct_label = paste0(source_fct, " (",
+                            n, ")")) %>% 
+  arrange(desc(perc)) %>% 
+ggplot( aes(x=fct_label, y=perc)) +
+  geom_segment( aes(x=fct_label, xend=fct_label, 
+                  y=0, yend=perc), 
+                color="skyblue") +
+  geom_point( color="blue", size=4, alpha=0.6) +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+   axis.text.y = element_text(size=14),
+    axis.text.x = element_text(size=14),
+    axis.ticks.y = element_blank()) +
+  xlab("") +
+  ylab("%")
+
+```
+:::
+:::
+
+## Harmonisation of the data {.smaller}
+
+-   **Tagname** re-naming was needed in all FCTs,
+
+    -   4 FCTs did not report Tagnames (DK19, NZ18, BA13 & NO21)
+
+-   **"Lower quality values"** were reported in 3 FCTs (JA15, KE18, WA19 and UF1)
+
+-   **Trace and/or below limit of detection values** were transformed to zero in 6 FCTs (IN17 ("\<LOD"), BA13, BR11, JA15 ("Tr"), KE18 & WA19 ("tr")).
+
+-   **Measurement units transformation** was needed for Tryptophan,Vitamin A, DHA and EPA in 3 FCTs (US19, IN17 & JA15).
+
+## Fisheries categories matching in Norwegian FCT (2021)
+
+-   **ISSCAAP code** was allocated to 79% (183/232) of the fish items in NO21, of which
+
+    -   89% (n=164) of the matches which were using the scientific names
+    -   10% (n=19) were done manually using scientific name/ food description.
+
+-   **ICS SUA fishery category** was matched to 234 fish and fishery products for use in the NCT (183 unique fish items).
+
+# Transformation & Harmonisation
+
+-   7 food components (SOP, Energy (kcal, kJ), Carbohydrates by difference, Vitamin A (RAE, RE) and Beta-Carotene Eq.) were re-calculated.
+
+-   4 food components (Ash, Beta-Carotene Eq., Retinol, and Niacin) were back-calculated.
+
+-   4 food components (Fat, Thiamine and Vitamin B6) were combined.
+
+## Visualisation for decision making (missing values and outliers)
+
+## Data Availability
+
+```{r}
+
+#├ Plot (heat map): % of missing values per FCT ----
+
+components <- c("WATERg",
+        "F22D6N3g",
+        "F20D5N3g",
+        "VITB6Amg",
+        "VITB6Cmg",
+        "VITB6_mg",
+        "NIAEQmg",
+        "NIAmg",
+        "NIATRPmg",
+        "TRPmg",
+        "VITB12mcg",
+        "VITDEQmcg",
+        "VITDmcg",
+        "CHOCALmcg",
+        "ERGCALmcg",
+        "CHOCALOHmcg",
+        "ERGCALOHmcg",
+        "CUmg",
+        "SEmcg",
+        "IDmcg")
+components_longname <- c( "Water",
+                 "Docosahexaenoic acid (DHA)",
+                 "Eicosapentaenoic acid (EPA)",
+                 "Vitamin B6 determined by analysis",
+                 "Vitamin B6 determined by calculation",
+                 "Vitamin B6 by unknown method",
+                # "VITB6_mg_standardised",
+                # "NIAmg_std",
+                 "Niacin equivalents",
+                 "Niacin, prefrormed",
+                 "Niacin equivalents, from tryptophan",
+                 "Tryptophan",
+                 "Vitamin B12",
+                 "Vitamin D calculated (eq)",
+                 "Vitamin D calculated",
+                 "Cholecalciferol (D3)",
+                 "Ergocalciferol (D2)",
+                 "25-hydroxycholecalciferol",
+                 "25-hydroxyergocalciferol",
+                 "Copper",
+                 "Selenium",
+                 "Iodine" )
+
+fao_fish_fct[, c(components ,"source_fct")] %>% 
+  rename_all(., ~c(components_longname,  "source_fct")) %>%  
+  naniar::gg_miss_fct(., fct = source_fct)  +
+  labs( x= "", y= "") +
+  theme(
+     axis.text.y = element_text(size=14),
+    axis.text.x = element_text(size=14)
+  )
+  
+
+```
+
+## Data Availability
+
+```{r}
+
+fao_fish_fct[, c(components ,"source_fct")] %>% 
+  rename_all(., ~c(components_longname,  "source_fct")) %>%  
+  naniar::gg_miss_fct(., fct = source_fct)  +
+   geom_rect(aes(xmin = 0.5, ymin = -Inf, xmax = 1.5, ymax =Inf), #AU19
+            linetype = "solid",alpha = 0, colour = "red", size = 1) +
+  labs( x= "", y= "") +
+  theme(
+     axis.text.y = element_text(size=14),
+    axis.text.x = element_text(size=14)
+  )
+```
+
+## Data Availability
+
+```{r}
+
+fao_fish_fct[, c(components ,"source_fct")] %>% 
+  rename_all(., ~c(components_longname,  "source_fct")) %>%  
+  naniar::gg_miss_fct(., fct = source_fct)  +
+   geom_rect(aes(xmin = 5.5, ymin = -Inf, xmax = 6.5, ymax =Inf), #JA15
+            linetype = "solid",alpha = 0, colour = "red", size = 1) +
+  labs( x= "", y= "") +
+  theme(
+     axis.text.y = element_text(size=14),
+    axis.text.x = element_text(size=14)
+  )
+```
+
+## Data Availability
+
+```{r }
+
+#├ Plot (heat map): % of missing values per FCT ----
+
+components <- c("WATERg",
+        "F22D6N3g",
+        "F20D5N3g",
+        "VITB6Amg",
+        "VITB6Cmg",
+        "VITB6_mg",
+        "NIAEQmg",
+        "NIAmg",
+        "NIATRPmg",
+        "TRPmg",
+        "VITB12mcg",
+        "VITDEQmcg",
+        "VITDmcg",
+        "CHOCALmcg",
+        "ERGCALmcg",
+        "CHOCALOHmcg",
+        "ERGCALOHmcg",
+        "CUmg",
+        "SEmcg",
+        "IDmcg")
+components_longname <- c( "Water",
+                 "Docosahexaenoic acid (DHA)",
+                 "Eicosapentaenoic acid (EPA)",
+                 "Vitamin B6 determined by analysis",
+                 "Vitamin B6 determined by calculation",
+                 "Vitamin B6 by unknown method",
+                # "VITB6_mg_standardised",
+                # "NIAmg_std",
+                 "Niacin equivalents",
+                 "Niacin, prefrormed",
+                 "Niacin equivalents, from tryptophan",
+                 "Tryptophan",
+                 "Vitamin B12",
+                 "Vitamin D calculated (eq)",
+                 "Vitamin D calculated",
+                 "Cholecalciferol (D3)",
+                 "Ergocalciferol (D2)",
+                 "25-hydroxycholecalciferol",
+                 "25-hydroxyergocalciferol",
+                 "Copper",
+                 "Selenium",
+                 "Iodine" )
+
+fao_fish_fct[, c(components ,"source_fct")] %>% 
+  rename_all(., ~c(components_longname,  "source_fct")) %>%  
+  naniar::gg_miss_fct(., fct = source_fct)  +
+   geom_rect(aes(xmin = 0.5, ymin = 4.5, xmax = Inf, ymax =6.5), #DHA & EPA
+            linetype = "solid",alpha = 0, colour = "red", size = 1) +
+  labs( x= "", y= "") +
+  theme(
+     axis.text.y = element_text(size=14),
+    axis.text.x = element_text(size=14))
+  
+
+```
+
+## Selecting nutrient values based on data availability
+
+```{r fig-2, fig.cap= "Availability of data: Percentage (%) of fish entries with values of selected components.", echo=FALSE}
+
+components <- c("WATERg",
+        "F22D6N3g",
+        "F20D5N3g",
+        "VITB6_mg_standardised",
+        "NIAmg_std",
+        "VITB12mcg",
+        "VITDEQmcg",
+        "VITDmcg",
+        "CHOCALmcg",
+        "ERGCALmcg",
+        "CHOCALOHmcg",
+        "ERGCALOHmcg",
+        "CUmg",
+        "SEmcg",
+        "IDmcg")
+
+components_longname <- c( "Water",
+                 "Docosahexaenoic acid (DHA)",
+                 "Eicosapentaenoic acid (EPA)",
+                 "VITB6_mg_standardised",
+                 "NIAmg_std",
+                 "Vitamin B12",
+                 "Vitamin D calculated (eq)",
+                 "Vitamin D calculated",
+                 "Cholecalciferol (D3)",
+                 "Ergocalciferol (D2)",
+                 "25-hydroxycholecalciferol",
+                 "25-hydroxyergocalciferol",
+                 "Copper",
+                 "Selenium",
+                 "Iodine" )
+
+fao_fish_fct %>% select(components) %>% rename_all(., ~components_longname) %>% 
+  mutate_at(components_longname, as.numeric) %>% 
+  pivot_longer(cols = all_of(components_longname),
+               names_to = "NV", 
+               values_to = "n") %>% 
+  filter(!is.na(n)) %>% 
+  group_by(NV) %>% 
+  summarise(total = n()) %>%
+  ungroup() %>% 
+  mutate(perc = total/nrow(fao_fish_fct), 
+         cat = ifelse(perc >.75, 
+                      "high", 
+                      ifelse(perc < 0.45, 
+                             "poor", "medium" ))) %>% 
+  ggplot(aes(x=reorder(NV, perc), y = perc*100, fill = as.factor(cat))) +
+  geom_bar(stat = "identity") +
+  theme_light() +
+  coord_flip() +
+  geom_hline(aes(yintercept = 60), linetype = "dashed") +
+  annotate(geom = "text", x=0.7, y=63, label="60%") +
+  scale_fill_manual("Coverage",
+  values=c("darkolivegreen3","lightgoldenrod2", "red4"), 
+  labels = c("High (> 75%)", "Medium (75-45%)", "Poor (<45%)")) +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank()) +
+   labs( x= "", y= "") + 
+  guides(x = guide_axis(n.dodge = 2)) +
+  theme(
+     axis.text.y = element_text(size=12),
+    axis.text.x = element_text(size=12))
+
+```
+
+::: notes
+From the 10 food components that we reviewed we decided to include 6 of them, because they had a overall coverage of more than 60%.
+:::
+
+## Checking for ICS SUA category data gaps
+
+```{r, echo=FALSE}
+
+fao_fish_summary <- readRDS(here::here("inter-output", "summary_fct_missingSe.rds"))
+
+body_fct1 <- function(col, row){
+  cells_body(
+    columns = col,
+    rows = {{row}} == 0
+  )
+}
+
+body_fct2 <- function(col, row){
+  cells_body(
+    columns = col,
+    rows = {{row}} == 1
+  )
+}
+
+
+(tab_1 <- fao_fish_summary %>% # filter(SEmcg_n < 1) %>% 
+  select(ics_faostat_sua_english_description, ends_with("_n")) %>% 
+  gt() %>% 
+  tab_spanner(
+    label = "Data available (count) per fish category and nutrient",
+    columns = c(2:9)
+  ) %>% 
+  cols_label(
+    ics_faostat_sua_english_description = "Fish categories",
+    WATERg_n = "Water",
+    VITB6_mg_standardised_n = "Vitamin B6",
+    VITB12mcg_n = "Vitamin B12", 
+    SEmcg_n = "Selenium", 
+    NIAmg_std_n = "Niacin", 
+    F22D6N3g_n = "DHA",
+    F20D5N3g_n = "EPA", 
+    CUmg_n = "Copper"
+  ) %>%
+  
+  tab_style(
+    style = list(
+      cell_fill(color = scales::alpha("red", 0.7)),
+      cell_text(color = "white", weight = "bold")
+    ),
+    locations = list(
+      body_fct1(2, WATERg_n),
+      body_fct1(3, VITB6_mg_standardised_n),
+      body_fct1(4, VITB12mcg_n),
+      body_fct1(5, SEmcg_n),
+      body_fct1(6, NIAmg_std_n),
+      body_fct1(7, F22D6N3g_n),
+      body_fct1(8, F20D5N3g_n),
+      body_fct1(9, CUmg_n)
+    )) %>%
+  
+  tab_style(
+    style = list(
+      cell_fill(color = scales::alpha("yellow", 0.7)),
+      cell_text(color = "black", weight = "bold")
+    ),
+    locations = list(
+      body_fct2(2, WATERg_n),
+      body_fct2(3, VITB6_mg_standardised_n),
+      body_fct2(4, VITB12mcg_n),
+      body_fct2(5, SEmcg_n),
+      body_fct2(6, NIAmg_std_n),
+      body_fct2(7, F22D6N3g_n),
+      body_fct2(8, F20D5N3g_n),
+      body_fct2(9, CUmg_n)
+    )) %>%  
+  tab_options(
+    row_group.border.top.width = px(3),
+    row_group.border.top.color = "black",
+    row_group.border.bottom.color = "black",
+    table.border.top.color = "white",
+    table.border.top.width = px(3),
+    table.border.bottom.color = "white",
+    table.border.bottom.width = px(3),
+    column_labels.border.bottom.color = "black",
+    column_labels.border.bottom.width = px(2)
+  ))
+
+
+```
+
+## Se imputation and documentation (1)
+
+-   Only Se in four ICS SUA category were missing
+-   Imputation was performed and documented in R(studio) (`missing.R`).
+-   Documentation can be found in `comment` variable in the Fisheries Global NCT.
+
+## Se imputation and documentation (2)
+
+```{r}
+  #ICS FAOSTAT description of the missing values
+  
+  missing <- c("Cephalopods, cured", "Aquatic animals nei, cured", 
+               "Aquatic animals nei, preparations nei", "Crustaceans, cured")
+  
+  # Checking the items included reporting other NVs for that categories
+  fao_fish_fct %>% 
+    filter(ics_faostat_sua_english_description %in% missing)  %>%
+    select(food_desc, SEmcg, source_fct, comment) %>% knitr::kable(digits = 2) %>%
+  kable_paper() %>%
+  kable_styling(font_size = 30) %>% 
+  kable_paper("hover", full_width = F) 
+  
+```
+
+## Missing values for DHA and EPA by ICS SUA Fishery Category {auto-animate="true"}
+
+```{r}
+
+fao_fish_fct[,c("FAT_g_standardised", "F22D6N3g",
+                "F20D5N3g", "ICS.FAOSTAT.SUA.Current.Code")] %>% 
+  rename_all(., ~c("Fat", "DHA", "EPA", "ICS.FAOSTAT.SUA.Current.Code")) %>% 
+  naniar::gg_miss_fct(., fct = ICS.FAOSTAT.SUA.Current.Code) +
+  coord_flip() +
+  scale_x_discrete(guide = guide_axis(n.dodge = 3))
+
+```
+
+::: notes
+DHA & EPA were reported to a lesser extent than fat. This may lead to inconsistencies/ inaccuracies in the final data. Imputation was discouraged due to lack of accurate data for the missing values and variability of this nutrients in fish.
+:::
+
+## Missing values for DHA and EPA by ICS SUA Fishery Category {auto-animate="true"}
+
+```{r}
+
+fao_fish_fct %>% filter(source_fct != "NO21") %>% 
+  select(FAT_g_standardised, F22D6N3g,
+                F20D5N3g, ICS.FAOSTAT.SUA.Current.Code) %>% 
+  rename_all(., ~c("Fat", "DHA", "EPA", "ICS.FAOSTAT.SUA.Current.Code")) %>% 
+  naniar::gg_miss_fct(., fct = ICS.FAOSTAT.SUA.Current.Code) +
+  coord_flip() +
+  scale_x_discrete(guide = guide_axis(n.dodge = 3))
+
+```
+
+::: notes
+DHA & EPA were reported to a lesser extent than fat, contribution from NO21. This may lead to inconsistencies/ inaccuracies in the final data. Imputation was discouraged due to lack of accurate data for the missing values and variability of this nutrients in fish.
+:::
+
+## Visual & Quality checks
+
+``` {.r code-line-numbers="3,4,5"}
+
+subset(fao_fish_fct, 
+       str_detect(food_desc, " dry| dried")&
+       !str_detect(food_desc, "stewed|cooked")&
+         WATERg>30, 
+       select = c(source_fct, food_desc,  WATERg)) %>% 
+  distinct()
+```
+
+```{r, results='asis'}
+
+subset(fao_fish_fct, 
+       str_detect(food_desc, " dry| dried")&
+       !str_detect(food_desc, "stewed|cooked")&
+         WATERg>30, 
+       select = c(source_fct, food_desc,  WATERg)) %>% 
+  distinct() %>% knitr::kable() %>%
+  kable_paper() %>%
+  kable_styling( font_size = 30) %>% 
+  kable_paper("hover", full_width = F) # %>%
+  #scroll_box(width = "500px", height = "2000px")
+
+```
+
+## Sum of Proximate
+
+```{r}
+
+n <- length(fao_fish_fct$food_desc[as.numeric(fao_fish_fct$SOP_std) <95|as.numeric(fao_fish_fct$SOP_std) >105])
+hist(as.numeric(fao_fish_fct$SOP_std), main = "",
+     xlab = paste0("There are ", n, " fish items outside of acceptable range (95-105g)"))
+abline(v = 95, col = 2, lwd=3, lty =2)
+abline(v = 105, col = 2, lwd=3, lty =2)
+
+```
+
+## Carbohydrates by difference
+
+```{r}
+
+label <- paste0(round(sum(str_detect(fao_fish_fct$comment, "CHOAVLDFg_std assumed zero"), na.rm = T)/length(fao_fish_fct$CHOAVLDFg_std)*100), "% of the carbohydrates by difference values were negative values and replaced with zero (\"assumed zero\")")
+
+hist(as.numeric(fao_fish_fct$CHOAVLDFg_std), main = "" ,
+     xlab = "")
+
+
+```
+
+::: aside
+`r  paste0(round(sum(str_detect(fao_fish_fct$comment, "CHOAVLDFg_std assumed zero"), na.rm = T)/length(fao_fish_fct$CHOAVLDFg_std)*100), "% of the carbohydrates by difference values were negative values and replaced with zero (\"assumed zero\")")`
+:::
+
+::: notes
+The documentation of these changes are important as they would have an impact of the final estimates, particularly as this variable is used to calculate SOP, and more importantly the total energy. If total energy is calculated using negative values it would lead to a underestimation of the total energy supplied by the foods
+:::
+
+## Documentation
+
+-   A document with all the decisions and assumptions was generated.
+
+-   In the NCT, "comments" were added as a separted column with all the data transformations: imputation, assumed zero, calculated, etc.
+
+-   Scripts are provided to fully reproduce the approach and/or to update if needed.
+
+::: notes
+this is important to 1) identify data gaps, and 2) flagging potential issues with the data.
+:::
+
+## How scripted approach allow for fast update and re-use of the FCT for new purposes
+
+## How collaborative coding and GitHub increases efficiency and transparency of the approach
+
+::: notes
+This is an stand-alone script that allows for: reproducibility, transparency and future review. In addition, it would allow excluding the imputed values (by not running that script when re-compiling the dataset) when new data is available.
+:::
+
+# Recommendations for the future
+
+## Nutrition {.incremental}
+
+-   Important data gaps were found,...
+
+-   More food composition analysis are required, particularly for some fishery categories & nutrients.
+
+          -  "Aquatic Animals nei", and fish oils in general.
+          -  DHA, EPA, I & Se
+
+-   For some fishery categories and food components, the number of data were far fewer than for other.
+
+-   Some of those fishery category with low number of values were very variable, and hard to know if this is the true range of chemical variability or analytical differences.
+
+-   Fisheries ICS categories for nutrition. For example, rethinking some groups. For example, "Aquatic animals, nei".
+
+## Data quality
+
+1.  Imputation techniques and their overall impact on mean values should be evaluated.
+
+2.  Food component description and combination of different methods of analysis (i.e., used for Vitamin B6)
+
+3.  Other data management practices and their impact on final results (i.e., using "low quality values", assuming zero for trace values, etc.)
+
+4.  Better data documentation for reproducibility and efficiency is needed.
+
+::: notes
+2.  Eg., Is it still relevant the use of three Tagnames if we are combining the results? What does it happen when there is an average of multiple values from different methods of analysis? Wouldn't it be better other reporting system. Eg., providing adequate metadata (both in content and in format) that allow users and machines to identify the method used for each value.
+
+2.e.g, how can we record and account for those low quality values within the datasets/ FCTs? can we generate a score with the number of "low quality" values per food item?
+:::

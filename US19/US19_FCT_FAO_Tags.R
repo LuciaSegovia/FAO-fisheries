@@ -166,9 +166,9 @@ Output_table <- Composite_Table %>%
     F20D5N3g = "20:5 n-3 (EPA) (g)") %>%
   mutate( TRPmg =  TRPg*1000, #convert TRP from g to mg
           comment = NA) %>%   
-  CARTBEQmcg_std_creator() %>%
+  #CARTBEQmcg_std_creator() %>%
   #  rename(CARTBEQmcg = "CARTBEQmcg_std") %>%   #Changing name of re-calculated variable for making VITA f(x) to work)
-  VITAmcg_std_creator() %>%   #Re-calcuating VITAmcg
+ # VITAmcg_std_creator() %>%   #Re-calcuating VITAmcg
   relocate(food_group, .after = food_desc) %>% #Some columns are relocated for easier reading
   relocate(source_fct, .after = food_group) %>%
   relocate(nutrient_data_source, .after = source_fct) %>%
@@ -179,11 +179,11 @@ Output_table <- Composite_Table %>%
 
 #Re-calcuating VITAmcg from Vit.A (IU)
 #Checking if RETOLmcg or CARTBmcg are available
-which(is.na(Output_table$VITAmcg_std) & !is.na(Output_table$VITAmcg_std))
-which(is.na(Output_table$VITAmcg_std))
+#which(is.na(Output_table$VITAmcg_std) & !is.na(Output_table$VITAmcg_std))
+#which(is.na(Output_table$VITAmcg_std))
 
 #Checking where VITAmcg could be re-caluclated form VIT A (IU)
-n <- which(is.na(Output_table$VITAmcg_std) & !is.na(Output_table$`Vitamin A, IU (IU)`))
+#n <- which(is.na(Output_table$VITAmcg_std) & !is.na(Output_table$`Vitamin A, IU (IU)`))
 
 #Recalculating - FAO/ INFOODS Guidelines for Converting Units, Denominators and Expressions Version 1.0
 #suggested converting when no other info is available and "assuming" all VITA is retinol.
