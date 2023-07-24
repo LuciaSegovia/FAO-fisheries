@@ -1,4 +1,5 @@
-library(tidyverse)
+library(dplyr)
+library(stringr)
 
 
 
@@ -69,8 +70,6 @@ wa_meta_quality <- wafct %>% mutate_at(wa_nut,  ~case_when(
   str_detect(. , '\\[.*?\\]') ~ "low_quality", #Looking for things in square brackets to mark as low quality
   str_detect(. , 'tr') ~ "trace", #Looking for things marked as "tr" and labels them as trace
   TRUE ~ "normal_value")) #Else it marks the entry as a normal value
-
-
 
 # Calculating with/tidying from low quality values ----
 
