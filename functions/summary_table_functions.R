@@ -112,8 +112,8 @@ CARTBEQmcg_std_creator <- function(dataset) {
                     select(all_of(columns))
             ))) %>%
             rowwise() %>%
-            # ! Replace comment NAs with blank so that we can concatenate comments well.
-            mutate(comment = ifelse(is.na(comment), "", comment)) %>%
+            # ! Replace comments NAs with blank so that we can concatenate commentss well.
+            mutate(comments = ifelse(is.na(comments), "", comments)) %>%
             # ! If all inputs to the CARTBEQmcg_std calculation are NA return NA
             # ! Else perform calculation ommiting NAs
             mutate(CARTBEQmcg_std = ifelse(
@@ -121,24 +121,24 @@ CARTBEQmcg_std_creator <- function(dataset) {
                 NA,
                 sum(1 * CARTBmcg, 0.5 * CARTAmcg, 0.5 * CRYPXBmcg, na.rm = TRUE)
             )) %>%
-            # ! Use the same logic as above for comment appendage.
-            mutate(comment = ifelse(
+            # ! Use the same logic as above for comments appendage.
+            mutate(comments = ifelse(
                 temp == length(columns),
-                comment,
+                comments,
                 paste0(
-                    comment,
+                    comments,
                     " | CARTBEQmcg_std calculated from CARTBmcg, CARTAmcg and CRYPXBmcg"
                 )
             )) %>%
-            # ! Check which components of the calculation were used. If only CARTB was used. Append the comment to reflect that.
-            mutate(comment = ifelse(
+            # ! Check which components of the calculation were used. If only CARTB was used. Append the comments to reflect that.
+            mutate(comments = ifelse(
                 (
                     temp != length(columns) &
                         !is.na(CARTBmcg) &
                         is.na(CARTAmcg) & is.na(CRYPXBmcg)
                 ),
-                paste0(comment, " but only CARTB was used"),
-                comment
+                paste0(comments, " but only CARTB was used"),
+                comments
             )) %>%
             # ! remove the temp column
             select(-temp) %>%
@@ -347,7 +347,7 @@ nia_conversion_creator <- function(dataset) {
 
 RETOLmcg_Recalculator <- function(dataset) {
     #' @title RETOLmcg_Recalculator
-    #' @description Recalculates the values of RETOLmcg(Retinol in mcg per 100g of EP), when it is not provided. Works in 2 cases and in both cases an associated comment is added indicating how the value was derived.
+    #' @description Recalculates the values of RETOLmcg(Retinol in mcg per 100g of EP), when it is not provided. Works in 2 cases and in both cases an associated comments is added indicating how the value was derived.
     #' @param RETOLmcg Retinol in mcg per 100g of EP
     #' @param VITA_RAEmcg Vitamin A (Retinol Activity Eq. (RAE) = mcg retinol + 1/12 mcg ß- carotene + 1/24 mcg other provitamin A carotenoids) in mcg per 100g of EP
     #' @param VITAmcg Vitamin A (Retinol Eq. (RE) = mcg retinol + 1/6 mcg ß- carotene + 1/12 mcg other pro-vitamin A carotenoids) in mcg per 100g of EP
@@ -361,7 +361,7 @@ RETOLmcg_Recalculator <- function(dataset) {
             as_tibble() %>%
             mutate_at(.vars = columns, .funs = as.numeric) %>%
             rowwise() %>%
-            mutate(comment = ifelse(is.na(comment), "", comment)) %>%
+            mutate(comments = ifelse(is.na(comments), "", comments)) %>%
             # ! case 1 If all three variables are not NA them calculate and add comment
             mutate(RETOLmcg = ifelse((is.na(RETOLmcg) &
                 !is.na(CARTBEQmcg) &
@@ -369,16 +369,16 @@ RETOLmcg_Recalculator <- function(dataset) {
             sum(VITA_RAEmcg, (-1 / 12 * CARTBEQmcg)),
             RETOLmcg
             )) %>%
-            mutate(comment = ifelse((is.na(RETOLmcg) &
+            mutate(comments = ifelse((is.na(RETOLmcg) &
                 !is.na(CARTBEQmcg) &
                 !is.na(VITA_RAEmcg)),
             paste0(
-                comment,
+                comments,
                 " | RETOLmcg value re-calulated from VITA_RAEmcg and CARTBEQmcg "
             ),
-            comment
+            comments
             )) %>%
-            # ! Case 2: If RETOLmcg is not present and CARTBEQmcg also not present but both VITA_RAEmcg and VITAmcg are available then calculate with eq2 and add comment.
+            # ! Case 2: If RETOLmcg is not present and CARTBEQmcg also not present but both VITA_RAEmcg and VITAmcg are available then calculate with eq2 and add comments.
             mutate(RETOLmcg = ifelse((
                 is.na(RETOLmcg) &
                     is.na(CARTBEQmcg) &
@@ -387,16 +387,16 @@ RETOLmcg_Recalculator <- function(dataset) {
             sum((2 * VITA_RAEmcg), VITAmcg),
             RETOLmcg
             )) %>%
-            mutate(comment = ifelse((
+            mutate(comments = ifelse((
                 is.na(RETOLmcg) &
                     is.na(CARTBEQmcg) &
                     !is.na(VITA_RAEmcg) & !is.na(VITAmcg)
             ),
             paste0(
-                comment,
+                comments,
                 " | RETOLmcg value re-calulated from VITA_RAEmcg and VITAmcg "
             ),
-            comment
+            comments
             )) %>%
             ungroup(),
         error = function(e) {
@@ -430,16 +430,16 @@ CARTBEQmcg_std_back_calculator_VITA_RAEmcg <- function(dataset) {
             rowwise() %>%
             # ! Check if all the rows are NA then output NA else do the
             # calculation and omit NAs
-            mutate(comment = ifelse(is.na(comment), "", comment)) %>%
-            mutate(comment = ifelse((
+            mutate(comments = ifelse(is.na(comments), "", comments)) %>%
+            mutate(comments = ifelse((
                 is.na(CARTBEQmcg_std) &
                     !is.na(VITA_RAEmcg) & !is.na(RETOLmcg)
             ),
             paste0(
-                comment,
+                comments,
                 " | CARTBEQmcg_std back calculated from VITA_RAEmcg and VITAmcg"
             ),
-            comment
+            comments
             )) %>%
             mutate(CARTBEQmcg_std = ifelse((
                 is.na(CARTBEQmcg_std) &
@@ -465,7 +465,7 @@ CARTBEQmcg_std_back_calculator_VITA_RAEmcg <- function(dataset) {
 CARTBEQmcg_std_imputer_with_CARTBEQmcg <-
     function(dataset) {
         #' @title CARTBEQmcg_std_imputer_with_CARTBEQmcg
-        #' @description Imputes values of CARTBEQmcg into CARTBEQmcg_std when they are NAs. then adds a comment
+        #' @description Imputes values of CARTBEQmcg into CARTBEQmcg_std when they are NAs. then adds a comments
         #' @param CARTBEQmcg_std Beta-carotene equivalents, expressed in mcg per 100g of EP
         #' @param CARTBEQmcg Beta-carotene equivalents, is the sum of the beta-carotene + 1/2 quantity of other carotenoids with vitamin A activity, expressed in mcg per 100g of EP
         #' @return Original FCT with the imputed values
@@ -477,14 +477,14 @@ CARTBEQmcg_std_imputer_with_CARTBEQmcg <-
                 as_tibble() %>%
                 mutate_at(.vars = columns, .funs = as.numeric) %>%
                 rowwise() %>%
-                mutate(comment = ifelse(is.na(comment), "", comment)) %>%
-                mutate(comment = ifelse((is.na(CARTBEQmcg_std) &
+                mutate(comments = ifelse(is.na(comments), "", comments)) %>%
+                mutate(comments = ifelse((is.na(CARTBEQmcg_std) &
                     !is.na(CARTBEQmcg)),
                 paste0(
-                    comment,
+                    comments,
                     "| CARTBEQmcg_std imputed with CARTBEQmcg"
                 ),
-                comment
+                comments
                 )) %>%
                 mutate(CARTBEQmcg_std = ifelse((is.na(CARTBEQmcg_std) &
                     !is.na(CARTBEQmcg)),
@@ -507,11 +507,11 @@ CARTBEQmcg_std_imputer_with_CARTBEQmcg <-
 
 CARTBEQmcg_std_to_zero <- function(dataset) {
     #' @title CARTBEQmcg_std_to_zero
-    #' @description Handling Implausible values of CARTBEQmcg_std (Beta-carotene equivalents, expressed in mcg per 100g of EP). i.e. if CARTBEQmcg_std < 0 replace it with zero and add comment.
+    #' @description Handling Implausible values of CARTBEQmcg_std (Beta-carotene equivalents, expressed in mcg per 100g of EP). i.e. if CARTBEQmcg_std < 0 replace it with zero and add comments.
     dataset %>%
         as_tibble() %>%
         rowwise() %>%
-        mutate(comment = ifelse((CARTBEQmcg_std < 0), paste0(comment, "| Impausible value of CARTBEQmcg_std = ", CARTBEQmcg_std, " replaced with 0"), comment)) %>%
+        mutate(comments = ifelse((CARTBEQmcg_std < 0), paste0(comments, "| Impausible value of CARTBEQmcg_std = ", CARTBEQmcg_std, " replaced with 0"), comments)) %>%
         mutate(CARTBEQmcg_std = ifelse(CARTBEQmcg_std < 0, 0, CARTBEQmcg_std)) %>%
         ungroup()
 }
