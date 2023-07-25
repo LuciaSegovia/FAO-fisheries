@@ -1,5 +1,5 @@
 ---
-title: "Results"
+title: "Results: Harmonisation of the food composition tables and databases"
 format: html
 editor: source
 ---
@@ -47,7 +47,7 @@ ggplot( aes(x=fct_label, y=perc)) +
 
 The data cleaning operations were done by individual annotated R scripts for each FCT and were stored, together the raw data (raw FCT files), in a folder with its biblioID (See Table 2). Details on the operations and decisions made during the data cleaning are presented in subsequent sections. 
 
-#### 2.1. Renaming variables
+#### 2.2. Renaming variables: Food components definition and re-naming
 
 Food component names and descriptions were examined in each FCT and renamed with the corresponding Tagnames.
 
@@ -136,10 +136,14 @@ NCT, 2022, and the documentation accompanying each FCT.
     included for this project hence a more in-depth review of each
     component was needed and it is described in the **Section X.X of the
     NO21 documentation**
+    
+In summary, all the FCTs needed some degree of food component renaming.7 FCT’s reported (to a certain extent) the use of Tagnames for food components identification, whereas 6 did not used the Tagnames. For the latter, in certain cases, documentation was not enough to identify the correct Tagname, for instance for vitamin E in NO21 which remainded   with the original name. In addition, we found some food components for which Tagnames are currently unavailable (e.g., ). 
 
-#### 2.2. Other tidying operations
+#### 2.3. Standardisation of values
 
-##### Removing parentheses and brackets <br>
+In summary, the most common transformation was from edible portion expressed in percentage to a fraction, which was performed in XX FCTs. Other measurement unit’s standardisation performed were from g to mg, for example, tryptophan (g/100g) to mg/100g or vice versa, for DHA and EPA g/100g to mg/100g.  and vitamin A (IU) to mcg/100g, for some foods, in US19, tryptophan from (g/100g of protein) to mg/100g EP in IN17. Reported missing values were standardised in 4 FCTs of the 12 FCTs, while trace and/or below limit of detection values were transformed to zero in 7 FCTs (IN17 ("<LOD"), BA13, BR11, JA15 ("Tr"), and KE18, and WA19 ("tr"). Brackets (and parenthesis) used to denote “lower quality values” were removed in 4 FCTs, such as JA15, KE18, WA19 and UF17. 
+
+**a. Removing parentheses and brackets**: 
 
 In JA15, parentheses were used to denote "estimated values". According
 to JA15 documentation, those were used to "Composition values estimated
@@ -151,15 +155,18 @@ listed values of similar foods are indicated by placing them in
 parentheses." (REF).
 
 Bracket ("[]") for low quality values were removed or generated a new column
-with the alternative analytical method for UF16, WA19 and KE18. In KE18, brackets denoting not preferred values, as for the KE18, UF16 and WA19
-reporting: "For alternative analytical method or lower quality. Data
-from non-preferred Tagnames were presented only where preferred Tagnames
-data was not available." (REF).When we removed the brackets, for future development accounting for the impact of the "estimated values" should be studied.
+with the alternative analytical method for UF16, WA19 and KE18. 
 
+In KE18, brackets denoting not preferred values, as for the KE18, UF16 and WA19
+reporting: "For alternative analytical method or lower quality.
+
+Data from non-preferred Tagnames were presented only where preferred Tagnames
+data was not available." (REF).When we removed the brackets, for future development accounting for the impact of the "estimated values" should be studied.
 
 In addition, for the KE18, a star ("\*") was used to identify items
 fortified with folic acid. Note that some issues on the reporting of fortification were found previously, however the data was not reviewed
 in-depth because folate and related food components were outside the scope of this work. 
+
 
 ##### Food name/ description standardisation
 
@@ -173,6 +180,9 @@ fisheries were divided into five food groups: "White fish (JA)", "Fatty
 fish (JC)", "Crustacea (JK)", "Molluscs (JM)", and "Fish products and
 dishes (JR)". The id (`fcd_id`) could be used as well to identify as all
 fisheries, as all started with "16".
+
+#### 2.4. Other tidying operations
+
 
 ### 3. Transforming values
 

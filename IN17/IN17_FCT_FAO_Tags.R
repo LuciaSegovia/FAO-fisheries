@@ -128,13 +128,18 @@ IN17_Renamed %>%  select(F18D2N6g)
 IN17_Raw %>%  select(F18D2N6mg)
 
 #Unit conversion and renaming of Amino Acids
+aa_prot <- grep( "_100gPROTCNT", names(IN17_Renamed), value = TRUE)
+aa_mg <- gsub("g_100gPROTCNT", "mg", aa_prot)
+
+IN17_Renamed[, aa_mg] <- IN17_Renamed[, aa_prot]*IN17_Renamed$PROCNTg*10
+
 
 #Applying unit conversion in the columns by name
-IN17_Renamed <-IN17_Renamed %>% 
-  mutate_at(vars(matches("*_100gPROTCNT")), ~.*PROCNTg*10, na.rm = T)
+#IN17_Renamed <- IN17_Renamed %>% 
+ # mutate_at(vars(matches("*_100gPROTCNT")), ~.*PROCNTg*10, na.rm = T)
 
 #Renaming the columns according to the new units
-colnames(IN17_Renamed) <- str_replace(colnames(IN17_Renamed), "g_100gPROTCNT", "mg")
+#colnames(IN17_Renamed) <- str_replace(colnames(IN17_Renamed), "g_100gPROTCNT", "mg")
 
 #Checking that the conversion have been done properly
 IN17_Renamed %>% select(matches("*_100gPROTCNT"))

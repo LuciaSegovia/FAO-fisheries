@@ -27,29 +27,37 @@ table 3).
 
 ### 2. Tidying the data
 
-
-In order to merge all data from various FCTs into one common FCT data library, we needed to harmonise the information in each dataset. The steps that were taken are explained
-below and annotated scripts for each FCTs can be found in this
-repository in each corresponding folder, as previously mentioned.
+The steps outlined in the following sections aim to obtain a clean and standardise FCT, which is necessary to merge all data, from various FCTs, into one common FCT data library. The overall steps that were taken are explained
+below and annotated scripts for each FCTs can be found in this repository in each corresponding folder, as well as template to serve as a guideline for processing new FCTs. Note that the order of the steps may change from script to script as the shape, format and type of data will influence the processing workflow. Similarly, based on the data structure some steps may not be necessary while other FCTs may require additional processing steps. 
 
 #### 2.1.	Formatting FCT into a tabular format
 
-**a. Diving combined variables into two (or more) columns.** For
-example, when two components (Tagnames) were reported in the same column
-and identified using brackets ([]) around the component values.
-(`CARTEB or [CARTEBEQ]`) were separated into two independent columns and
-bracket removed (`CARTEBmg`, `CARTBEQmg`).
+##### 2.1.1. Creating food groups variable and tidying
 
-**e. Food groups variable.** Some food composition tables reported food
-groups that were placed as the first row of each category. Those rows
-were extracted and allocated as a new attribute of each food/fish entry
-(i.e., from row to new column (`food_group`)).
+Some food composition tables reported food
+groups that were placed as the first row of each category, however that it is not a data structure that can be used, as we need one column per variable. Hence, the food group names are extracted from the rows, and are allocated as a new attribute of each food (e.g., fish and fishery products to catfish). The food groups are stored in a new column (`food_group`).
 
+##### 2.1.2. Diving combined variables into two (or more) columns
+
+In some cases, to minimise the number of missing values, two similar food components are combined into one column/ variable. For
+example, when Beta-carotene and Beta-Carotene Eq. were reported in the same column
+and identified using brackets ([]) around the component values (`CARTEB or [CARTEBEQ]`). However, because we are aiming to have one variable per column, we need to divide the combined variables into two (or more) columns, as such the Beta-carote variable was separated into two independent columns (`CARTEBmg`, `CARTBEQmg`). Note that when we are separating these two food components into the new variable, there are several things that we need to check: we need to check whether they are present in the original FCT, otherwise we may be overwriting values. 
+
+1) The variable is not present, then create a new column.
+2) The variable is present: only overwrite if the value is missing in the original column.
+3) Do not remove the brackets from the original variable. As we will add information (metadata) about the quality of the value after removing the brackets. 
+
+
+**c. Removing summary statistics from the table.** Because summary
+statistics will not be used, data were removed. For future development,
+a way to account for variability (e.g., using the summary stats) could
+be studied (How can we keep/use that data?, could we use them to account
+for uncertainty in the final results?).
 
 #### 2.2. Renaming variable names: Food components definition and re-naming
 
-Each FCT has its own variable names, including for simiar food components. Some
-FCTs included information related to the FAO/ INFOODS food components
+Each FCT has its own variable names, including for similar food components. Some
+FCTs included information related to the FAO/ INFOODS food component
 identifiers
 [(Tagnames)](https://www.fao.org/infoods/infoods/standards-guidelines/food-component-identifiers-tagnames/en/)
 
@@ -93,7 +101,20 @@ read.csv(here::here("data", "metadata",                     "variable_standards.
 ```
 
 
-#### 2.3 Standardising unit of measurement <br>
+
+#### 2.3. Standardising of values <br>
+
+To perform mathematical operations, characters needed to be converted
+into numeric operator. This includes two steps: 
+
+**a. Removing brackets or other special characters ("[]", "()", "\*")**. As, described above in section 2.1.2.[LINK], special character  were used to denote "low quality values" and/or alternative (determination) methods. For those cases, the numeric
+value was extracted and the special character removed. In addition, the variable `comments` was created in a way of keeping that information as metadata for other users. In the future, that variable could be converted into a proxy for data quality, such as, generating a score with the number of "low quality"
+values per food item and/or food component. 
+
+**b. Changing characters into numeric**: For instance, values that were reported to be trace ("tr") or below the detection limit ("<LOD") were converted to zero (0). This was in agreement with other FC compilers and nutrition expert from the FAO  (A.M., B.H, D.R., F.G.). These changes are also recorded in the `comments` variable as part of the metadata available. 
+
+
+#### 2.4. Standardising unit of measurement <br>
 
 To standardise and merge the different FCTs, food components need to be
 reported in the same units. For example, some nutrients needed to be
@@ -117,24 +138,6 @@ Eg. amino acids (AA) reported per g in 100g of PROT to mg in 100g of EP:
 **Eq.3.1** Edible portion = Edible portion (%)/100
 
 
-#### 2.4. Other tidying operations <br>
-
-
-**b. Removing brackets or other special characters ("[]", "()", "\*")**.
-Similarly, special character were used to denote "low quality values"
-and/or alternative (determination) methods. For those cases, the numeric
-value was extracted and the special character removed. For future
-development, a way of keeping that information should be found (e.g, how
-can we record and account for those low quality values within the
-dataset?, can we generate a score with the number of "low quality"
-values per food item?).
-
-**c. Removing summary statistics from the table.** Because summary
-statistics will not be used, data were removed. For future development,
-a way to account for variability (e.g., using the summary stats) could
-be studied (How can we keep/use that data?, could we use them to account
-for uncertainty in the final results?).
-
 **d. Food name/ description standardisation.** The ASFIS list was used
 for identification of the fish and fishery products. International Standard Statistical Classification for Aquatic Animals and Plants (ISSCAAP) codes and the
 3-alpha codes were assigned to fishery products for identification and
@@ -149,13 +152,6 @@ semi-manually using R scripts (`NO21/NO21.R`) and it is reported in
 ### 3. Data transformation
 
 Some variables needed more than just renaming to allow comparison.
-
-#### 3.1. Changing characters into numeric <br>
-
-To perform mathematical operations, characters needed to be converted
-into numeric operator. For instance, values that were reported to be
-trace ("tr") or below the detection limit ("\<LOD") were converted to
-zero (0).
 
 
 #### 3.3. Producing the harmonised data library

@@ -168,7 +168,7 @@ Output_table <- Composite_Table %>%
           comment = NA) %>%   
   #CARTBEQmcg_std_creator() %>%
   #  rename(CARTBEQmcg = "CARTBEQmcg_std") %>%   #Changing name of re-calculated variable for making VITA f(x) to work)
- # VITAmcg_std_creator() %>%   #Re-calcuating VITAmcg
+  # VITAmcg_std_creator() %>%   #Re-calcuating VITAmcg
   relocate(food_group, .after = food_desc) %>% #Some columns are relocated for easier reading
   relocate(source_fct, .after = food_group) %>%
   relocate(nutrient_data_source, .after = source_fct) %>%

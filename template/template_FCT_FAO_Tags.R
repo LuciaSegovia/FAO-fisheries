@@ -1,20 +1,26 @@
-
-# Template for cleaning and standardising FCTs
-# after obtaining the FCT data file
+#
+# Template for cleaning and standardising FCTs from diverse sources
+# 
 # More details can be found in the documentation. 
-
+#
 # Note: Most of the optional steps are commented out, to be run
 # remove the "#" adjust for your dataset structure and need and run
-
-
-
+#
+# 0. Obtaining the raw (FCT) file(s) for importing
+# # Check licensing conditions & record the data source (see README)
+#
+##Run this to clean the environment
+#rm(list = ls())
 
 
 # Loading libraries
 ## Note: if it is the first time: install.packages() first
 library(dplyr) # For data cleaning (wrangling)
-library(measurements)
-source(here::here("functions.R")) # Loading nutrition fuctions (change to package when finalise)
+library(stringr) # For string manipulation (data cleaning)
+library(measurements) # For unit conversion
+source(here::here("functions.R")) # Loading nutrition functions (change to package when ready)
+
+
 
 # 1. Importing the data (loading the data)
 ## What kind of file is? E.g.: xlsx (readxl::read_excel)
@@ -28,16 +34,16 @@ data.df <- readxl::read_excel(here::here('template', # Change to your folder nam
 
 # Checking the loaded data
 ## How many rows & columns have the data?
-dim(data.df)
+dim(data.df) # rows & columns
 
 ## What are the variables names? 
 names(data.df)
 
 # We are happy that we have loaded the correct FCT file
 
-# 2. Tidying the data
+# 2. Tidying the data  ----
 
-## 2.1.	Formatting FCT into a tabular format
+## 2.1.	Formatting FCT into a tabular format  ----
 ### Visually checking the data
 
 head(data.df) # Checking the first rows and columns
@@ -48,10 +54,74 @@ tail(data.df) # Checking the last rows and columns
 
 #data.df <- data.df %>% slice(1:300) # Removing the last row, if needed adjust for your dataset
 
-# 2.2.	Renaming variables
+### 2.1.1. Creating food_groups variable and tidying ----
+
+# Extracting food group names
+fgroup <- data.df %>% filter(is.na(food_desc), !is.na(fdc_id)) %>% pull(fdc_id) %>%
+  stringr::str_split_fixed( '/', n = 2) %>% as_tibble() %>% pull(V1) #Creates a list of the food groups using their unique row structure in the table to identify them
+
+# Creating the food_group variable in the FCT
+data.df <- data.df %>% #Identifies the food group number from the fdc_id, and applies the correct food_group from the fgroup list to the food_group column
+  mutate(food_group =
+    ifelse(grepl("01_", fdc_id), fgroup[1],
+    ifelse(grepl("02_", fdc_id), fgroup[2],
+    ifelse(grepl("03_", fdc_id), fgroup[3], 
+    ifelse(grepl("04_", fdc_id), fgroup[4], 
+    ifelse(grepl("05_", fdc_id), fgroup[5],
+    ifelse(grepl("06_", fdc_id), fgroup[6],
+    ifelse(grepl("07_", fdc_id), fgroup[7],
+    ifelse(grepl("08_", fdc_id), fgroup[8],
+    ifelse(grepl("09_", fdc_id), fgroup[9], 
+    ifelse(grepl("10_", fdc_id), fgroup[10], 
+    ifelse(grepl("11_", fdc_id), fgroup[11],
+    ifelse(grepl("12_", fdc_id), fgroup[12],     
+    ifelse(grepl("13_", fdc_id), fgroup[13],
+    ifelse(grepl("14_", fdc_id), fgroup[14],
+    'NA'))))))))))))))) %>% 
+  filter(!is.na(food_desc)) # Removes any rows without a food description entry (the food group name rows, and a row that have already been used for naming)
+
+# Checking changes in the data structure
+data.df %>% filter(is.na(food_desc), # 
+                   !is.na(fdc_id))
+str(data.df) # Checking columns: 1 variable per column, no empty rows.
+head(dta.df)
+dim(data.df) # rows and column # Note: it should have less rows (from trimming) and one more column (food_group)
+
+### 2.1.2. Diving combined variables into two (or more) columns ----
+
+# This is just an example!
+data.df <- data.frame(a = c("x1", "x2", "x3", "x4"), 
+                      b = c("399", "[899]", "[5000]", "3000"), 
+                      b1 = c("399", "450*", NA, "3000"), 
+                      c = c("399", "899", "[5000]", "3000"),
+                      d = c("LOD", "<lod", "[5000]", "tr"))
+
+data.df <- data.df %>% 
+  mutate(e = str_extract(b, '(?<=\\[).*?(?=\\])'),  #Creating calculated values from the lower quality method and removing the original values from the original variable
+         b1 = ifelse(is.na(b1), str_extract(b, '(?<=\\[).*?(?=\\])'), b1)) 
+
+
+# Separating variables: 4 new variables, 3 existing one
+data.df <- data.df %>% 
+  mutate(FATCEg = str_extract(FATg, '(?<=\\[).*?(?=\\])'),  
+         FIBCg =  str_extract(FIBTGg, '(?<=\\[).*?(?=\\])'), 
+         CARTBmcg = ifelse(is.na(CARTBmcg), str_extract(CARTBEQmcg, '(?<=\\[).*?(?=\\])'), CARTBmcg), 
+         TOCPHAmg = ifelse(is.na(TOCPHAmg),str_extract(VITEmg, '(?<=\\[).*?(?=\\])'), TOCPHAmg ),
+         NIAmg = ifelse(is.na(NIAmg), str_extract(NIAEQmg, '(?<=\\[).*?(?=\\])'), NIAmg), 
+         FOLSUMmcg = str_extract(FOLmcg, '(?<=\\[).*?(?=\\])'), 
+         PHYTCPPD_PHYTCPPImg = str_extract(PHYTCPPmg, '(?<=\\[).*?(?=\\])'))
+
+# Checking changes in the data structure
+names(data.df) # Check variable names (are the new variables there?)
+dim(data.df) # rows and column # Note: same rows and 4 more column (4 new variables)
+str(data.df) # Checking columns: 1 variable per column, no empty rows.
+
+
+## 2.2.	Renaming variables  ----
 # Checking variables names
 names(data.df) # Are the variable names = column names? 
 #If not, more formatting is needed (back to previous step)
+
 #If yes, 
 # are the food component variable names using INFOODS tagnames & units
 # e.g. [Variable]_[unit] (NA_mg)? Then, rename other variables:
@@ -60,7 +130,7 @@ names(data.df) # Are the variable names = column names?
 # If not, do they provide INFOODS tagname information? 
 # If yes, use that information to rename food components
 
-# Automatic renaming of INFOODS tagname & units ----
+# Automatic renaming of INFOODS tagnames & units
 #for( i in 8:62){ #Loops through each column between column 8 and 64 - this is specific for each dataset!!
   first_row <- toString(names(data.df)[i]) #Takes the column names and assigns it to a variable (name & unit)
   second_row <- toString(data.df[1, i]) #Takes the first row for that column and assigns it to a variable (tagname)
@@ -71,6 +141,7 @@ names(data.df) # Are the variable names = column names?
 # The next row
 
 # If not, then, manually rename each food component with their correct tagname & current unit
+# Change the names in quotes ("") to those in your dataset, remove/ add as needed 
 
 data.df <- data.df %>%  
   dplyr::rename(
@@ -124,41 +195,38 @@ data.df <- data.df %>%
 names(data.df) # Checking variable names (are all correctly named?)
 head(data)
 
-## 2.3.	Standardisation of values 
+## 2.3.	Standardisation of values  ----
 # Are there any character on the numeric variables (e.g., "tr" in CAmg)?
-
-# This is just an example!
-data.df <- data.frame(a = c("x1", "x2", "x3", "x4"), 
-                      b = c("399", "[899]", "[5000]", "3000"), 
-                      c = c("399", "899", "[5000]", "3000"))
                       
 data.df$comments <- NA # New column to add metadata (e.g., when [] are removed) for data users
 
 # Adding metadata info to the variables before removing the characters
-#fdc_id <- "a" # Variable with the food id/code to be addded into the metadata
+#fdc_id <- "a" # Variable with the food id/code to be added into the metadata
 
 # data.df <- data.df %>% 
 #   mutate(comments = ifelse(stringr::str_detect(. , '\\[.*?\\]'), 
 #   paste0("low quality(", toString(.[stringr::str_which(. , '\\[.*?\\]'), fdc_id], " ", 
 #    names(.)[stringr::str_which(., '\\[.*?\\]')], ")"), comments))
 
-# Replacing character with numberic-like values (e.g trace = 0, missing values = NA)
+# Replacing character with numeric-like values (e.g trace = 0, missing values = NA)
 # Using a function - check what kind of character-like values are
 #Function to remove brackets and replace trace to zero
 #The following f(x) removes [] and changing tr w/ 0
 
-variables <- names(data.df)[2:3] # Specify the NVs columns
+variables <- names(data.df)[2:6] # Specify the NVs columns
 
 data.df <- data.df %>% 
-  mutate_at(variables, no_brackets_tr) %>%  #This applies the above function
+  mutate_at(variables, no_brackets_tr)   #This applies the function for removing brackets
 
-# Check that there are no more character
-  
+# Check that there are no more characters
+  # Currently, only works for presence of character strings, [], and * 
+#NOTE: we are using only NVs variables as character are found in non-numeric variables (i.e., food_desc)
+
+data.df[, variables][grepl("[:alpha:]|\\[|\\*", data.df[, variables])] 
 
 # This steps only can be run after before step the previous step
   data.df <- data.df %>% 
   mutate_at(variables, as.numeric) # This convert all NVs into numeric 
-
 
 
 # 2.4.	Units of measurements
@@ -172,14 +240,21 @@ data.df[, variable] <- data.df[, variable]/1000
 # Also can use conv_unit()
 
 #Then, other might be also a different denominator: 
-# Amino acid in 100g of protein 
+# Amino acid in g/100g of protein to mg or EP.
+
+#Unit conversion and in new column of Amino Acids
+# multiplying AA*Protein/10 (Eq.2.3)
+aa_prot <- grep( "_100gPROTCNT", names(data.df), value = TRUE) # Getting AA variables
+aa_mg <- gsub("g_100gPROTCNT", "mg", aa_prot) # Getting the new variable name [NV+unit]
+
+data.df[, aa_mg] <- data.df[, aa_prot]*data.df$PROCNTg*10 # Generating the new AA variable
 
 
 
-# Data Output ----
+# 2.5. Data output for harmonisation ----
 
 # Once all these steps are done: The FCT is clean & standardise 
-# And it's ready to be merge, exported, and/or, be used w/ the other scripts
+# And it's ready to be merge, exported, and/or, be used w/ the other scripts (harmonisation)
 
 write.csv(data.df, file = here::here("Output", "template-name_FCT_FAO_Tags.csv"), # Change according to the FCT file
           row.names = FALSE) #Saves the newly-created data table to the Output folder
