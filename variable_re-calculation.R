@@ -1,12 +1,38 @@
+#
+# This script re-calculate food components in standardised FCTs
+# 
+# More details can be found in the documentation. 
+#
+# Note1: Most of the optional steps are commented out, to be run
+# remove the "#" adjust for your dataset structure and needs and run
+#
+# Note2: If your dataset is not in standard format check documentation
+# 
+#
+##Run this to clean the environment
+#rm(list = ls())
 
-library(gt)
-#If data is not loaded 
-source("merging_all.R")
-source("functions.R")
 
+# Loading libraries
+## Note: if it is the first time: install.packages() first
+library(dplyr) # For data cleaning (wrangling)
+library(stringr) # For string manipulation (data cleaning)
+library(measurements) # For unit conversion
+library(gt) # For generating tables
+source(here::here("functions.R")) # Loading nutrition functions (change to package when ready)
+
+
+# Loading the data
+# For reproducing, our updating the FAO-fisheries load data by
+#Uncommenting and running the following
+#source(here::here("merging_all.R"))
+#data.df <- fao_fish_fct
+
+data.df <- 
+  
 # 0) Check that we have all FCTs merged ----
 
-fao_fish_fct %>% 
+data.df %>% 
   group_by(source_fct) %>% count()
 
 
