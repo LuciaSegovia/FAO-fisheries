@@ -148,13 +148,7 @@ semi-manually using R scripts (`NO21/NO21.R`) and it is reported in
 (`NO21/NO21_docu.Rmd`).
 
 
-
-### 3. Data transformation
-
-Some variables needed more than just renaming to allow comparison.
-
-
-#### 3.3. Producing the harmonised data library
+### 3. Data compilation and harmonisation
 
 Once the FCTs were loaded and harmonised, we combined them into a single
 data file (FCT data library), extracted from each FCT the fish and fishery product items and merged the

@@ -14,7 +14,8 @@ Standardisation_fn <- function(df, var1, var2, var3, new_col_name = "standardise
   
   df[ncol(df)+1] <- NA
   colnames(df)[ncol(df)] <- new_col_name
-  
+
+  for(i in 1:nrow(df)){
   if (!is.na(df$var1[i])) {
     print(!is.na(df$var1[i]))
     df$var4[i] <- df$var1[i]
@@ -29,4 +30,6 @@ Standardisation_fn <- function(df, var1, var2, var3, new_col_name = "standardise
     df$var4[i] <- NA
   }
   print(df$var4[i])
+  }
 }
+

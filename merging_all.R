@@ -39,8 +39,8 @@ list.files("Output/", pattern = "*_FCT_FAO_Tags", recursive=FALSE, #so it is not
   map_df(~read_csv(., col_types = cols(.default = "c"), locale = locale(encoding = "Latin1")))  
 
 #saving all the cleaned FCTs/FCDBs into one single object (data.frame)
-#fct_cover <- list.files("Output/", pattern = "*_FCT_FAO_Tags", recursive=FALSE, full.names=TRUE) %>% 
-# map_df(~read_csv(., col_types = cols(.default = "c"), locale = locale(encoding = "Latin1"))) 
+fct_cover <- list.files("Output/", pattern = "*_FCT_FAO_Tags", recursive=FALSE, full.names=TRUE) %>% 
+ map_df(~read_csv(., col_types = cols(.default = "c"), locale = locale(encoding = "Latin1"))) 
 
 #checking that we have loaded all the FCT/FCDBs (n=13)
 fct_cover %>% distinct(source_fct) 

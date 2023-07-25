@@ -28,10 +28,9 @@ source(here::here("functions.R")) # Loading nutrition functions (change to packa
 #source(here::here("merging_all.R"))
 #data.df <- fao_fish_fct
 
-data.df <- 
+data.df <- read.csv(here::here("Output", "template-name_FCT_FAO_Tags.csv"))
   
 # 0) Check that we have all FCTs merged ----
-
 data.df %>% 
   group_by(source_fct) %>% count()
 
@@ -56,26 +55,56 @@ subset(fao_fish_fct, is.na(ASHg_std)) %>% count(source_fct)
 
 ##├  ) Fat - standardised ----
 
-#This function combine all the Tagnames for FAT_g_standardised
 
-for(i in 1:nrow(fao_fish_fct)){
+#This loop combine all the Tagnames for FAT_g_standardised
+#Checking variable names:
+names(data.df)
+
+# Adding Fat component names
+var1 <- "FATg"
+var2 <- "FAT_g"
+var3 <- "FATCEg"
+#data.df$comments <- NA #Uncomment if not found
+
+# New variable (where to be stored) (check with documentation)
+new_var <- "FAT_g_standardised"
+text <- paste0(new_var, " equals to ") #metadata in comments variable
+
+# Loop that prioritise in the other of the variables defined above (1->3)
+for(i in 1:nrow(data.df)){
   print(i)
-  if (!is.na(fao_fish_fct$FATg[i])) {
-    print(!is.na(fao_fish_fct$FATg[i]))
-    fao_fish_fct$FAT_g_standardised[i] <- fao_fish_fct$FATg[i]
-  }  
-  if (is.na(fao_fish_fct$FATg[i])) { 
-    fao_fish_fct$FAT_g_standardised[i] <- fao_fish_fct$FAT_g[i]
+  if (!is.na(data.df[i, var1])) {
+    print(!is.na(data.df[i, var1]))
+    data.df[i, new_var] <- data.df[i, var1]
+    data.df[i, "comments"] <- ifelse(!is.na(data.df[i, "comments"]), 
+                                     paste0(data.df[i, "comments"], ";", text, var1), 
+                                     paste0(text, var1))
+                                     
+    
+  }  else if (is.na(data.df[i, var1]) & !is.na(data.df[i, var2])) { 
+    data.df[i, new_var] <- data.df[i, var2]
+    data.df[i, "comments"] <- ifelse(!is.na(data.df[i, "comments"]), 
+                                     paste0(data.df[i, "comments"], ";", text, var2), 
+                                     paste0(text, var2))
+    
   } 
-  if (is.na(fao_fish_fct$FATg[i]) & is.na(fao_fish_fct$FAT_g[i])) {
-    fao_fish_fct$FAT_g_standardised[i] <- fao_fish_fct$FATCEg[i]
+  if (is.na(data.df[i, var1]) & is.na(data.df[i, var2]) & !is.na(data.df[i, var3])) {
+    data.df[i, new_var] <- data.df[i, var3]
+    data.df[i, "comments"] <- ifelse(!is.na(data.df[i, "comments"]), 
+                                     paste0(data.df[i, "comments"], ";", text, var3), 
+                                     paste0(text, var3))
+    
   }
-  if (is.na(fao_fish_fct$FATg[i]) & is.na(fao_fish_fct$FAT_g[i]) & 
-      is.na(fao_fish_fct$FATCEg[i])) {
-    fao_fish_fct$FAT_g_standardised[i] <- NA
+  if (is.na(data.df[i, var1]) & is.na(data.df[i, var2]) & is.na(data.df[i, var3])) {
+    data.df[i, new_var] <- NA
   }
-  print(fao_fish_fct$FAT_g_standardised[i])
+  print(data.df[i, new_var])
 }
+
+# Checking that the changes are performed
+names(data.df)
+data.df[, c(var1, var2, var3, new_var, "comments")] #checking the new variable w/ other
+dim(data.df) # same rows, one more column
 
 
 #├ ) Carbohydrates - standardised ----
