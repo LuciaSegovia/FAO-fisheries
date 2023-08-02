@@ -203,10 +203,14 @@ data.df$comments <- NA # New column to add metadata (e.g., when [] are removed) 
 # Adding metadata info to the variables before removing the characters
 #fdc_id <- "a" # Variable with the food id/code to be added into the metadata
 
-# data.df <- data.df %>% 
-#   mutate(comments = ifelse(stringr::str_detect(. , '\\[.*?\\]'), 
-#   paste0("low quality(", toString(.[stringr::str_which(. , '\\[.*?\\]'), fdc_id], " ", 
-#    names(.)[stringr::str_which(., '\\[.*?\\]')], ")"), comments))
+ data.df <- data.df %>% 
+   mutate(comments = ifelse(stringr::str_detect(. , '\\[.*?\\]'), 
+   paste0("low quality(", toString(.[stringr::str_which(. , '\\[.*?\\]'), fdc_id], " ", 
+    names(.)[stringr::str_which(., '\\[.*?\\]')], ")"), comments)))
+   
+data.df$comments <- ifelse(stringr::str_detect(data.df[,i] , '\\[.*?\\]'), 
+                      paste0("low quality(", toString(.[stringr::str_which(. , '\\[.*?\\]'), fdc_id], " ", 
+                 names(.)[stringr::str_which(., '\\[.*?\\]')], ")"), comments))
 
 # Replacing character with numeric-like values (e.g trace = 0, missing values = NA)
 # Using a function - check what kind of character-like values are

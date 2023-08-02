@@ -207,7 +207,9 @@ In the IN17, fatty acids (including DHA and EPA) needed to be converted from mg/
 
 Similarly, in JA15, we need to change the unit of the fatty acids (DHA and EPA) from mg to g, and the edible portion was calculated from refuse (Eq.3.1).
 
-Moreover, when (substantial) changes, like those mentioned above, were
+In UK21, alcohol values were converted from g/100mL to g/100g (`ALCg_100mL` to `ALCg`) using [Eq. 1](). Moreover, in other to proceed with the conversion values of density (specific gravity) were imputed from the FAO/INFOODS Density database v.2 (@charrondiereFAOINFOODSDensity). The imputed values were recorded an applied using a separate script (`UK21_missing-values.R`) as part of the reproducibility and interoperability of the framework. 
+
+Finally, when (substantial) changes, like those mentioned above, were
 made to the values reported in the original FCT, documentation was done
 on GitHub so future users could review our decisions:
 
@@ -547,7 +549,7 @@ reported in `missing.R`, and in the `comment` variable in the Fisheries Global N
 In this section we reported the imputed values and the
 annotated scripts are complied in `missing.R`.
 
-There were only four ICS FAOSTAT categories that needed data impututation. The rationale is described below for each one:
+There were only four ICS FAOSTAT categories that needed data imputation. The rationale is described below for each one:
 
 For **Cephalopods, cured**, we used the water-adjusted Se mean
 concentration of the items reported in table 5 to "complete" the Se

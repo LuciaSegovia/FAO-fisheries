@@ -122,7 +122,7 @@ convert from mg/100g to g/100g, or from percentage (100%) to a fraction (1). For
 Converting Units, Denominators and Expression (FAO/INFOODS, 2012b), and
 the suggested standard reporting units.
 
-Eg. Converting alcohol from weight in volume (w/v) to weight in mass (w/m).
+Eg. Converting alcohol from weight in volume (w/v) to weight in mass (w/m). (See INFOODS Guidelines - page 12)
 
 **Eq.1** ALC (g/100mL) / density (g/mL) = ALC (g/100 EP)
 
@@ -227,7 +227,7 @@ Vitamin B6 or total fat into a `_standardised` variable.
 
 #### 3.5. Imputing values <br>
 
-Data imputation was avoided whenever it was possible (i.e., when mean value for each ICS SUA fishery categories were available (n=>1). In the cases when this condition was not met, a case-by-case approach was taken and it was documented here (See Section 4.2.1. Missing values) and in the final Fisheries Global NCT was docummented in the column `comment`. 
+Data imputation was avoided whenever it was possible (i.e., when mean value for each ICS SUA fishery categories were available (n=>1). In the cases when this condition was not met, a case-by-case approach was taken and it was documented here (See Section 4.2.1. Missing values) and in the final Fisheries Global NCT was docummented in the column `comments`. 
 
 ##### Generating functions for data transformation <br>
 
