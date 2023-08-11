@@ -1,0 +1,62 @@
+---
+title: "Developing a reproducible framework for generating FCTs & NCTs"
+subtitle: "MAPS Briefing <br/> (02/08/2023)"
+format:
+     revealjs:
+        max-scale: 2
+        incremental: true
+        scrollable: true
+        auto-animate-easing: ease-in-out
+        auto-animate-unmatched: false
+        auto-animate-duration: 0.8
+        slide-number: true
+        logo: MAPS-logo.png
+        css: logo.css
+        theme: simple.scss
+        embed-resources: true
+editor: source
+resources:
+    - demo.pdf
+---
+
+## Background
+
+<br/>
+1. Food composition tables and databases (FCTs) have multiple uses in public health nutrition, including  estimating apparent intake
+
+2. The information in FCTs is often compiled into survey specific food composition datasets: Nutrient Conversion Tables (NCTs)
+
+3. Many processing steps and decisions are made to generate both FCTs and NCTs leading to high data uncertainty & significant human/financial resources
+
+4. These uncertainties will leak into the apparent intake and risk of (in)adequacy estimates 
+<br/>
+
+## Why the framework was needed?
+<br/>
+
+1. FCTs are available in multiple data formats.
+2. Data harmonisation requires effort, expertise, and time.  
+3. Increasing the standardisation of the FCTs would...
+
+::: {.fragment}
+\... Lower cost of updating & generating new NCTs.
+:::
+::: {.fragment}
+\... Increase reproducibility & transparency of NCTs and their survey outputs.
+:::
+::: {.fragment}
+\... Increase re-usability & dissemination of FCTs/NCTs.
+:::
+
+## Objectives
+
+1. Increase the transparency, reproducibility and efficiency of FCT/NCT compilation, by:
+
+-  Providing (R) scripts for FCT standardisation & documentation of the steps & decision made.
+
+-  Providing (R) scripts for quality & visual checks
+
+-  Proving (R) scripts for NCT compilation
+
+2. Provide guidance for different users for (re-)using & adpating the (R) scripts and the datasets generated within the project for their needs.
+

@@ -30,7 +30,7 @@ SOP_std_creator <- function(dataset) {
     #' @param WATERg Water/ moisture content in g per 100g of EP
     #' @param PROCNTg Protein in g per 100g of EP, as reported in the original FCT and assumed to be calculated from nitrogen (NTg) content
     #' @param FAT_g_standardised fat content unknown method of calculation in g per 100g of EP
-    #' @param CHOAVLg Available carbohydrates calculated by weight in g per 100g of EP
+    #' @param CHOAVLDFg_std Available carbohydrates calculated by difference in g per 100g of EP
     #' @param FIBTGg Total dietary fibre by AOAC Prosky method expressed in g per 100g of EP
     #' @param ALCg Alcohol in g per 100g
     #' @param ASHg_std Ashes in g per 100g of EP
@@ -41,7 +41,7 @@ SOP_std_creator <- function(dataset) {
         "WATERg",
         "PROCNTg",
         "FAT_g_standardised",
-        "CHOAVLg",
+        "CHOAVLDFg_std",
         "FIBTGg",
         "ALCg",
         "ASHg_std"
@@ -67,7 +67,7 @@ SOP_std_creator <- function(dataset) {
                     WATERg,
                     PROCNTg,
                     FAT_g_standardised,
-                    CHOAVLg,
+                    CHOAVLDFg_std,
                     FIBTGg,
                     ALCg,
                     ASHg_std,
@@ -345,7 +345,7 @@ nia_conversion_creator <- function(dataset) {
 
 
 
-RETOLmcg_Recalculator <- function(dataset) {
+RETOLmcg_calculator <- function(dataset) {
     #' @title RETOLmcg_Recalculator
     #' @description Recalculates the values of RETOLmcg(Retinol in mcg per 100g of EP), when it is not provided. Works in 2 cases and in both cases an associated comments is added indicating how the value was derived.
     #' @param RETOLmcg Retinol in mcg per 100g of EP
@@ -410,8 +410,8 @@ RETOLmcg_Recalculator <- function(dataset) {
 }
 
 
-
-CARTBEQmcg_std_back_calculator_VITA_RAEmcg <- function(dataset) {
+# TODO: As above to add 2-case (for VITAmcg)
+CARTBEQmcg_backcalculator <- function(dataset) {
     #' @title CARTBEQmcg_std_back_calculator_VITA_RAEmcg
     #' @description Recalculates CARTBEQmcg_std when they are NAs. It is used after running `CARTBEQmcg_std_creator(dataset)` first. It does the back calculation using sum(12 * VITA_RAEmcg, -12 * RETOLmcg).
     #' @param CARTBEQmcg_std Beta-carotene equivalents, expressed in mcg per 100g of EP
@@ -514,4 +514,69 @@ CARTBEQmcg_std_to_zero <- function(dataset) {
         mutate(comments = ifelse((CARTBEQmcg_std < 0), paste0(comments, "| Impausible value of CARTBEQmcg_std = ", CARTBEQmcg_std, " replaced with 0"), comments)) %>%
         mutate(CARTBEQmcg_std = ifelse(CARTBEQmcg_std < 0, 0, CARTBEQmcg_std)) %>%
         ungroup()
+}
+
+
+ASHDFg_calculator <- function(dataset) {
+  #' @description Calculates ASHDFg = 100-(WATERg + PROCNTg + FAT_g_standardised + CHOAVLg + FIBTGg + ALCg).
+  #' Column names are case sensitive and error is thrown if not found.
+  #' @param dataset :Required (FCT dataset to be checked)
+  #' @param ASHDFg Ash calculated by difference in g per 100g EP 
+  #' @param WATERg Water/ moisture content in g per 100g of EP
+  #' @param PROCNTg Protein in g per 100g of EP, as reported in the original FCT and assumed to be calculated from nitrogen (NTg) content
+  #' @param FAT_g_standardised fat content compiled from all tagnames in g per 100g of EP
+  #' @param CHOAVLg Available carbohydrates calculated by weight in g per 100g of EP
+  #' @param FIBTGg Total dietary fibre by AOAC Prosky method expressed in g per 100g of EP
+  #' @param ALCg Alcohol in g per 100g
+  #' @return Original FCT dataset with SOP_std column added
+  #' @examples
+  # Check presence of required columns
+  columns <- c(
+    "WATERg",
+    "PROCNTg",
+    "FAT_g_standardised",
+    "CHOAVLg",
+    "FIBTGg",
+    "ALCg"
+    )
+  check_columns(dataset = dataset, columns = columns)
+  tryCatch(
+    dataset %>%
+      as_tibble() %>%
+      mutate_at(.vars = columns, .funs = as.numeric) %>%
+      # ! Create a temp row with the count of NAs in the required columns
+      mutate(temp = rowSums(is.na(
+        dataset %>%
+          select(all_of(columns))
+      ))) %>%
+      # Rowwise allows for per row evaluations.
+      rowwise() %>%
+      # ! If all the rows are NA then output is NA.
+      # ! Else do the calculation and omit NAs.
+      mutate(ASHDFg = ifelse(
+        temp == length(columns),
+        NA,
+        100-sum(
+          WATERg,
+          PROCNTg,
+          FAT_g_standardised,
+          CHOAVLg,
+          FIBTGg,
+          ALCg,
+          na.rm = TRUE
+        )
+      )) %>%
+      # ! remove the temp column
+      select(-temp) %>%
+      ungroup(),
+    error = function(e) {
+      print(
+        paste0(
+          "Error : Required columns i.e. ",
+          columns,
+          " should be numeric. The ASHDFg will not be calculated"
+        )
+      )
+    }
+  )
 }

@@ -235,7 +235,7 @@ source("variable_re-calculation.R")
            !is.na(SEmcg),
            str_detect(food_desc, "crayfish|Crayfish" )) %>% pull(fdc_id)
   
-  crayfish[4] <- "092004" #Adding this from the ref. list
+  crayfish[4] <- "092004" # Adding this from the ref. list
   #Storing FCT (source_fct)
   crayfish_fct <- unique(fao_fish_fct$source_fct[fao_fish_fct$fdc_id %in% crayfish])
   

@@ -47,6 +47,15 @@ ggplot( aes(x=fct_label, y=perc)) +
 
 The data cleaning operations were done by individual annotated R scripts for each FCT and were stored, together the raw data (raw FCT files), in a folder with its biblioID (See Table 2). Details on the operations and decisions made during the data cleaning are presented in subsequent sections. 
 
+##### 2.1.1. Creating food groups variable and tidying
+
+Each FCT has its own food groups, for instance in some FCTs were useful
+for identifying fishery and fishery products. For instance in UK21
+fisheries were divided into five food groups: "White fish (JA)", "Fatty
+fish (JC)", "Crustacea (JK)", "Molluscs (JM)", and "Fish products and
+dishes (JR)". The id (`fcd_id`) could be used as well to identify as all
+fisheries, as all started with "16".
+
 #### 2.2. Renaming variables: Food components definition and re-naming
 
 Food component names and descriptions were examined in each FCT and renamed with the corresponding Tagnames.
@@ -143,6 +152,21 @@ In summary, all the FCTs needed some degree of food component renaming.7 FCT’s
 
 In summary, the most common transformation was from edible portion expressed in percentage to a fraction, which was performed in XX FCTs. Other measurement unit’s standardisation performed were from g to mg, for example, tryptophan (g/100g) to mg/100g or vice versa, for DHA and EPA g/100g to mg/100g.  and vitamin A (IU) to mcg/100g, for some foods, in US19, tryptophan from (g/100g of protein) to mg/100g EP in IN17. Reported missing values were standardised in 4 FCTs of the 12 FCTs, while trace and/or below limit of detection values were transformed to zero in 7 FCTs (IN17 ("<LOD"), BA13, BR11, JA15 ("Tr"), and KE18, and WA19 ("tr"). Brackets (and parenthesis) used to denote “lower quality values” were removed in 4 FCTs, such as JA15, KE18, WA19 and UF17. 
 
+
+**a. Removing brackets or other special characters ("[]", "()", "\*")**
+
+We generated a function (`no_brackets_tr()`) to change trace and below the detection limit values to zero, and to remove brackets (see `functions.R`).
+
+Trace and/or below detection limit were reported and converted to zero
+in the following FCTs: IN17 ("\<LOD"), BA13, BR11, JA15 ("Tr"), and
+KE18, UK21, and WA19 ("tr").
+
+Characters and symbols were used to report missing values were "nv" in
+DK19, "-" in JA15, and "M" in NO21 which were all transformed to `NA`. Similarly, nutrients present in significant quantities (not trace), but without reliable information on the amount, were reported in UK21 as "N" which were converted to `NA`.
+
+
+
+
 **a. Removing parentheses and brackets**: 
 
 In JA15, parentheses were used to denote "estimated values". According
@@ -168,34 +192,8 @@ fortified with folic acid. Note that some issues on the reporting of fortificati
 in-depth because folate and related food components were outside the scope of this work. 
 
 
-##### Food name/ description standardisation
 
-In addition, the standard fish identification was done for the N021 which is detailed in NO21 documentation. 
-
-##### Food groups <br>
-
-Each FCT has its own food groups, for instance in some FCTs were useful
-for identifying fishery and fishery products. For instance in UK21
-fisheries were divided into five food groups: "White fish (JA)", "Fatty
-fish (JC)", "Crustacea (JK)", "Molluscs (JM)", and "Fish products and
-dishes (JR)". The id (`fcd_id`) could be used as well to identify as all
-fisheries, as all started with "16".
-
-#### 2.4. Other tidying operations
-
-
-### 3. Transforming values
-
-#### 3.1. Characters in nutrient values <br>
-
-Trace and/or below detection limit were reported and converted to zero
-in the following FCTs: IN17 ("\<LOD"), BA13, BR11, JA15 ("Tr"), and
-KE18, UK21, and WA19 ("tr").
-
-Characters and symbols were used to report missing values were "nv" in
-DK19, "-" in JA15, and "M" in NO21 which were all transformed to `NA`. Similarly, nutrients present in significant quantities (not trace), but without reliable information on the amount, were reported in UK21 as "N" which were converted to `NA`.
-
-#### 3.2 & 3.3. Unit of measurement transformation and re-calculation <br>
+#### 2.4. Standardising unit of measurement <br>
 
 Some components were reported in different measurement units as the recommended units in
 the Tagnames, hence unit conversion operations were performed. For
@@ -218,44 +216,24 @@ Documentation in GitHub
 [Issue\\#9](https://github.com/LuciaSegovia/UoN-FAO/issues/9),
 [Issue\\#10](https://github.com/LuciaSegovia/UoN-FAO/issues/10).
 
-#### 3.3. Merging all the data together <br>
+### 3. Merging all the data together <br>
 
 Once the FCTs were loaded and harmonised, we combined them into a single data library. 
 
-###### 3.3.1. Allocating the FAO codes: ISSCAAP, alpha-three, and ICS FAOSTAT.
+#### 3.4.	Food name/ description standardisation and food matching  <br>
 
-Fish matching between FCTs fish entries and ICS FAOSTAT fish category, alpha-three code and ISSCAAP code was previously done in the Fishery Global NCT, 2022. Hence, we used that information to generate a fisheries data library which
-contained information for each fish entry regarding ISSCAAP, ICS FAOSTAT and
-alpha-three codes ("ics-code_fish-code.csv"). The dataframe
-`ics_code_file` contained the information in the following variables:
-`ICS.FAOSTAT.SUA.Current.Code`, `source_fct`, `NDB_number`, `fdc_id`,
-`Food.description`, `Scientific.name`, `ISSCAAP.Group`, and
-`X3.alpha.code`.
+#### 3.6. Dealing with missing values <br>
 
-Minor adjustment were needed, for instance, the food id of KE18 in the
-Fishery Global NCT, 2022 were as in the "original" (raw) KE18 (e.g.,
-"0807"). In order to match the KE18 food ids (`fdc_id`) in our dataset, we removed the first "0" (e.g., "807"). For the US19, we needed to change the `fdc_id` to `NDB_number`. Then, we merged `ics_code_file` (the dataset derived
-from Fishery Global NCT, 2022) and the newly Fisheries nutrient table
-(`fish_fct`) by each fish entry id. (`fdc_id`). That operation resulted
-in the fisheries NCT library with all the fishery products and its corresponding ICS
-FAOSTAT code, alpha-three code and ISSCAAP code.
+##### 3.6.1. Imputing values <br>
 
-The UK21 was excluded from the Fishery Global NCT, 2022 hence ICS
-FAOSTAT code were not available for the fish in that FCT.
+In the fisheries case study, data imputation from different foods was avoided whenever it was possible, such as when values for each ICS SUA Fishery Category were available (n≠0) (See section 3.6.1 in _methods.qmd). In the instances when this condition was not met, a case-by-case approach was taken for each category and food component to avoid missing values. This was performed in a separate script (`missing.R`) which provide flexibility in the workflow, as it could be avoided if new data on the missing values are provided, and/or allowing to test the impact of adding those values (or others) to the final datasets. 
 
-After all the merging operations, only fish with information on ICS code
-were kept, hence, around 318 fish entries were filtered out, mainly from
-UK21 but some from [NO21](see NO21_docu.R) as well.
+As reported previously, missing values were evaluated only for each ICS SUA Fishery Category, which reported no missing values with the exception of Se concentration in four categories: “Cephalopods, cured”, “Aquatic animals nei, cured”, “Aquatic animals nei, preparations nei”, "Crustaceans, cured" and "Cephalopods, canned”, which represented the 0.2% of Se values (n=11). For “cephalopods, canned”, we used fish entries from a similar category, following the approach used for other categories, such as frozen fish and explained before. For the other three categories, that approach was not possible due to the nature of the foods, hence imputation was used instead. The details of the fish entries values used, and the operations performed (e.g., water adjustment) for each imputed value are found in the documentation, and in the global fisheries NCT.
 
-```{r, loading-data, include=FALSE}
 
-source("variable_re-calculation.R")
+Moreover, 35% of the beta-carotene eq. values were imputed from either Beta-carotene (n= 1,422) or Beta-carotene eq. (n=297), furthermore, in 38% entries (n=1,849) the calculation of the carbohydrates available (by difference) yielded negative values which were assumed zero. Likewise, alcohol and fibre were assumed zero when used for recalculating values when those values were not reported (i.e., 3590 and 440 missing values respectively).
 
-fish_fct %>% filter(is.na(ICS.FAOSTAT.SUA.Current.Code)) %>% count(source_fct)
-
-```
-
-#### 3.4. Calculated and combined variables (standardised) <br>
+#### 3.5. Re-calculating variables <br>
 
 After merging and filtering the fishes, and before calculating the mean
 nutrient values of each ICS FAOSTAT fishery category some variables needed to be recalculated and/or standardised.
@@ -285,11 +263,11 @@ In addition, two special cases are reported here: ASHg_std and RETOLmcg, which w
 
 Sum of proximate was not reported by all FCTs. Therefore, it was
 re-calculated using the equation reported in the methods section
-(@eq-5). Additionally, it was calculated at ICS (SUA) fish category
+(@eq-5). 
+
+Additionally, it was calculated at ICS (SUA) fish category
 level.
 
-Sum of proximate (=Σof water + protein + fat + available carbohydrates +
-dietary fibre + alcohol + ash)
 
 ```{r}
 

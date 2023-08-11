@@ -778,10 +778,8 @@ fisheries, as all started with "16".
 
 Trace and/or below detection limit were reported and converted to zero
 in the following FCTs: IN17 ("\<LOD"), BA13, BR11, JA15 ("Tr"), and
-KE18, UK21, and WA19 ("tr").
+KE18, UK21, and WA19 ("tr"). These operation were performed using the function (`no_brackets_tr()`) to change trace and below the detection limit values to zero, and to remove brackets (see `functions.R`). When different characters or symbols were used, manual recode was needed. For instance, characters and symbols were used to report missing values were "nv" in DK19, "-" in JA15, and "M" in NO21 which were all transformed to `NA`. Similarly, nutrients present in significant quantities (not trace), but without reliable information on the amount, were reported in UK21 as "N" which were converted to `NA`.
 
-Characters and symbols were used to report missing values were "nv" in
-DK19, "-" in JA15, and "M" in NO21 which were all transformed to `NA`. Similarly, nutrients present in significant quantities (not trace), but without reliable information on the amount, were reported in UK21 as "N" which were converted to `NA`.
 
 #### 3.2 & 3.3. Unit of measurement transformation and re-calculation <br>
 
@@ -833,7 +831,7 @@ After all the merging operations, only fish with information on ICS code
 were kept, hence, around 318 fish entries were filtered out, mainly from
 UK21 but some from [NO21](see NO21_docu.R) as well.
 
-```{r loading-data, include=FALSE}
+```{r, loading-data, include=FALSE}
 
 source("variable_re-calculation.R")
 
@@ -842,6 +840,8 @@ fish_fct %>% filter(is.na(ICS.FAOSTAT.SUA.Current.Code)) %>% count(source_fct)
 ```
 
 #### 3.4. Calculated and combined variables (standardised) <br>
+
+Special attention was given to a selection of nutrients based on their importance to health and because fish and aquatic products are one of the main dietary sources of those nutrients, while other nutrients were finally excluded due to the limited data availability. 
 
 After merging and filtering the fishes, and before calculating the mean
 nutrient values of each ICS FAOSTAT fishery category some variables needed to be recalculated and/or standardised.

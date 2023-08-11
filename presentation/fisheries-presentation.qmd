@@ -1,6 +1,6 @@
 ---
-title: "Developing a reproducible approach for generating FCTs & NCTs"
-subtitle: "Technical webinar on the extension of the global food composition table for fisheries. November, 2022"
+title: "Developing a reproducible framework for generating FCTs & NCTs"
+subtitle: "MAPS Briefing <br/> (02/08/2023)"
 format:
      revealjs:
         max-scale: 2
@@ -25,7 +25,7 @@ library(tidyverse)
 library(gt)
 library(kableExtra)
 
-fao_fish_fct <- readRDS(file = here::here("inter-output",
+fao_fish_fct <- readRDS(file = here::here("presentation",
                       "fao-fish-df.rds"))
 
 ```
@@ -33,9 +33,12 @@ fao_fish_fct <- readRDS(file = here::here("inter-output",
 
 {{< include _intro.qmd >}}
 
-# The Fisheries Global Nutrient Conversion Table
+{{< include _background-objectives.qmd >}}
 
-## The Fisheries Global Nutrient Conversion Table {auto-animate=true}
+# The Fisheries Global Nutrient Conversion Table {visibility="hidden"}
+
+
+## The Fisheries Global Nutrient Conversion Table {auto-animate=true} {visibility="hidden"}
 
 <br/>
 The Fisheries Global NCT provided information on:
@@ -48,7 +51,7 @@ The Fisheries Global NCT provided information on:
 -&nbsp;11 Food composition tables and databases (FCTs).
 
 
-## The Fisheries Global Nutrient Conversion Table {auto-animate=true}
+## The Fisheries Global Nutrient Conversion Table {auto-animate=true} {visibility="hidden"}
 
 <br/>
 The Fisheries Global NCT provided information on:
@@ -67,98 +70,87 @@ The Fisheries Global NCT provided information on:
 ::: notes
 We were tasked to evaluate 10 fish-relevant nutrients for inclusion
 :::
-# Development of the framework for compiling NCTs
+# Development of the framework for compiling FCTs/NCTs
 
-## Why the framework was needed?
-<br/>
 
-1. FCTs are available in multiple data formats.
-2. Data harmonisation requires effort, expertise, and time.  
-3. Increasing the standardisation of the FCTs would...
+## Overview of the FCT/NCT framework
 
-::: {.fragment}
-\... Lower cost of updating & generating new NCTs.
-:::
-::: {.fragment}
-\... Increase reproducibility of NCTs and their survey outputs.
-:::
-::: {.fragment}
-\... Increase re-usability & dissemination of FCTs.
-:::
+![](Workflow_v2.png)
 
-## Overview of the NCT framework
+## The user journey
 
-![](Workflow.PNG)
-
-## Overview of the NCT framework {visibility="hidden"}
-
-```{r}
-
-DiagrammeR::grViz("digraph { graph [layout = dot, rankdir = TB]
-              
-node [shape = box]
-          
-rec1 [label = 'Step 1. Identify and obtain data'] 
-rec2 [label = 'Step 2. Importing the data into the tool (R)']
-rec3 [label = 'Step 3. Data standardisation']
-rec4 [label = 'Step 4. Data harmonisation'] 
-rec5 [label = 'Step 5. Visual & Statistic QC'] 
-rec6 [label = 'Step 6. Exporting data & metadata']
-
-#node [shape = circle]
-#QC1; QC2; QC3
-
-# edge definitions with the node IDs 
-rec1 -> rec2 -> rec3 -> rec4 -> rec5 -> rec6; 
-rec5 -> rec1 ; rec5 -> rec4; 
-#QC1 -> rec1; QC2 -> rec2;
-#QC3 -> rec4
-
-}")
-   
-                  
-```
+![](Framework-users_v2.png)
 
 ## Steps 1 & 2: Data Sources & Importing 
 
 <br/> 
 
--  Downloading and storing original 11 FCTs [^2] + Norwegian FCT (2021).
+-  Selection criteria for FCTs are based on the relevancy for the study/context
+<br/> 
+-  Attention to metadata/ documentation, licensing and data format
+<br/> 
+-  FCTs are imported into R(Studio) & independent scripts are generated for each FCT.
 
--   FCTs were imported into R(Studio) & independent scripts were generated for each FCT.
+## Steps 2: Data Importing 
 
-- All the data operations (from Step 2 to Step 6) were done in R(Studio).
+<br/> 
+FCTs  were found in a variety of formats
+<br/> 
 
-[^2]: FCTs and food components that were already identified & compiled in the Fisheries Global NCT.
+``` {.r code-line-numbers="2-3"}
 
-::: notes
-Thirteen FCTs were selected for the Food Global NCT, of which two were excluded, and one new was added for its relevance to the Fisheries Global NCT (i.e. to fill some data gaps for DHA and EPA).
-:::
+# 1. Importing the data (loading the data)
+## What kind of file is? E.g.: xlsx (readxl::read_excel)
+#Reads the excel document 
+data.df <- readxl::read_excel(here::here('template', # Change to your folder name
+                                'template-file-name.xlsx'), # Change to your file name
+                              sheet = 5  # Change to excel sheet where the FCT is stored in the excel file
+                              ) %>%  
+  mutate(source_fct = 'template-xx')  # Creates the source_fct column and fills with "location-year" of FCT 
+
+  
+```
+
+
+## Steps 2: Data Importing 
+
+<br/> 
+FCTs  were found in a variety of formats
+<br/> 
+
+``` {.r code-line-numbers="4-8"}
+
+# 1. Importing the data (loading the data)
+## What kind of file is? E.g.: xlsx (readxl::read_excel)
+#Reads the excel document 
+data.df <- readxl::read_excel(here::here('template', # Change to your folder name
+                                'template-file-name.xlsx'), # Change to your file name
+                              sheet = 5  # Change to excel sheet where the FCT is stored in the excel file
+                              ) %>%  
+  mutate(source_fct = 'template-xx')  # Creates the source_fct column and fills with "location-year" of FCT 
+
+  
+```
+
 
 ## Step 3: Data cleaning and standardisation of FCTs 
 
 <br/> 
 
-Food component names/ description standardisation using Tagnames[^3]. For example...<br/>
+ 1. Formatting FCT into a tabular format
 
-"Vitamin B12" -> VITB12 
-<br/>
+ - Creating food groups variable and tidying
+ - Diving combined variables into two (or more) columns
+ 
+ 2. Renaming variable names: Food components definition and re-naming
 
-::: {.fragment}
+ 3. Standardising of values
 
-"Vitamin A" -> VITA or VITA_RAE? <br/>
-"Vitamin B6" -> VITB6A or VITB6C or VITB6-? <br/>
+ 4. Standardising unit of measurement
 
-:::
 
-[^3]: FAO/INFOODS, 2013. https://www.fao.org/infoods/infoods/standards-guidelines/food-component-identifiers-tagnames/en/ 
 
-::: notes
-We focused on the 10 fish-relevant food components for inclusion + 21 food components.
-For the future, a way of keeping that information should be found (e.g, how can we record and account for those low quality values within the dataset?, can we generate a score with the number of "low quality" values per food item?).
-:::
-
-## Step 3: Data cleaning and standardisation of FCTs 
+## Step 3: Data cleaning and standardisation of FCTs  {visibility="hidden"}
 
 <br/> 
 
@@ -173,7 +165,7 @@ For the future, a way of keeping that information should be found (e.g, how can 
 :::
 
 
-## Step 3: Food name/ description standardisation 
+## Step 3: Food name/ description standardisation {visibility="hidden"}
 
 <br/> 
 
@@ -189,7 +181,7 @@ Fisheries categories matching in Norwegian FCT (2021).
 For example, fish description mentioning "cured, smoked, salted or dried" were allocated to the fish preparation type "cured" Therefore, a fish entry that was matched to the ISSCAAP code == "39" and to the fish preparation type "cured" would be assigned to the ICS SUA category "1544", which corresponds to "Marine fish, other, cured".
 :::
 
-## Step 4a: Data harmonisation and compilation of FCTs 
+## Step 4a: Data harmonisation and compilation of FCTs  {visibility="hidden"}
 
 <br/>
 
@@ -208,7 +200,7 @@ The steps outlined thus far were performed by individual script for each FCT, an
 :::
 
 
-## Step 4b: Variable recalculation and missing values 
+## Step 4b: Variable recalculation and missing values {visibility="hidden"}
 
 <br/>
 
@@ -229,7 +221,7 @@ Food components were recalculated using functions generated based on FAO/ INFOOD
 :::
 
 
-## Functions: Re-calculation
+## Functions: Re-calculation {visibility="hidden"}
 
 <br/>
 Functions were developed to re-calculate:
@@ -249,25 +241,9 @@ Functions were developed to re-calculate:
 :::
 
 
-## Functions: Energy {auto-animate="true"}
 
-``` {.r code-line-numbers="7-8"}
 
-ENERCKcal_standardised <- function(PROTg, FATg_standardised, CHOAVLDFg,
-                          FIBGTg, ALCg){
-                         
-  ALCg <- ALCg %>% replace_na(0)
-  FIBGTg <- FIBGTg %>% replace_na(0)
-  ENERCKcal_std <- PROTg*4 + FATg_standardised*9 +  CHOAVLDFg*4 +
-  FIBGTg*2 + ALCg*7
-  
-  return(ENERCKcal_std)
-  
-  }
-  
-```
-
-## Functions: Energy {auto-animate="true"}
+## Functions: Energy {auto-animate="true"} {visibility="hidden"}
 
 ``` {.r code-line-numbers="5-6"}
 
@@ -285,7 +261,7 @@ ENERCKcal_standardised <- function(PROCNTg, FATg_standardised, CHOAVLDFg,
 ```
 
 
-## Functions: Re-calculation
+## Functions: Re-calculation {visibility="hidden"}
 
 <br/>
 Functions were developed to re-calculate:
@@ -301,7 +277,7 @@ Functions were developed to re-calculate:
 `CARTBEQmcg_std_creator()` - Beta-Carotene Eq. <br/>
 
 
-## Functions: Beta-Carotene Equivalents {auto-animate="true"}
+## Functions: Beta-Carotene Equivalents {auto-animate="true"} {visibility="hidden"}
 
 ``` {.r code-line-numbers="4,24"}
 
@@ -332,7 +308,7 @@ CARTBEQmcg_std_creator <- function(dataset) {
 }
 ```
 
-## Functions: Beta-Carotene Equivalents {auto-animate="true"}
+## Functions: Beta-Carotene Equivalents {auto-animate="true"} {visibility="hidden"}
 
 ``` {.r code-line-numbers="32,42"}
 
@@ -393,7 +369,7 @@ CARTBEQmcg_std_creator <- function(dataset) {
 ```
 
 
-## Functions: Back-calculation
+## Functions: Back-calculation {visibility="hidden"}
 
 <br/> 
 
@@ -406,7 +382,7 @@ CARTBEQmcg_std_creator <- function(dataset) {
 4. Niacin (mcg/100g) - `nia_conversion_creator()`
 
 
-## Back-calculation: Ash by difference
+## Back-calculation: Ash by difference {visibility="hidden"}
 <br/> 
 <br/> 
 
@@ -437,7 +413,7 @@ NO_FCT_Data$ASHg_bydiff <-  100-(NO_FCT_Data$WATERg + NO_FCT_Data$PROCNTg +
 
 :::
 
-## Back-calculation: Beta-carotene equivalents {visibility="hidden"}
+## Back-calculation: Beta-carotene equivalents {visibility="hidden"} {visibility="hidden"}
 
 ::: {.fragment}
 **Beta-Carotene eq. (mcg/100g)**  = 1\*Beta-carotene
@@ -466,7 +442,7 @@ When implausible value (Retinol > Vitamin A)
 :::
 
 
-## Back-calculation: Retinol {visibility="hidden"}
+## Back-calculation: Retinol {visibility="hidden"} {visibility="hidden"}
 
 
 ::: {.fragment}
@@ -487,18 +463,18 @@ When implausible value (Retinol > Vitamin A)
 
 :::
 
-## Combination of variables
+## Combination of variables {visibility="hidden"}
 
 ::: {.panel-tabset}
 
 
-### Combined variables
+### Combined variables {visibility="hidden"}
 
   - Thiamin - `THIAmg_standardised`
   - Vitamin B6 - `VITB6_mg_standardised`
   - Fat - `FAT_g_standardised`
 
-### Code
+### Code {visibility="hidden"}
 
 ```{r, echo=TRUE}
 
@@ -531,7 +507,7 @@ In our FCT data library the following variables were recombined: FAT_g\_standard
 
 :::
 
-## Step 5: Visual and statistical quality checks 
+## Step 5: Visual and statistical quality checks  {visibility="hidden"}
  
  <br/> 
 Visualisation was performed in the harmonised data library for nutrient evaluation and missing values identification. <br/>
@@ -553,7 +529,7 @@ Similarly, we used visuals to identify data gaps and completeness for final incl
 Histograms and boxplots were used to check the data variability and identify outliers. 
 :::
 
-## Step 6: Data formatting & exporting
+## Step 6: Data formatting & exporting {visibility="hidden"}
 <br/>
 
 -   Food component values were calculated for each ICS SUA fishery category.
@@ -576,24 +552,11 @@ Formatting and re-calculation were done using functions.
 :::
 
 
-# The Extended Fisheries Global NCT (2022) 
+# The Extended Fisheries Global NCT (2022)  {visibility="hidden"}
 
----
 
-![](NCT.png)
-
-::: aside
-Columns:33, Rows:4939
-:::
-
-::: notes
-
-:::
-
----
-
-## Fishery products per FCTs
-
+## Fishery products per FCTs {visibility="hidden"}
+ 
 ```{r}
 
 fao_fish_fct %>% count(source_fct) %>% 
@@ -623,7 +586,7 @@ ggplot( aes(x=fct_label, y=perc)) +
 [US19: US Department of Agriculture (USDA) FCT (2019), AU19: Food Standards Australia New Zealand (FSANZ) FCT (2019), NZ18: New Zealand Food Composition FCT (2019),  UK21: McCance and Widdowson's The Composition of Foods Integrated Dataset (CoFID) (2021), DK19: Frida, DTU Foods (Denmark) FCT (2019), WA19:  FAO/INFOODS FCT for Western Africa (2019), KE18: Kenya FCT (2018), IN17: Indian FCT (2017), JA15: The Standard FCT in Japan (2015), BA13: FCT for Bangladesh, BR11: Brazilian FCT (TACO) (2011), UF16: FAO/INFOODS Global FCT for Fish and Shellfish (2016)]{style="font-size: 12px; color:#696969"}
 :::
 
-## Food composition data for fishery products: Overview (1)  
+## Food composition data for fishery products: Overview (1)  {visibility="hidden"} 
 
 <br/>
 
@@ -637,7 +600,7 @@ ggplot( aes(x=fct_label, y=perc)) +
 *including duplicated items
 :::
 
-## Harmonisation of the data 
+## Harmonisation of the data  {visibility="hidden"}
 
 <br/>
 
@@ -652,7 +615,7 @@ ggplot( aes(x=fct_label, y=perc)) +
 - **Measurement units transformation** was needed for Tryptophan,Vitamin A, DHA and EPA in 3 FCTs [(US19, IN17 & JA15)]{style="font-size: 20px; color:#696969"}.
 
   
-## Fisheries categories matching in Norwegian FCT (2021) 
+## Fisheries categories matching in Norwegian FCT (2021)  {visibility="hidden"}
 
 - **ISSCAAP code** was allocated to 79% (183/232) of the fish items in NO21, of which
 
@@ -666,7 +629,7 @@ ggplot( aes(x=fct_label, y=perc)) +
 :::
 
 
-## Data Availability 
+## Data Availability  {visibility="hidden"}
 
 ```{r}
 
@@ -738,7 +701,7 @@ Scale - Bright yellow 100% missing values and dark blue - no missing data
 
 :::
 
-## Data Availability
+## Data Availability {visibility="hidden"}
 
 ```{r}
 
@@ -757,7 +720,7 @@ fao_fish_fct[, c(components ,"source_fct")] %>%
 [US19: US Department of Agriculture (USDA) FCT (2019), AU19: Food Standards Australia New Zealand (FSANZ) FCT (2019), NZ18: New Zealand Food Composition FCT (2019),  UK21: McCance and Widdowson's The Composition of Foods Integrated Dataset (CoFID) (2021), DK19: Frida, DTU Foods (Denmark) FCT (2019), WA19:  FAO/INFOODS FCT for Western Africa (2019), KE18: Kenya FCT (2018), IN17: Indian FCT (2017), JA15: The Standard FCT in Japan (2015), BA13: FCT for Bangladesh, BR11: Brazilian FCT (TACO) (2011), UF16: FAO/INFOODS Global FCT for Fish and Shellfish (2016)]{style="font-size: 12px; color:#696969"}
 :::
 
-## Data Availability
+## Data Availability {visibility="hidden"}
 
 ```{r}
 
@@ -775,7 +738,7 @@ fao_fish_fct[, c(components ,"source_fct")] %>%
 ::: aside
 [US19: US Department of Agriculture (USDA) FCT (2019), AU19: Food Standards Australia New Zealand (FSANZ) FCT (2019), NZ18: New Zealand Food Composition FCT (2019),  UK21: McCance and Widdowson's The Composition of Foods Integrated Dataset (CoFID) (2021), DK19: Frida, DTU Foods (Denmark) FCT (2019), WA19:  FAO/INFOODS FCT for Western Africa (2019), KE18: Kenya FCT (2018), IN17: Indian FCT (2017), JA15: The Standard FCT in Japan (2015), BA13: FCT for Bangladesh, BR11: Brazilian FCT (TACO) (2011), UF16: FAO/INFOODS Global FCT for Fish and Shellfish (2016)]{style="font-size: 12px; color:#696969"}
 :::
-## Data Availability 
+## Data Availability  {visibility="hidden"}
 
 ```{r }
 
@@ -797,7 +760,7 @@ fao_fish_fct[, c(components ,"source_fct")] %>%
 [US19: US Department of Agriculture (USDA) FCT (2019), AU19: Food Standards Australia New Zealand (FSANZ) FCT (2019), NZ18: New Zealand Food Composition FCT (2019),  UK21: McCance and Widdowson's The Composition of Foods Integrated Dataset (CoFID) (2021), DK19: Frida, DTU Foods (Denmark) FCT (2019), WA19:  FAO/INFOODS FCT for Western Africa (2019), KE18: Kenya FCT (2018), IN17: Indian FCT (2017), JA15: The Standard FCT in Japan (2015), BA13: FCT for Bangladesh, BR11: Brazilian FCT (TACO) (2011), UF16: FAO/INFOODS Global FCT for Fish and Shellfish (2016)]{style="font-size: 12px; color:#696969"}
 :::
 
-## Transformation & Harmonisation
+## Transformation & Harmonisation {visibility="hidden"}
 
 - 7 food components (SOP, Energy (kcal, kJ), Carbohydrates by difference, Vitamin A (RAE, RE) and Beta-Carotene Eq.) were re-calculated.
 
@@ -806,7 +769,7 @@ fao_fish_fct[, c(components ,"source_fct")] %>%
 - 3 nutrients each (Fat, Thiamine and Vitamin B6) had multiple variables which were integrated.
 
 
-## Evaluating 10 nutrients based on data availability
+## Evaluating 10 nutrients based on data availability {visibility="hidden"}
 
 ```{r fig-2, fig.cap= "Availability of data: Percentage (%) of fish entries with values of selected components.", echo=FALSE}
 
@@ -881,93 +844,7 @@ fao_fish_fct %>% select(components) %>% rename_all(., ~components_longname) %>%
 From the 10 food components that we reviewed we decided to include 6 of them, because they had a overall coverage of more than 60%.
 :::
 
-## Checking for ICS SUA category data gaps {.smaller}
-
-```{r, echo=FALSE}
-
-fao_fish_summary <- readRDS(here::here("inter-output", "summary_fct_missingSe.rds"))
-
-body_fct1 <- function(col, row){
-  cells_body(
-    columns = col,
-    rows = {{row}} == 0
-  )
-}
-
-body_fct2 <- function(col, row){
-  cells_body(
-    columns = col,
-    rows = {{row}} == 1
-  )
-}
-
-
-(tab_1 <- fao_fish_summary %>% # filter(SEmcg_n < 1) %>% 
-  select(ics_faostat_sua_english_description, ends_with("_n")) %>% 
-  gt() %>% 
-  tab_spanner(
-    label = "Data available (count) per fish category and nutrient",
-    columns = c(2:9)
-  ) %>% 
-  cols_label(
-    ics_faostat_sua_english_description = "Fish categories",
-    WATERg_n = "Water",
-    VITB6_mg_standardised_n = "Vitamin B6",
-    VITB12mcg_n = "Vitamin B12", 
-    SEmcg_n = "Selenium", 
-    NIAmg_std_n = "Niacin", 
-    F22D6N3g_n = "DHA",
-    F20D5N3g_n = "EPA", 
-    CUmg_n = "Copper"
-  ) %>%
-  
-  tab_style(
-    style = list(
-      cell_fill(color = scales::alpha("red", 0.7)),
-      cell_text(color = "white", weight = "bold")
-    ),
-    locations = list(
-      body_fct1(2, WATERg_n),
-      body_fct1(3, VITB6_mg_standardised_n),
-      body_fct1(4, VITB12mcg_n),
-      body_fct1(5, SEmcg_n),
-      body_fct1(6, NIAmg_std_n),
-      body_fct1(7, F22D6N3g_n),
-      body_fct1(8, F20D5N3g_n),
-      body_fct1(9, CUmg_n)
-    )) %>%
-  
-  tab_style(
-    style = list(
-      cell_fill(color = scales::alpha("yellow", 0.7)),
-      cell_text(color = "black", weight = "bold")
-    ),
-    locations = list(
-      body_fct2(2, WATERg_n),
-      body_fct2(3, VITB6_mg_standardised_n),
-      body_fct2(4, VITB12mcg_n),
-      body_fct2(5, SEmcg_n),
-      body_fct2(6, NIAmg_std_n),
-      body_fct2(7, F22D6N3g_n),
-      body_fct2(8, F20D5N3g_n),
-      body_fct2(9, CUmg_n)
-    )) %>%  
-  tab_options(
-    row_group.border.top.width = px(3),
-    row_group.border.top.color = "black",
-    row_group.border.bottom.color = "black",
-    table.border.top.color = "white",
-    table.border.top.width = px(3),
-    table.border.bottom.color = "white",
-    table.border.bottom.width = px(3),
-    column_labels.border.bottom.color = "black",
-    column_labels.border.bottom.width = px(2)
-  ))
-
-
-```
-
-## Selenium imputation and documentation (1)
+## Selenium imputation and documentation (1) {visibility="hidden"}
 
 <br>
 
@@ -977,7 +854,7 @@ body_fct2 <- function(col, row){
 
 <br>
 
-## Selenium imputation and documentation (2) {.smaller}
+## Selenium imputation and documentation (2) {.smaller} {visibility="hidden"}
 
 ```{r}
   #ICS FAOSTAT description of the missing values
@@ -996,7 +873,7 @@ body_fct2 <- function(col, row){
 ```
 
 
-## Missing values for Fatty Acids (DHA and EPA) by ICS SUA Fishery Category {auto-animate="true"}
+## Missing values for Fatty Acids (DHA and EPA) by ICS SUA Fishery Category {auto-animate="true"} {visibility="hidden"}
 
 ```{r}
 
@@ -1022,7 +899,7 @@ This may lead to inconsistencies/ inaccuracies in the final data.
 Imputation was discouraged due to lack of accurate data for the missing values and variability of this nutrients in fish.
 :::
 
-## Missing values for Fatty Acids (DHA and EPA) by ICS SUA Fishery Category {auto-animate="true"}
+## Missing values for Fatty Acids (DHA and EPA) by ICS SUA Fishery Category {auto-animate="true"} {visibility="hidden"}
 
 ```{r}
 
@@ -1049,7 +926,7 @@ Imputation was discouraged due to lack of accurate data for the missing values a
 :::
 
 
-## Visualisation for decision making: outliers {auto-animate="true"}
+## Visualisation for decision making: outliers {auto-animate="true"} {visibility="hidden"}
 
 ```{r}
 test <- "Aquatic mammals, meat"
@@ -1060,11 +937,11 @@ hist(as.numeric(fao_fish_fct$FAT_g_standardised[fao_fish_fct$ics_faostat_sua_eng
 ```
 
 
-## Checking outliers: Copper 
+## Checking outliers: Copper  {visibility="hidden"}
 
 :::{.panel-tabset}
 
-### Visualising Cu (mg/100g) per FCT 
+### Visualising Cu (mg/100g) per FCT  {visibility="hidden"}
 
 ```{r}
 
@@ -1073,7 +950,7 @@ fao_fish_fct %>% ggplot(aes(as.numeric(CUmg), source_fct)) +
 
 ```
 
-### High Cu values 
+### High Cu values  {visibility="hidden"}
 
 ```{r}
 
@@ -1088,7 +965,7 @@ fao_fish_fct %>% filter(as.numeric(CUmg)>2.5) %>%
 
 :::
 
-## Other visual & quality checks: Water
+## Other visual & quality checks: Water {visibility="hidden"}
 
 ``` {.r code-line-numbers="3,4,5"}
 
@@ -1115,7 +992,7 @@ subset(fao_fish_fct,
 
 ```
 
-## Other visual & quality checks: Sum of Proximate
+## Other visual & quality checks: Sum of Proximate {visibility="hidden"}
 
 ```{r}
 
@@ -1134,7 +1011,7 @@ abline(v = 105, col = 2, lwd=3, lty =2)
 :::
 
 
-## Other visual & quality checks: Carbohydrates by difference
+## Other visual & quality checks: Carbohydrates by difference {visibility="hidden"}
 
 
 ```{r}
@@ -1156,8 +1033,8 @@ hist(as.numeric(fao_fish_fct$CHOAVLDFg_std), main = "" ,
 ::: notes
 The documentation of these changes are important as they would have an impact of the final estimates, particularly as this variable is used to calculate SOP, and more importantly the total energy. If total energy is calculated using negative values it would lead to a underestimation of the total energy supplied by the foods
 :::
-
-## Documentation 
+ 
+## Documentation  {visibility="hidden"}
 
 - A document with all the decisions and assumptions was generated.
 
@@ -1169,123 +1046,14 @@ The documentation of these changes are important as they would have an impact of
 this is important to 1) identify data gaps, and 2) flagging potential issues with the data. 
 :::
 
-# The advantages of a scripted approach
+# The advantages of a scripted approach {visibility="hidden"}
 
 Thomas Codd
 
 
-## The advantages of a scripted approach
+# Conclusion & Recommendations for the future  {visibility="hidden"}
 
--  Changes to the data are recorded in the script, not just in the data itself
--  Repeatable results (given the same input data and scripts have been run)
--  Easy to reapply processes after new data is integrated to the dataset
--  Produces a framework to solve a problem or produce a certain output, which can then be modified
-
-## How a scripted approach allows for fast updates (1)
-
-An update can come in a number of forms:
-
--  Type 1: The data itself is updated, but the data format and structure remains the same
--  Type 2: The data is updated and the dataset is expanded (e.g. new columns added)
--  Type 3: The data is updated and/or expanded, <b>and</b> the data format or structure is altered
-
-## How a scripted approach allows for fast updates (2)
-
--  Type 1 solution: No change
--  Type 2 solution: Modify input script to account for new fields (renaming and reformatting etc)
--  Type 3 solution: Recreate input script to account for new data format
-
-## How a scripted approach allows for fast updates - the function aspect
-
--  Code segments of similar function can be repurposed for specific use-cases
--  Code segments can be written with express intent to complete a function with the least amount of adaptation required - functions
--  Several functions were written throughout this project, and tens of thousands of line of adaptable code
-
-
-## How a scripted approach allows for re-use of the FCT for new purposes through data interoperability
-
--  Once an FCT has been processed into an interoperable format the data can be re-used very easily, in R and out 
--  Within R interoperable datasets can be combined with each other, subsetted, analysed, or adapted for other projects very easily
--  Exporting data to a csv and .xlsx document for use in other software is also easy to do
-
-
-## Reuse through interoperability - Example
-
-![](fisheries-presentation_files/interoperability_example/Coverage.PNG)
-
-## Reuse through interoperability - Example
-
-![](fisheries-presentation_files/interoperability_example/Breakdown.PNG)
-
-# Documentation, and Collaborative Reproducibility with Git, GitHub & Sharepoint
-
-Liberty Mlambo 
-
-## Documentation, and Collaborative Reproducibility with Git, GitHub & Sharepoint 
-
-<br/>
-
-**Fully reproducible data & documentation** is provided within the repository available at [https://github.com/LuciaSegovia/FAO-fisheries](https://github.com/LuciaSegovia/FAO-fisheries){preview-link="true"}
-
-A **report** covering: data curation steps, variable description, reference to external resources used, and describing any assumptions and challenges.(Available also in pdf)
-
-<!-- ::: {.fragment style="text-align: left; margin-top: 1em"} -->
-All these steps would allow to replicate the process and to re-generate the table with the same format for future updates.
-<!-- ::: -->
-
-
-<!-- ## How collaborative coding and GitHub increases efficiency and transparency of the approach -->
-
-<!-- --- -->
-
-<!-- ![](Github-slides/Slide1.PNG){.r-stretch} -->
-
----
-
-![](Github-slides/Slide2.PNG)
-
----
-
-![](Github-slides/Slide3.PNG)
-
----
-
-![](Github-slides/Slide4.PNG)
-
----
-
-![](Github-slides/Slide5.PNG)
-
----
-
-![](Github-slides/Slide6.PNG)
-
----
-
-![](Github-slides/Slide7.PNG)
-
----
-
-![](Github-slides/Slide8.PNG)
-
----
-
-![](Github-slides/Slide9.PNG)
-
----
-
-![](Github-slides/Slide10.PNG)
-
----
-
-![](Github-slides/Slide11.PNG)
-
----
-
-
-# Conclusion & Recommendations for the future
-
-## What has been completed? 
+## What has been completed?  {visibility="hidden"}
 
 <br>
 
@@ -1302,8 +1070,8 @@ All these steps would allow to replicate the process and to re-generate the tabl
   -  Reproducible workflow & report.
 
 
-## An opportunity
-
+## An opportunity {visibility="hidden"}
+ 
  <br>
  
 - For 12 FCTs all data was imported & harmonised in R(Studio).
@@ -1317,7 +1085,7 @@ All these steps would allow to replicate the process and to re-generate the tabl
 
 :::
 
-## What needs to be further advanced?
+## What needs to be further advanced? {visibility="hidden"}
 
  <br>
 
@@ -1345,7 +1113,7 @@ We checked imputing vs no imputing for this dataset for Retinol & Beta-Carotene 
 :::
 
 
-## Better data for Nutrition
+## Better data for Nutrition {visibility="hidden"}
 
  <br/>
  
@@ -1370,7 +1138,7 @@ Some of those fishery category with low number of values were very variable, and
 For example, rethinking some groups. For example, "Aquatic animals, nei".
 :::
 
-## Improving data quality & reporting
+## Improving data quality & reporting {visibility="hidden"}
 
 <br>
 

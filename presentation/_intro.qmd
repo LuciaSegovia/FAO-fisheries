@@ -1,5 +1,6 @@
 ---
-title: "Developing a reproducible approach for generating FCTs & NCTs"
+title: "Developing a reproducible framework for generating FCTs & NCTs"
+subtitle: "MAPS Briefing <br/> (02/08/2023)"
 format: 
     revealjs:
         logo: MAPS-logo.png
@@ -7,19 +8,18 @@ format:
 editor: source
 ---
 
-## Agenda (1) {.smaller}
+## Agenda (1) 
 
--   **Introduction**
-
+-   **Background**
+<br/> 
 -   **Objectives**
+<br/> 
+-   **Method: Development of a framework for compiling FCTs/NCTs** 
+<br/> 
+-   **Results: Reusable & transparent script for compiling compiling FCTs/NCTs** 
 
--   **Development of a framework for compiling NCTs.** The Extended Fisheries Global NCT (2022) as case study
 
-    -   Background and starting point for the NCT
-    -   Harmonising Food Composition Tables and Databases
-    -   Visualisation for nutrient evaluation and missing values identification
-
-## Agenda (2) {.smaller}
+## Agenda (2) {.smaller} {visibility="hidden"}
 
 -   **The Extended Fisheries Global NCT (2022)**
 
@@ -40,7 +40,7 @@ editor: source
 Speaker notes go here.
 :::
 
-## Introduction
+## Introduction {visibility="hidden"}
 
 <br/> Meet the team! <br/>
 
@@ -61,7 +61,7 @@ Speaker notes go here.
 
 
 
-## Objective
+## Objective {visibility="hidden"}
 
 <br/> Applying MAPS framework: <br/> <br/>
 
