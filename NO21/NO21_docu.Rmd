@@ -40,7 +40,7 @@ The dataset containing information about fishery product ICS codes was shared in
 
 Before renaming the variables in the Norwegian FCDB,a detailed characterisation of the food components of interest was needed for allocating the correct Tagnames.
 
-#### The identification of food components
+#### 2.2. Renaming variable names: Food components definition and re-naming
 
 Information on the food components and their description can be found [here](www.matportalen.no/verktoy/the_norwegian_food_composition_table/about_the_table_values).
 
@@ -74,15 +74,24 @@ Variables that were calculated:
 -   SOP: sum of proximate - Not included.
 -   Energy (see below)
 
+Fatty Acids were renamed following the string pattern.
+
 #### Renaming variables
 
 For ISSCAAP dataset, we only renamed one variable 3A_CODE to alpha_code because R does not allow variable names that start with a numeric character.
 
 For the NO21, we renamed the variables following the same procedure at was done for the other FCDBs and according to the information obtained from the identification of the food components (see section above).
 
-#### Transforming variables
+#### 2.3. Standardising of values <br>
 
-We converted edible portion from percentage to a faction. Also, missing values in the edible portion (coded as "M") were converted into `NA`.
+Missing values which were present only in the edible portion (coded as "M") were converted into `NA`.
+
+
+#### 2.4. Standardising unit of measurement <br>
+
+We converted edible portion from percentage to a faction (\Eq.3). Also, missing values in the edible portion (coded as "M") were converted into `NA`.
+
+\\Eq.3: Edible portion = Edible portion (%)/100
 
 ### Generating the fish composition database
 

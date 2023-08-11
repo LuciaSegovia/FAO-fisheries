@@ -128,7 +128,7 @@ convert from mg/100g to g/100g, or from percentage (100%) to a fraction (1). For
 Converting Units, Denominators and Expression (FAO/INFOODS, 2012b), and
 the suggested standard reporting units.
 
-Eg. Converting alcohol from weight in volume (w/v) to weight in mass (w/m) (Eq.1a) or percentage of alcohol (v/v) into weight mass (Eq.1b). (See INFOODS Guidelines - page 12)
+Eg. Converting alcohol from weight in volume (w/v) to weight in mass (w/m) (Eq.1a) or percentage of alcohol (v/v) into weight mass (Eq.1b) (See INFOODS Guidelines - page 12). 
 
 **Eq.1a** ALC (g/100mL) (w/v) / density (g/mL) = ALC (g/100 EP)
 
@@ -143,7 +143,7 @@ Eg. amino acids (AA) reported per g in 100g of PROT to mg in 100g of EP:
 
 **Eq.2.3** AA mg/100g EP = AA g/100g prot \* prot g/100g EP \*10
 
-**Eq.3** Edible portion = Edible portion (%)/100
+\\Eq.3: Edible portion = Edible portion (%)/100
 
 
 **d. Food name/ description standardisation.** The ASFIS list was used

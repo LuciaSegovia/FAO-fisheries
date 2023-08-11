@@ -51,7 +51,13 @@ readxl::excel_sheets(here::here( "NO21",
 no21 <- readxl::read_excel(here::here("NO21",
                                       "NorwegianFCT.xlsx"),
                            sheet = "Foods", skip = 2) %>% 
-  janitor::clean_names()
+  janitor::clean_names() 
+
+# Checking variable names
+names(no21)
+
+# Checking variables removing ref.
+grep("ref", names(no21), value = TRUE, invert = TRUE)
 
 #├  Norwegian FCDB data - Scientific names ----
 
@@ -66,11 +72,45 @@ sci_no21 <- readxl::read_excel(here::here("NO21",
   janitor::clean_names() 
 
 
-# 1) Cleaning the Norwegian FCT ----
+# 2.1	Formatting FCT   ----
 
-#├ Renaming variables ----
+data.df <- no21
 
-no21 <- no21 %>%  rename(
+#Checking values with food entry id.
+data.df %>% filter(!is.na(fdc_id)) 
+data.df %>% filter(is.na(ENERCkJ))
+
+# Removing empty rows
+
+data.df  <- data.df %>% filter(!is.na(food_id) & !is.na(food_item))
+
+#├ 2.1.1 Food groups ----
+
+# Getting the food groups
+foodgroup <- no21 %>% filter(is.na(edible_part) & grepl("^\\d{1,2}$", food_id)) %>% .[,1:2]
+
+# Creating the variable for food groups
+data.df$foodgroup <- NA
+
+# Loop to allocate the food groups
+for(j in 1:nrow(foodgroup)){
+  
+for(i in 1:nrow(data.df)){
+  
+  if(as.numeric(str_extract(data.df$food_id[i], "^[[:digit:]]{1,2}")) == j){
+    data.df$foodgroup[i] <- toString(foodgroup[j,2])
+  }
+}
+  
+}
+
+
+# Checking the data
+data.df %>% filter(foodgroup == "Infant food")
+
+# 2.2 Renaming variables ----
+
+data.df <- data.df %>%  rename(
   fdc_id = "food_id",
   food_desc = "food_item",
   Edible_factor_in_FCT = "edible_part", 
@@ -81,11 +121,11 @@ no21 <- no21 %>%  rename(
   FASATg = "sat_fa",
   FAMSg = "mu_fa",
   FAPUg = "pu_fa",
-  F22D6N3g = "c22_6n_3_dha", 
-  F20D5N3g = "c20_5n_3_epa", 
+  FATRNg = "trans_fa", 
   CHOLEmg = "cholesterol",
   CHOAVLg = "carbo", #if imputed it can be CHOAVLDFg
   SUGARg = "sugar", 
+  STARCHg = "starch",
   FIBTGg = "dietary_fibre", 
   PROCNTg = "protein",
   ALCg = "alcohol", 
@@ -112,20 +152,39 @@ no21 <- no21 %>%  rename(
   IDmcg = "iodine",
   ZNmg = "zinc")
 
+# Renaming Fatty Acids (FA)
 
-#Checking values with food entry id.
-no21 %>% filter(!is.na(fdc_id)) 
-no21 %>% filter(is.na(ENERCkJ))
+grep("^c\\d", names(data.df), value = TRUE) # Checking FA names
+data.df[1, grep("^c\\d", names(data.df))] # Checking FA units
+# Generating new FA Tagnames (pattern)
+fatty <- grep("^c\\d", names(data.df), value = TRUE) # creating a vector w/ FA names
+fatty <- gsub("c", "F", fatty) # Changing "c" to "F (No of C)
+fatty <- sub("_", "D", fatty) # Changing first "_" to "D" 
+fatty <- sub("_[[:alpha:]]{2,}", "", fatty) # Removing short name for FA
+fatty <- sub("n_", "N", fatty) # Changing "n_" to "N"
+fatty <- paste0(fatty, "g") # adding the unit "g"
+
+names(data.df)[grep("^c\\d", names(data.df))] <- fatty # Actual renaming
+
+# Checking new names 
+names(data.df)
+
 
 #The Norwegian FCDB - remove # if willing to have the whole dataset.
 #no21_fct <- no21 %>% filter(!is.na(ENERCkcal)) %>% slice (-1)
 
-# ├ Transforming variables ----
+# 2.3 Standardising of values ----
+
+str(data.df)
+
+
+# 2.4 Unit of measurement  ----
 
 #Converting EP into a fraction (M == NA)
 no21$Edible_factor_in_FCT <- as.numeric(no21$Edible_factor_in_FCT)/100
 
 #2) Extracting only fishery products ----
+
 
 #Checking food groups
 no21 %>% 
@@ -293,12 +352,13 @@ no21_fish <-  no21_fish %>%
 # Checking results:  entries w/  ISSCAAP code
 no21_fish %>% filter(!is.na(ISSCAAP)) 
 dim(no21_fish)
+
 #Saving into csv to inspect the ISSCAAP code allocations. 
 # no21_fish %>% select(fdc_id:ref_116) %>% 
 #  write.csv(., here::here("inter-output", "NorwegianFCBD_fish_isscaap.csv"),
 #   row.names = F)
 
-#5)  Identifying the processing categoy of the fish ----
+#5)  Identifying the processing category of the fish ----
 
 #├ Identification of the ICS fish category in the ICS file  ----
 
