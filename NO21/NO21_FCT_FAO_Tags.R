@@ -6,11 +6,32 @@
 #                                                                             #
 #                                                                             #
 ###############################################################################
+##Run this to clean the environment
+rm(list = ls())
+#
+# Data Import ----
+#
+# Loading libraries
+## Note: if it is the first time: install.packages() first
+library(dplyr) # For data cleaning (wrangling)
+library(stringr) # For string manipulation (data cleaning)
+library(measurements) # For unit conversion
+source(here::here("functions.R")) # Loading nutrition functions (change to package when ready)
 
-
-# 0) Loading packages and data ----
-
-library(tidyverse)
+# 0. Obtaining the raw (FCT) file(s) and other data needed (only run first time)
+# # Check licensing conditions & record the data source (see README)
+#
+# Here's the link to the online file
+# f <- "https://www.matportalen.no/verktoy/the_norwegian_food_composition_table/article43472.ece/BINARY/The%20Norwegian%20Food%20Composition%20Table%202022%20(xlsx)"
+# 
+# download.file(f,  # the location where is downloaded from
+#              destfile = here::here('NO21', 
+#                                    "NorwegianFCT.xlsx"), # the location where is stored in your terminal
+#             method="wininet", # use "curl" for OS X / Linux, "wininet" for Windows
+#             mode="wb")
+# 
+## cleaning scientific names
+# source(here::here("NO21", "NO21_scientific-names.R"))
 
 #├  FAO data - ICS codes and ISSCAAP groups  ----
 
@@ -41,7 +62,7 @@ isscaap <- readxl::read_excel(here::here("data",
 #starting w/ a number
 
 
-#├  Norwegian FCDB data ----
+#├  Norwegian FCDB data (NO21) ----
 
 #reading excel
 readxl::excel_sheets(here::here( "NO21",
@@ -59,26 +80,21 @@ names(no21)
 # Checking variables removing ref.
 grep("ref", names(no21), value = TRUE, invert = TRUE)
 
-#├  Norwegian FCDB data - Scientific names ----
 
-#reading excel
-readxl::excel_sheets(here::here("NO21",
-                                "Scientific-name_Norwegian-FCDB.xlsx"))
+#├  NO21 - Scientific names ----
 
-#loading the data
-sci_no21 <- readxl::read_excel(here::here("NO21",
-                                          "Scientific-name_Norwegian-FCDB.xlsx"),
-                               sheet = 1) %>% 
-  janitor::clean_names() 
-
-
+# Loading the data
+sci_no21 <- readRDS(here::here("NO21", "scientific-name_NO21.RDS"))
+                              
 # 2.1	Formatting FCT   ----
 
 data.df <- no21
 
+names(data.df)
+
 #Checking values with food entry id.
-data.df %>% filter(!is.na(fdc_id)) 
-data.df %>% filter(is.na(ENERCkJ))
+data.df %>% filter(!is.na(food_id)) 
+data.df %>% filter(is.na(kilojoules))
 
 # Removing empty rows
 
@@ -132,8 +148,8 @@ data.df <- data.df %>%  rename(
   VITA_RAEmcg = "vitamin_a", 
   RETOLmcg = "retinol",
   CARTBmcg = "beta_carotene",
-  VITDmcg = "vitamin_d", #not well-defined in the documentation
-  VITEmg = "vitamin_e", #expressed in alpha-tocopherol eq.
+  VITDmcg = "vitamin_d", # not well-defined in the documentation
+  VITEmg = "vitamin_e", # expressed in alpha-tocopherol eq.
   THIAmg ="thiamin",
   RIBFmg = "riboflavin",
   NIAmg = "niacin", 
@@ -177,25 +193,38 @@ names(data.df)
 
 str(data.df)
 
+# Check that there are no more characters
+# Currently, only works for presence of character strings, [], and * 
+#NOTE: we are using only NVs variables as character are found in non-numeric variables (i.e., food_desc)
+
+variables <- grep("^[[:upper:]]+",  names(data.df), value = TRUE)  # Specify the NVs columns
+data.df[, variables][grepl("[:alpha:]|\\[|\\*", data.df[, variables])] 
+data.df[, variables][grepl("M", data.df[, variables])]  # M is the code for missing values (M == NA)
+grep("M|-", data.df$F12D0g, value = TRUE) # From scientific notation
+
+sum(is.na(data.df$F12D0g)) #96
+sum(is.na(data.df$Edible_factor_in_FCT) | data.df$Edible_factor_in_FCT == "M") #88 NA +M 140
+sum(is.na(data.df$Edible_factor_in_FCT)) #88 NA +M 140
+
+data.df[, variables] <- apply(data.df[, variables], 2, as.numeric)
 
 # 2.4 Unit of measurement  ----
 
-#Converting EP into a fraction (M == NA)
-no21$Edible_factor_in_FCT <- as.numeric(no21$Edible_factor_in_FCT)/100
+# Converting EP into a fraction 
+data.df$Edible_factor_in_FCT <- data.df$Edible_factor_in_FCT/100
 
-#2) Extracting only fishery products ----
-
+# 2) Extracting only fishery products ----
 
 #Checking food groups
-no21 %>% 
+data.df %>% 
   filter(str_detect(fdc_id, "^[:digit:]{1}$"))
 
 #Identifying the location (row no.) of the fishery products
-which(no21$fdc_id == "4")
-which(no21$fdc_id == "5")
+row1 <- which(data.df$fdc_id == "4") # 459
+row2 <- which(data.df$fdc_id == "5") # 702
 
 #Selecting only fish
-no21_fish <- no21 %>% slice(484:734) %>%
+no21_fish <- data.df %>% slice(row1:row2) %>%
   filter(!is.na(WATERg)) # To remove food category & sub-category rows.
 
 #Checking the result
@@ -203,36 +232,11 @@ colnames(no21_fish)
 head(sci_no21)
 dim(no21_fish) #232
 
-#├ Tidying the scientific names dataset (NO21)  ----
 
-#Checking data structure
-head(sci_no21)
-
-sci_no21 %>% separate(x4,c("name2", "ref"),
-                      sep = " ") %>% filter(str_detect(name2, "^[:lower:]"))
-
-#Getting one column with the scientific name and one column with the ref. for 
-#the scientific name.
-
-sci_no21 <- sci_no21 %>% separate(x4,c("name2", "ref", "X5"),
-                                  sep = " ") %>% 
-  mutate(Scientific_name = ifelse(str_detect(name2, "^[:lower:]"),
-                                  paste(scientific_name, name2), 
-                                  scientific_name),
-         Ref = ifelse(!is.na(X5),
-                      paste(ref, X5), 
-                      ifelse(str_detect(name2, "^[:upper:]"),
-                             paste(name2, ref),
-                             ref))) %>% 
-  select(1:2, Scientific_name, Ref)
-
-#Checking the result
-head(sci_no21)
-
-#3) Merging fish names w/ scientific names (no21) ----
+# 3) Merging fish names w/ scientific names (no21) ----
 
 #List of fishery entries without Scientific name
-no21_fish %>% left_join(., sci_no21, by = c("fdc_id" = "x1")) %>% 
+no21_fish %>% left_join(., sci_no21, by = "fdc_id") %>% 
   mutate(Scientific_name = case_when(
     str_detect(food_desc, "cod|Cod|Stockfish") ~ "Gadus morhua",
     str_detect(food_desc, "Anchovy") ~ "Engraulis encrasicolus",
@@ -247,7 +251,7 @@ no21_fish %>% left_join(., sci_no21, by = c("fdc_id" = "x1")) %>%
 
 #├ Fixing scientific names by fish name (NO21) ----
 
-no21_fish <- no21_fish %>% left_join(., sci_no21, by = c("fdc_id" = "x1")) %>% 
+no21_fish <- no21_fish %>% left_join(., sci_no21, by = "fdc_id") %>% 
   mutate(Scientific_name = case_when(
     str_detect(food_desc, "cod|Cod|Stockfish") ~ "Gadus morhua",
     str_detect(food_desc, "Anchovy") ~ "Engraulis encrasicolus",
@@ -265,9 +269,9 @@ no21_fish <- no21_fish %>% left_join(., sci_no21, by = c("fdc_id" = "x1")) %>%
 #checking results
 head(no21_fish)
 dim(no21_fish) #shouldn't add/remove any obs (rows) but add 2 variables (cols)
-subset(no21_fish, !is.na(Scientific_name)) #No of fish w/ scientifc name
+subset(no21_fish, !is.na(Scientific_name)) #No of fish w/ scientific name
 
-#4) Merging the corresponding ISSCAAP to Scientific names ----
+# 4) Merging the corresponding ISSCAAP to Scientific names ----
 
 #checking variables in isscaap
 str(isscaap)
@@ -282,7 +286,7 @@ no21_fish <- no21_fish %>%
 
 #checking results
 head(no21_fish)
-dim(no21_fish) #shouldn't add/remove any obs (rows) but add 4 variables (cols)
+dim(no21_fish) # shouldn't add/remove any obs (rows) but add 4 variables (cols)
 
 #├ Fixing ISSCAAP code by Scientific name ----
 

@@ -24,9 +24,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### INTRO
 
+
 The Norwegian Food Composition Database (NO21) was accessed online and provided a wealth of information for raw fish as well as fish preparations (n=232). We also identified that the scientific name is provided in the [online version](www.matvaretabellen.no/?language=e) under the "classification". The scientific name is provided below the food entry name, the fish entry in our case. In addition, LanguaL codes are provided to classify the food entry, there we could obtain information, such as edible portion (i.e., skeletal meat part, without bones, without skin), whether it is drained or not.
 
-### Getting the data
+### 2. 1.	Identifying and obtaining the food composition tables and databases
+
+### 2.2.	Importing the data 
 
 The Norwegian FCDB and the ICCAAP code dataset are publicly available and can be accessed here:
 
@@ -35,6 +38,8 @@ The Norwegian FCDB and the ICCAAP code dataset are publicly available and can be
 [ICSSCAAP](www.fao.org/fishery/en/collection/asfis/en)
 
 The dataset containing information about fishery product ICS codes was shared internally by the FAO for this project and hence shall remain private. Similarly, the Scientific names of the fish included in the Norwegian FCDB were shared internally through personal communication with the data owners. The dataset contained the fish id., fish description, scientific name and reference for most of the fish products in the NO21.
+
+
 
 ### Tidying the data
 

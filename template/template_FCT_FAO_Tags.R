@@ -6,13 +6,27 @@
 # Note: Most of the optional steps are commented out, to be run
 # remove the "#" adjust for your dataset structure and need and run
 #
+##Run this to clean the environment
+#rm(list = ls())
+#
 # 0. Obtaining the raw (FCT) file(s) for importing
 # # Check licensing conditions & record the data source (see README)
 #
-##Run this to clean the environment
-#rm(list = ls())
+#
+# If the data is publicly available online (from source of the data see README) - Uncomment!
+# Only need to do it the first time to obtain the raw files!
+# 
+# Here's the link to the online file
+#f <- "http://www.the-source-of-the-data/.../the-file-data.xlsx"
 
+#download.file(f,  # the location where is downloaded from
+#             destfile = here::here('template', "the-file-name-of-data.xlsx"), # the location where is stored in your terminal
+#             method="wininet", # use "curl" for OS X / Linux, "wininet" for Windows
+#            mode="wb")
+#
 
+# Data Import ----
+#
 # Loading libraries
 ## Note: if it is the first time: install.packages() first
 library(dplyr) # For data cleaning (wrangling)
