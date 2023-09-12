@@ -1,8 +1,16 @@
 
-
-
-library(tidyverse)
-library(visdat)
+##Run this to clean the environment
+rm(list = ls())
+#
+# Data Compilation ----
+#
+# Loading libraries
+## Note: if it is the first time: install.packages() first
+library(dplyr) # For data cleaning (wrangling)
+library(stringr) # For string manipulation (data cleaning)
+library(measurements) # For unit conversion
+source(here::here("functions.R")) # Loading nutrition functions (change to package when ready)
+library(visdat) # Data visualisation
 
 #0) Only run if first time or updated original FCDB scripts ----
 #There are four scripts that need to run from the file
@@ -58,7 +66,7 @@ col_names <- c("fdc_id",
                "source_fct",
                "nutrient_data_source",
                "Edible_factor_in_FCT",
-               "ICS_FAOSTAT", #we need for NO21
+               "ICS_FAOSTAT", # we need for NO21
                #"Edible_desc",
                "specific_gravity",
                "SOPg",
@@ -148,37 +156,15 @@ fct_cover %>% select(col_names) %>% count(source_fct)
 
 #Filtering out components that are not used and removing "_FCT" from the FCTs/FCDB name
 #added quality for NO21
-fct_cover <- fct_cover %>% select(col_names, quality) %>% 
-  mutate_at("source_fct", ~str_replace(., "_FCT", "")) 
+#fct_cover <- fct_cover %>% select(col_names, quality) %>% 
+#  mutate_at("source_fct", ~str_replace(., "_FCT", "")) 
 
 #Checking that we have all the variables of interest
 fct_cover %>% str()
 
-#2) Generating the Fish and Fishery FCBD ----
+# 2) Generating the Fish and Fishery FCBD ----
 
 #├ Extracting fish entries from each FCTs/FCDBs ----
-
-#├├ Preparing data frame that was prepared for the Global FCT (only fish) ----
-#contains information for each fish on ISSCAAP code, ICS FAOSTAT fish codes, and
-#alpha-three code, when available. 
-
-# Loading the file 
-ics_code_file <- read.csv(here::here("data", "ics-code_fish-code.csv")) %>% 
-  rename(source_fct = "Source.FCT.for.NVs") #renaming variable the FCT source (e.g. BA13, WA19)
-
-#fixing discrepancy between fcd_id in our dataframe (df) and Global FCT df for KE18 and US19
-#This is needed for merging and filtering the fish and adding the ICS FAOSTAT code
-
-ics_code_file %>% filter(str_detect(fdc_id, "^0")) 
-ics_code_file <- ics_code_file %>% mutate(fdc_id = ifelse(source_fct == "KE18",
-                         str_replace(fdc_id, "^0", ""), fdc_id))  %>%  #removing the 0 of the fdc_id
-  mutate(fdc_id = ifelse(source_fct == "US19",
-                         NDB_number , fdc_id)) #using NDB_number as the fdc_id
-
-#checking the US19 data from the FAO Global Fisheries data
-ics_code_file %>% filter(source_fct == "US19")
-
-
 
 #├├ Filtering only fish in all FCTs/FCDBs ----
 

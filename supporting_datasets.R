@@ -1,6 +1,92 @@
+#                                                                             # 
+#                                                                             # 
+#                           FAO - Fisheries                                   # 
+#                     Producing supporting datasets                           #     
+#                                                                             #
+#                                                                             #
+#                                                                             #
+###############################################################################
 
 
-## Producing supporting datasets
+
+
+## Food matching: Fish and Fisheries ----
+# Preparing data frame that was prepared for the Global FCT (only fish)
+# contains information for each fish on ISSCAAP code, ICS FAOSTAT fish codes, and
+# alpha-three code, when available. 
+
+#├ Loading the file ----
+
+ics_code_file <- read.csv(here::here("data", "ics-code_fish-code.csv")) %>% 
+  rename(source_fct = "Source.FCT.for.NVs") #renaming variable the FCT source (e.g. BA13, WA19)
+
+#├ Standardising the file for FCT standard fdc_id ----
+
+#fixing discrepancy between fcd_id in our dataframe (df) and Global FCT df for KE18 and US19
+#This is needed for merging and filtering the fish and adding the ICS FAOSTAT code
+
+ics_code_file %>% filter(str_detect(fdc_id, "^0")) 
+
+ics_code_file <- ics_code_file %>% 
+  mutate(fdc_id = ifelse(source_fct == "KE18",
+                         str_replace(fdc_id, "^0", ""), fdc_id))  %>%  #removing the 0 of the fdc_id
+  mutate(fdc_id = ifelse(source_fct == "US19",
+                         NDB_number , fdc_id)) #using NDB_number as the fdc_id
+
+#checking the US19 data from the FAO Global Fisheries data
+ics_code_file %>% filter(source_fct == "US19")
+
+#├  Updating fish matches ----
+## Following expert advise (2023)
+names(ics_code_file)
+ics_code_file$Food.description[ics_code_file$ICS.FAOSTAT.SUA.Current.Code == "1532"]
+
+#├├  Excluding: ----
+
+# Excluded, not fresh fish (surimi)
+ics_code_file$ICS.FAOSTAT.SUA.Current.Code[ics_code_file$ICS.FAOSTAT.SUA.Current.Code %in% c("1514", "1515") & 
+                                             ics_code_file$fdc_id == "10200"]
+ics_code_file <- subset(ics_code_file, !(ICS.FAOSTAT.SUA.Current.Code %in% c("1514", "1515") & fdc_id == "10200"))
+
+# Excluded, frozen and not fresh fish
+ics_code_file$ICS.FAOSTAT.SUA.Current.Code[ics_code_file$ICS.FAOSTAT.SUA.Current.Code %in% c("1503", "15030") &
+                                             ics_code_file$fdc_id == "091019"]
+ics_code_file <- subset(ics_code_file, !(ICS.FAOSTAT.SUA.Current.Code %in% c("1503", "15030") & fdc_id == "091019"))
+
+# Duplicated item!
+ics_code_file$ICS.FAOSTAT.SUA.Current.Code[ics_code_file$ICS.FAOSTAT.SUA.Current.Code %in% c("1504") &
+                                             ics_code_file$fdc_id == "091019"]
+subset(ics_code_file, (ICS.FAOSTAT.SUA.Current.Code %in% c("1504") & fdc_id == "091019"))
+
+# Removing dulpicated (15)
+dim(ics_code_file)
+ics_code_file <- distinct(ics_code_file)
+
+# Excluded, fish not specified in the description - Not found
+ics_code_file$ICS.FAOSTAT.SUA.Current.Code[ics_code_file$ICS.FAOSTAT.SUA.Current.Code %in% c("1532") &
+                                             ics_code_file$fdc_id == "9003"]
+
+# Excluded, recipe with many ingredients
+ics_code_file$ICS.FAOSTAT.SUA.Current.Code[ics_code_file$ICS.FAOSTAT.SUA.Current.Code %in% c("1554") &
+                                             ics_code_file$fdc_id == "15142"]
+ics_code_file <- subset(ics_code_file, !(ICS.FAOSTAT.SUA.Current.Code %in% c("1554") & fdc_id == "15142"))
+
+# Excluded, refers to fat only
+ics_code_file$ICS.FAOSTAT.SUA.Current.Code[ics_code_file$ICS.FAOSTAT.SUA.Current.Code %in% c("1580") &
+                                             ics_code_file$fdc_id == "11112"]
+ics_code_file <- subset(ics_code_file, !(ICS.FAOSTAT.SUA.Current.Code %in% c("1580") & fdc_id == "11112"))
+
+#Excluded food from the matching for the four SUA items - Not found
+ics_code_file$fdc_id[ICS.FAOSTAT.SUA.Current.Code$ICS.FAOSTAT.SUA.Current.Code %in% c("1505","15051","1518","1544") &
+                       ics_code_file$fdc_id == "173712"]
+ics_code_file <- subset(ics_code_file, !(ICS.FAOSTAT.SUA.Current.Code %in% c("1580") & fdc_id == "11112"))
+
+ics_code_file$source_fct[ics_code_file$ICS.FAOSTAT.SUA.Current.Code %in% c("1573")]
+
+#├ Saving ICS and food_id (fish matching) ----
+
+saveRDS(ics_code_file, file = here::here("data", "ics-code_fish-code.RDS"))
+
 
 # Loading the data
 
