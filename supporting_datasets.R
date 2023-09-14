@@ -63,8 +63,8 @@ dim(ics_code_file)
 ics_code_file <- distinct(ics_code_file)
 
 # Excluded, fish not specified in the description - Not found
-ics_code_file$ICS.FAOSTAT.SUA.Current.Code[ics_code_file$ICS.FAOSTAT.SUA.Current.Code %in% c("1532") &
-                                             ics_code_file$fdc_id == "9003"]
+#ics_code_file$ICS.FAOSTAT.SUA.Current.Code[ics_code_file$ICS.FAOSTAT.SUA.Current.Code %in% c("1532") &
+ #                                            ics_code_file$fdc_id == "9003"]
 
 # Excluded, recipe with many ingredients
 ics_code_file$ICS.FAOSTAT.SUA.Current.Code[ics_code_file$ICS.FAOSTAT.SUA.Current.Code %in% c("1554") &
@@ -77,11 +77,11 @@ ics_code_file$ICS.FAOSTAT.SUA.Current.Code[ics_code_file$ICS.FAOSTAT.SUA.Current
 ics_code_file <- subset(ics_code_file, !(ICS.FAOSTAT.SUA.Current.Code %in% c("1580") & fdc_id == "11112"))
 
 #Excluded food from the matching for the four SUA items - Not found
-ics_code_file$fdc_id[ICS.FAOSTAT.SUA.Current.Code$ICS.FAOSTAT.SUA.Current.Code %in% c("1505","15051","1518","1544") &
-                       ics_code_file$fdc_id == "173712"]
-ics_code_file <- subset(ics_code_file, !(ICS.FAOSTAT.SUA.Current.Code %in% c("1580") & fdc_id == "11112"))
-
-ics_code_file$source_fct[ics_code_file$ICS.FAOSTAT.SUA.Current.Code %in% c("1573")]
+#ics_code_file$fdc_id[ICS.FAOSTAT.SUA.Current.Code$ICS.FAOSTAT.SUA.Current.Code %in% c("1505","15051","1518","1544") &
+#                       ics_code_file$fdc_id == "173712"]
+#ics_code_file <- subset(ics_code_file, !(ICS.FAOSTAT.SUA.Current.Code %in% c("1580") & fdc_id == "11112"))
+#
+#ics_code_file$source_fct[ics_code_file$ICS.FAOSTAT.SUA.Current.Code %in% c("1573")]
 
 #├ Saving ICS and food_id (fish matching) ----
 

@@ -51,9 +51,13 @@ list.files("Output/", pattern = "*_FCT_FAO_Tags", recursive=FALSE, # so it is no
 fct_cover <- list.files("Output/", pattern = "*_FCT_FAO_Tags", recursive=FALSE, full.names=TRUE) %>% 
   map_df(~read_csv(., col_types = cols(.default = "c"), locale = locale(encoding = "Latin1"))) 
 
+# Importing the ICS Codes for all the fisheries
+
+ics_code_file <- readRDS(here::here("data", "ics-code_fish-code.RDS"))
+
 # Checking that we have loaded all the FCT/FCDBs (n=11, excluding UK21 & NO21)
 fct_cover %>% distinct(source_fct) 
-names(fct_cover)
+names(ics_code_file )
 
 fct_cover$food_desc[fct_cover$fdc_id == "10362"]
 fct_cover$source_fct[fct_cover$fdc_id == "1573"]
@@ -66,5 +70,7 @@ fct_cover$scientific_name[fct_cover$fdc_id == "173712"]
 fish_fct <- fct_cover %>% 
   left_join(., ics_code_file, by = c("source_fct",
                                      "fdc_id")) %>% 
-  filter(!is.na(ICS.FAOSTAT.SUA.Current.Code) | source_fct %in% c("NO21") |
-           food_group %in% c("JA", "JC", "JK", "JM", "JR")) 
+  filter(is.na(ISSCAAP.Group)) %>% distinct(source_fct)
+
+#Checking the no. of entries after filtering out all foods but fish
+fish_fct %>% group_by(source_fct) %>% count()
