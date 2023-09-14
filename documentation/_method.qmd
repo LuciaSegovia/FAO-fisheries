@@ -176,7 +176,6 @@ According to most food composition compilation, including the FAO/ INFOODS guide
 available carbohydrates + dietary fibre + alcohol + ash
 
 
-
 **Eq.6.1** Energy (kJ/100g EP): sum of protein (g/100g EP)\*17 + available carbohydate (g/100g EP)\*17 + fat(g/100g EP)\*37 +  alcohol (g/100g EP)\*29 + dietary fibre (g/100g EP)\*8
 
 **Eq.6.2** Energy (kcal/100g EP):  sum of protein (g/100g EP)\*4 + available carbohydate (g/100g EP)\*4 + fat(g/100g EP)\*9 +  alcohol (g/100g EP)\*7 + dietary fibre (g/100g EP)\*2
