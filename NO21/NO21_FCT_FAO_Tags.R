@@ -12,8 +12,6 @@
 rm(list = ls())
 
 
-# Data Import ----
-#
 # Loading libraries
 ## Note: if it is the first time: install.packages() first
 library(dplyr) # For data cleaning (wrangling)
@@ -36,20 +34,12 @@ source(here::here("functions.R")) # Loading nutrition functions (change to packa
 ## cleaning scientific names
 # source(here::here("NO21", "NO21_scientific-names.R"))
 
-#├  FAO data - ICS codes and ISSCAAP groups  ----
+# 1. Data Import ----
 
-#reading excel
-readxl::excel_sheets(here::here("data",
-                                "List_SUA_ICS_fish.xlsx"))
+#├  FAO data - ICS codes,  ISSCAAP groups & product type info  ----
+
 #loading the data
-ics_code <- readxl::read_excel(here::here("data",
-                                          "List_SUA_ICS_fish.xlsx"))%>% 
-  janitor::clean_names() %>%                         #tidying colnames
-  filter(!is.na(ics_faostat_sua_english_description)) #removing empty rows
-
-#Fixing a typo
-
-ics_code$ics_faostat_sua_english_description  <- gsub( "frozen, fillet", ", frozen fillet", ics_code$ics_faostat_sua_english_description)
+ics_code <- readRDS(here::here("data", "ics-code.RDS"))
 
 
 #├  FAO data - ISSCAAP codes and Scientific names ----
@@ -89,7 +79,9 @@ grep("ref", names(no21), value = TRUE, invert = TRUE)
 # Loading the data
 sci_no21 <- readRDS(here::here("NO21", "scientific-name_NO21.RDS"))
                               
-# 2.1	Formatting FCT   ----
+#  2.	Cleaning and standardising FCT   ----
+
+#├  2.1	Formatting FCT   ----
 
 data.df <- no21
 
@@ -103,7 +95,7 @@ data.df %>% filter(is.na(kilojoules))
 
 data.df  <- data.df %>% filter(!is.na(food_id) & !is.na(food_item))
 
-#├ 2.1.1 Food groups ----
+## ├ 2.1.1 Food groups ----
 
 # Getting the food groups
 foodgroup <- no21 %>% filter(is.na(edible_part) & grepl("^\\d{1,2}$", food_id)) %>% .[,1:2]
@@ -127,7 +119,7 @@ for(i in 1:nrow(data.df)){
 # Checking the data
 data.df %>% filter(foodgroup == "Infant food")
 
-# 2.2 Renaming variables ----
+#├  2.2 Renaming variables ----
 
 data.df <- data.df %>%  rename(
   fdc_id = "food_id",
@@ -192,7 +184,7 @@ names(data.df)
 #The Norwegian FCDB - remove # if willing to have the whole dataset.
 #no21_fct <- no21 %>% filter(!is.na(ENERCkcal)) %>% slice (-1)
 
-# 2.3 Standardising of values ----
+#├  2.3 Standardising of values ----
 
 str(data.df)
 
@@ -211,12 +203,14 @@ sum(is.na(data.df$Edible_factor_in_FCT)) #88 NA +M 140
 
 data.df[, variables] <- apply(data.df[, variables], 2, as.numeric)
 
-# 2.4 Unit of measurement  ----
+#├  2.4 Unit of measurement  ----
 
 # Converting EP into a fraction 
 data.df$Edible_factor_in_FCT <- data.df$Edible_factor_in_FCT/100
 
-# 2) Extracting only fishery products ----
+# 3. Data compilation and harmonisation ----
+
+## Extracting only fishery products 
 
 #Checking food groups
 data.df %>% 
@@ -236,9 +230,12 @@ head(sci_no21)
 dim(no21_fish) #232
 
 
-# 3) Merging fish names w/ scientific names (no21) ----
+#├  3.4. Food name/ description standardisation and food matching ----
 
-#List of fishery entries without Scientific name
+
+#├├  Merging fish names w/ scientific names (no21)  ----
+
+### List of fishery entries without Scientific name
 no21_fish %>% left_join(., sci_no21, by = "fdc_id") %>% 
   mutate(Scientific_name = case_when(
     str_detect(food_desc, "cod|Cod|Stockfish") ~ "Gadus morhua",
@@ -252,8 +249,8 @@ no21_fish %>% left_join(., sci_no21, by = "fdc_id") %>%
     str_detect(food_desc, "Lobster|lobster") ~ "Homarus gammarus",
     TRUE ~ Scientific_name)) %>% filter(is.na(Scientific_name))
 
-#├ Fixing scientific names by fish name (NO21) ----
 
+## Fixing scientific names by fish name (NO21) 
 no21_fish <- no21_fish %>% left_join(., sci_no21, by = "fdc_id") %>% 
   mutate(Scientific_name = case_when(
     str_detect(food_desc, "cod|Cod|Stockfish") ~ "Gadus morhua",
@@ -274,14 +271,15 @@ head(no21_fish)
 dim(no21_fish) #shouldn't add/remove any obs (rows) but add 2 variables (cols)
 subset(no21_fish, !is.na(Scientific_name)) #No of fish w/ scientific name
 
-# 4) Merging the corresponding ISSCAAP to Scientific names ----
+## Merging the corresponding ISSCAAP to Scientific names 
 
 #checking variables in isscaap
 str(isscaap)
 #checking variable names in no21_fish
 colnames(no21_fish)
 
-#Merging the two datasets and tidying the dataset
+## Merging the two datasets and tidying the dataset
+
 no21_fish <- no21_fish %>% 
   left_join(., isscaap %>% select(1:5)) %>%
   relocate(any_of(c("Scientific_name", "Ref", "ISSCAAP")),
@@ -291,7 +289,7 @@ no21_fish <- no21_fish %>%
 head(no21_fish)
 dim(no21_fish) # shouldn't add/remove any obs (rows) but add 4 variables (cols)
 
-#├ Fixing ISSCAAP code by Scientific name ----
+#├├ Fixing ISSCAAP code by Scientific name ----
 
 #Checking the fish with scientific name w/o ISSCAAP
 no21_fish %>% filter(!is.na(Scientific_name), is.na(ISSCAAP)) %>% 
@@ -332,7 +330,7 @@ dim(no21_fish) #shouldn't add/remove any obs (rows) but add 4 variables (cols)
 no21_fish %>% filter(!is.na(Scientific_name), is.na(ISSCAAP)) %>% 
   distinct(fdc_id, Scientific_name)
 
-#├ Fixing ISSCAAP code by fish name ----
+#├├ Fixing ISSCAAP code by fish name ----
 
 # List of fishery products w/o ISSCAAP
 no21_fish %>% filter(is.na(ISSCAAP)) %>% 
@@ -357,6 +355,7 @@ no21_fish <-  no21_fish %>%
     TRUE ~ ISSCAAP), ISSCAAP))
 
 # Checking results:  entries w/  ISSCAAP code
+
 no21_fish %>% filter(!is.na(ISSCAAP)) 
 dim(no21_fish)
 
@@ -365,48 +364,10 @@ dim(no21_fish)
 #  write.csv(., here::here("inter-output", "NorwegianFCBD_fish_isscaap.csv"),
 #   row.names = F)
 
-#5)  Identifying the processing category of the fish ----
+#├├  Identifying the processing category of the fish ----
 
-#├ Identification of the ICS fish category in the ICS file  ----
+## Identification of the ICS fish category in the NO21  
 
-#Checking categories w/o processing code
-#Aquatic mammals and aquatic plants
-
-ics_code %>% mutate(
-  product_type = case_when( 
-    str_detect(ics_faostat_sua_english_description, "fresh fillets") ~ "3", 
-    str_detect(ics_faostat_sua_english_description, "frozen fillets") ~ "4", 
-    str_detect(ics_faostat_sua_english_description, "fresh") ~ "1", 
-    str_detect(ics_faostat_sua_english_description, "frozen") ~ "2", 
-    str_detect(ics_faostat_sua_english_description, "cured") ~ "5", 
-    str_detect(ics_faostat_sua_english_description, "canned") ~ "6", 
-    str_detect(ics_faostat_sua_english_description, "preparations") ~ "7", 
-    str_detect(ics_faostat_sua_english_description, "body oils") ~ "8", 
-    str_detect(ics_faostat_sua_english_description, "liver oils") ~ "9",
-    TRUE ~ "NA"
-  )
-) %>% filter(product_type == "NA") %>% 
-  pull(ics_faostat_sua_english_description, isscaap_group)
-
-#adding processing group no. (product_type) to ics file
-#order should be from the most specific to the least
-
-ics_code <- ics_code %>% mutate(
-  product_type = case_when( 
-    str_detect(ics_faostat_sua_english_description, "fresh fillets") ~ "3", 
-    str_detect(ics_faostat_sua_english_description, "frozen fillets") ~ "4",
-    str_detect(ics_faostat_sua_english_description, "fresh") ~ "1", 
-    str_detect(ics_faostat_sua_english_description, "frozen") ~ "2", 
-    str_detect(ics_faostat_sua_english_description, "cured") ~ "5", 
-    str_detect(ics_faostat_sua_english_description, "canned") ~ "6", 
-    str_detect(ics_faostat_sua_english_description, "preparations") ~ "7", 
-    str_detect(ics_faostat_sua_english_description, "body oils") ~ "8", 
-    str_detect(ics_faostat_sua_english_description, "liver oils") ~ "9",
-    TRUE ~ "NA"
-  )
-) %>% relocate(product_type, .before = "ics_faostat_sua_english_description")
-
-#├ Identification of the ICS fish category in the NO21  ----
 dim(no21_fish)
 #Raw  (1)
 no21_fish  %>% 
@@ -452,7 +413,7 @@ no21_fish  %>%
   filter(str_detect(food_desc, "Oil| oil|Fat|fat")) %>%
   pull(food_desc)
 
-##├ Adding the preparation code (1-9) ----
+##  Adding the preparation code (1-9) 
 
 no21_fish  <- no21_fish   %>% mutate(
   product_type = case_when(
@@ -522,7 +483,7 @@ dim(no21_fish) #this should be +21 "new" entries
 #         "cured", "canned",
 #        "preparations, nei", "body oils", "liver oils")
 
-#6) Matching NO21 fish to ICS FAOSTAT fish category ----
+#├├  Matching NO21 fish to ICS FAOSTAT fish category ----
 
 isscaap_group <- list(unique(ics_code$isscaap_group[grepl("Freshwater & ",
                                                           ics_code$ics_faostat_sua_english_description)]))
@@ -548,7 +509,7 @@ ics_code %>%
   filter(str_detect(ics_faostat_sua_english_description, "Mollus"))%>% 
   pull(ics_faostat_sua_current_code, ics_faostat_sua_english_description)
 
-#├ Allocating the ICS FAOSTAT "current" code  ----
+#├├ Allocating the ICS FAOSTAT "current" code  ----
 #based on ISSCAAP code of each category (see above, line 442-448)
 #and preparation category (product_type)
 
@@ -630,7 +591,7 @@ ics_code %>%
   filter(str_detect(ics_faostat_sua_english_description, "Cepha"))%>% 
   pull(ics_faostat_sua_future_code, ics_faostat_sua_english_description)
 
-#├ Allocating the ICS FAOSTAT "future" code ---- 
+#├├  Allocating the ICS FAOSTAT "future" code ---- 
 #based on ISSCAAP code of each category (see above, line 445-452)
 #and preparation category (product_type) 
 
@@ -732,15 +693,20 @@ no21_fish %>% filter(ICS_FAOSTAT_future == "NA") %>%  pull(food_desc)
 no21_fish %>% 
   filter(str_detect(food_desc, "Snails, canned"))
 
-#Adding extra ICS FAOSTAT codes - manually
+subset(no21_fish, fdc_id %in% c("04.265", "04.079"))
+
+#├├ Adding extra ICS FAOSTAT codes - manually ----
+
+# Excluded: Crabstick, fish balls (acc. to FAO advise) from 1520
+
 no21_fish <- no21_fish %>% mutate(
   ICS_FAOSTAT = case_when(
-    str_detect(food_desc, "Crabstick|Fish ball|burger|Surimi") ~ "1520", 
+    str_detect(food_desc, "burger|Surimi") ~ "1520", 
     str_detect(food_desc, "Lutef") ~ "1518", 
     str_detect(food_desc, "Snails, canned") ~ "1562", 
     TRUE ~ ICS_FAOSTAT),
   ICS_FAOSTAT_future = case_when(
-    str_detect(food_desc, "Crabstick|Fish ball|burger|Surimi") ~ "15200", 
+    str_detect(food_desc, "burger|Surimi") ~ "15200", 
     str_detect(food_desc, "Lutef") ~ "15180", 
     str_detect(food_desc, "Snails, canned") ~ "15620", 
     TRUE ~ ICS_FAOSTAT_future)) 
@@ -767,7 +733,7 @@ no21_fish <- no21_fish  %>%
            .before = "fdc_id") %>% 
   rename(scientific_name = "Scientific_name")
 
-#Adding Quality Code for the matching
+#├├ Adding Quality Code for the matching ----
 
 no21_fish <- no21_fish %>% 
   mutate(quality = 
@@ -806,21 +772,11 @@ NO_FCT_Data %>% naniar::replace_with_na(replace = list(ICS_FAOSTAT = "NA")) %>%
 # Save an NO21 to a R file - for QC.
 saveRDS(NO_FCT_Data, file = "NO21/fish_NO21.rds")
 
-#Excluding fishery entries w/ extreme values from the final selection
-#See documentation and NO21_QC.R)
-#Removing some fish items from the included selection that did not pass the QC.
-#04.366 Surimi, LobNobs --> SOP_std too small
-#"04.373 - Caviar, polar" --> CHO too high
-#04.307- Caviar, cod roe with mayonnaise
-#04.089 - Caviar, capelin roe --> CHO too high
-#"04.323 Fish burger, breaded, --> Not only the fish burger
+#├ 3.6. Dealing with missing values ----
 
-excluded <- c("04.366", "04.373", "04.307", "04.089", "04.323")
+#├├ 3.6.3. Back-calculating variables  ----
 
-NO_FCT_Data$ICS_FAOSTAT[NO_FCT_Data$fdc_id %in% excluded] <- NA
-NO_FCT_Data$ics_faostat_sua_english_description[NO_FCT_Data$fdc_id %in% excluded] <- NA
-
-#Generating the ASHg_bydiff variable to be used in calculations
+# Generating the ASHg_bydiff variable to be used in calculations
 
 proximates <- c("WATERg", "PROCNTg", "FAT_g",  "CHOAVLg", "FIBTGg", "ALCg")
 
@@ -831,13 +787,32 @@ NO_FCT_Data$ASHg_bydiff <-  100-(NO_FCT_Data$WATERg + NO_FCT_Data$PROCNTg +
                                    NO_FCT_Data$FAT_g + NO_FCT_Data$FIBTGg + 
                                    NO_FCT_Data$ALCg + NO_FCT_Data$CHOAVLg)
 
+
+# 4. Data visualisation & Quality Checks ----
+
+#Excluding fishery entries w/ extreme values from the final selection
+# See documentation and NO21_QC.R)
+#Removing some fish items from the included selection that did not pass the QC.
+# "04.366", - Surimi, LobNobs --> SOP_std too small
+# "04.373", - Caviar, polar" --> CHO too high
+# "04.307", - Caviar, cod roe with mayonnaise
+# "04.089", - Caviar, capelin roe --> CHO too high
+# "04.323 ", - Fish burger, breaded, --> Not only the fish burger
+
+excluded <- c("04.366", "04.373", "04.307", "04.089", "04.323")
+
+NO_FCT_Data$ICS_FAOSTAT[NO_FCT_Data$fdc_id %in% excluded] <- NA
+NO_FCT_Data$ics_faostat_sua_english_description[NO_FCT_Data$fdc_id %in% excluded] <- NA
+
 #Final checks
-head(NO_FCT_Data) #First 6 rows of the data
-dim(NO_FCT_Data) #No. of rows and columns
+head(NO_FCT_Data) # First 6 rows of the data
+dim(NO_FCT_Data) # No. of rows and columns
 
 subset(NO_FCT_Data, !is.na(ics_faostat_sua_english_description))
 
-#7) Saving NO21 fish ----
+# 5. Exporting data and metadata  ----
+
+#Saving NO21 fish
 
 #Saving the NO21-fish, we kept all fishery product (w/ and w/o ICS code)
 NO_FCT_Data %>% 
@@ -845,5 +820,5 @@ NO_FCT_Data %>%
   write.csv(., file = here::here("Output", "NO21_FCT_FAO_Tags.csv"),
             row.names = FALSE)
 
-#Removing object// Cleaning environment
+# Removing object// Cleaning environment
 rm(list = ls())

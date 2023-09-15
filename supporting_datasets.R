@@ -9,11 +9,73 @@
 
 
 
+# Loading libraries
+## Note: if it is the first time: install.packages() first
+library(dplyr) # For data cleaning (wrangling)
+library(stringr) # For string manipulation (data cleaning)
 
 ## Food matching: Fish and Fisheries ----
 # Preparing data frame that was prepared for the Global FCT (only fish)
 # contains information for each fish on ISSCAAP code, ICS FAOSTAT fish codes, and
 # alpha-three code, when available. 
+
+#├  FAO data - ICS codes and ISSCAAP groups  ----
+
+#reading excel
+readxl::excel_sheets(here::here("data",
+                                "List_SUA_ICS_fish.xlsx"))
+#loading the data
+ics_code <- readxl::read_excel(here::here("data",
+                                          "List_SUA_ICS_fish.xlsx"))%>% 
+  janitor::clean_names() %>%                         #tidying colnames
+  filter(!is.na(ics_faostat_sua_english_description)) #removing empty rows
+
+#Fixing a typo
+
+ics_code$ics_faostat_sua_english_description  <- gsub( "frozen, fillet", ", frozen fillet", ics_code$ics_faostat_sua_english_description)
+
+
+#Checking categories w/o processing code
+#Aquatic mammals and aquatic plants
+
+ics_code %>% mutate(
+  product_type = case_when( 
+    str_detect(ics_faostat_sua_english_description, "fresh fillets") ~ "3", 
+    str_detect(ics_faostat_sua_english_description, "frozen fillets") ~ "4", 
+    str_detect(ics_faostat_sua_english_description, "fresh") ~ "1", 
+    str_detect(ics_faostat_sua_english_description, "frozen") ~ "2", 
+    str_detect(ics_faostat_sua_english_description, "cured") ~ "5", 
+    str_detect(ics_faostat_sua_english_description, "canned") ~ "6", 
+    str_detect(ics_faostat_sua_english_description, "preparations") ~ "7", 
+    str_detect(ics_faostat_sua_english_description, "body oils") ~ "8", 
+    str_detect(ics_faostat_sua_english_description, "liver oils") ~ "9",
+    TRUE ~ "NA"
+  )
+) %>% filter(product_type == "NA") %>% 
+  pull(ics_faostat_sua_english_description, isscaap_group)
+
+#adding processing group no. (product_type) to ics file
+#order should be from the most specific to the least
+
+ics_code <- ics_code %>% mutate(
+  product_type = case_when( 
+    str_detect(ics_faostat_sua_english_description, "fresh fillets") ~ "3", 
+    str_detect(ics_faostat_sua_english_description, "frozen fillets") ~ "4",
+    str_detect(ics_faostat_sua_english_description, "fresh") ~ "1", 
+    str_detect(ics_faostat_sua_english_description, "frozen") ~ "2", 
+    str_detect(ics_faostat_sua_english_description, "cured") ~ "5", 
+    str_detect(ics_faostat_sua_english_description, "canned") ~ "6", 
+    str_detect(ics_faostat_sua_english_description, "preparations") ~ "7", 
+    str_detect(ics_faostat_sua_english_description, "body oils") ~ "8", 
+    str_detect(ics_faostat_sua_english_description, "liver oils") ~ "9",
+    TRUE ~ "NA"
+  )
+) %>% relocate(product_type, .before = "ics_faostat_sua_english_description")
+
+#├ Saving ICS, ISSCAAP groups & product type info (fish matching) ----
+
+saveRDS(ics_code, file = here::here("data", "ics-code.RDS"))
+
 
 #├ Loading the file ----
 
@@ -82,6 +144,9 @@ ics_code_file <- subset(ics_code_file, !(ICS.FAOSTAT.SUA.Current.Code %in% c("15
 #ics_code_file <- subset(ics_code_file, !(ICS.FAOSTAT.SUA.Current.Code %in% c("1580") & fdc_id == "11112"))
 #
 #ics_code_file$source_fct[ics_code_file$ICS.FAOSTAT.SUA.Current.Code %in% c("1573")]
+
+## Identification of the ICS fish category in the ICS file  
+
 
 #├ Saving ICS and food_id (fish matching) ----
 

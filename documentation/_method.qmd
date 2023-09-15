@@ -29,7 +29,7 @@ the original FCT (raw files) in individual folders named with the
 BiblioID (See table 2) which is stored in the variable `source_fct` (See
 table 3).
 
-### 2. Tidying the data
+### 2. Cleaning (tidying) and standardising the data
 
 The steps outlined in the following sections aim to obtain a clean and standardise FCT, which is necessary to merge all data, from various FCTs, into one common FCT data library. The overall steps that were taken are explained
 below and annotated scripts for each FCTs can be found in this repository in each corresponding folder, as well as template to serve as a guideline for processing new FCTs. Note that the order of the steps may change from script to script as the shape, format and type of data will influence the processing workflow. Similarly, based on the data structure some steps may not be necessary while other FCTs may require additional processing steps. 
@@ -262,8 +262,6 @@ function is provided in Issue #46.
 
 
 
-
-
 **Calculating variables**: For instance, Vitamin A, retinol
 eq.(mcg/100g) and Beta-Carotene eq.(mcg/100g) were calculated using a
 function for the weighted sum of the listed variables. Including one of the special cases, for instance, `RETOLmcg_Recalculator()` was used to
@@ -292,7 +290,7 @@ the Fisheries Global NCT, 2022 (Oct., 2022).
 
 
 
-### 4. Data visualisation
+### 4. Data visualisation & Quality Checks
 
 #### 4.1. Checking Tagnames for completeness <br>
 
