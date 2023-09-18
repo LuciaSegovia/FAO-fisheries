@@ -50,7 +50,7 @@ data/*
 US19/SR-LEG_DB/
 *.xlsx
 
-#Outputs (e.g., documents, images, plots, etc.)
+# Outputs (e.g., documents, images, plots, etc.)
 *.docx
 *.pdf
 images/

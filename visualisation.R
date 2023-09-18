@@ -1,17 +1,15 @@
 
 
-#0) Loading the data 
+#0) Loading the data ----
 #NOTE: For the images to be saved create a folder called "images"
 
+# NCT harmnonisation ----
+
 #If data is not loaded 
-source("variable_re-calculation.R")
+source("merging.R")
 library(gt)
-#library(gtExtras)
-colnames(fao_fish_fct)
-
-#1) Check that we have all FCTs merged ----
-
-fao_fish_fct %>% count(source_fct)
+library(gtExtras)
+library(ggplot2)
 
 
 #Total count of the no. of food entries (not only fish)
@@ -21,6 +19,41 @@ fct_cover %>% ggplot(aes(source_fct)) +
   geom_bar() + 
   theme_light() +
   coord_flip() 
+
+## Figure 3 - presentation ----
+
+# Checking fish included vs total (other food/fish) in FCTS
+
+fish_fct %>% distinct(source_fct, fdc_id) %>% 
+  group_by(source_fct) %>% count() %>% rename(Nfish = "n") %>% 
+  left_join(., fct_cover %>% group_by(source_fct) %>% count()) %>% 
+  rename(Total = "n") %>% 
+  mutate(Nothers = Total-Nfish) %>% 
+  pivot_longer(cols = c(Nfish, Nothers), 
+               names_to = "Foods", 
+               values_to = "counts") %>% 
+  mutate(perc = (counts/Total*100)) %>% 
+  select(!Total) %>% 
+  arrange(source_fct, desc(Foods)) %>%
+  mutate(lab_ypos = cumsum(perc) - 0.5 * perc) %>% 
+  ggplot(aes(x = source_fct, y = perc)) +
+  geom_col(aes(fill = Foods), width = 0.7) +
+  geom_text(aes(y = lab_ypos, label = counts, group =Foods),
+            color = "black", size = 4) +
+  coord_flip() +
+  theme_light()
+
+
+
+# NCT compilation ----
+
+#If data is not loaded 
+source("variable_re-calculation.R")
+library(gt)
+#library(gtExtras)
+colnames(fao_fish_fct)
+
+
 
 # Basic piechart
 fao_fish_fct %>% count(source_fct) %>% 

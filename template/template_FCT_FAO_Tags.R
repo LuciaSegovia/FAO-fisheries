@@ -25,7 +25,6 @@
 #            mode="wb")
 #
 
-# Data Import ----
 #
 # Loading libraries
 ## Note: if it is the first time: install.packages() first
@@ -36,7 +35,8 @@ source(here::here("functions.R")) # Loading nutrition functions (change to packa
 
 
 
-# 1. Importing the data (loading the data)
+# 1. Importing the data  ----
+## loading the data
 ## What kind of file is? E.g.: xlsx (readxl::read_excel)
 #Reads the excel document 
 data.df <- readxl::read_excel(here::here('template', # Change to your folder name
@@ -66,7 +66,7 @@ tail(data.df) # Checking the last rows and columns
 
 ### Trimming the dataframe horizontally
 
-#data.df <- data.df %>% slice(1:300) # Removing the last row, if needed adjust for your dataset
+# data.df <- data.df %>% slice(1:300) # Removing the last row, if needed adjust for your dataset
 
 ### 2.1.1. Creating food_groups variable and tidying ----
 
@@ -145,9 +145,9 @@ names(data.df) # Are the variable names = column names?
 # If yes, use that information to rename food components
 
 # Automatic renaming of INFOODS tagnames & units
-#for( i in 8:62){ #Loops through each column between column 8 and 64 - this is specific for each dataset!!
-  first_row <- toString(names(data.df)[i]) #Takes the column names and assigns it to a variable (name & unit)
-  second_row <- toString(data.df[1, i]) #Takes the first row for that column and assigns it to a variable (tagname)
+for( i in 8:62){ #Loops through each column between column 8 and 64 - this is specific for each dataset!!
+  first_row <- toString(names(data.df)[i]) # Takes the column names and assigns it to a variable (name & unit)
+  second_row <- toString(data.df[1, i]) # Takes the first row for that column and assigns it to a variable (tagname)
   split_string <- str_split(first_row, "\\(") #Splits the first row around "(", assigning the two resulting strings to a variable (separating units from names)
   units_int <- gsub("\\*|\\(|\\)", "", split_string[[1]][length(split_string[[1]])]) #Separates the units out from the split_string (everything after the last open bracket) (getting units)
   names(data.df)[i] <- paste0(second_row, units_int) #The column name is replaced with row 1 and the units from row 2 (changing old column name w/ new tagname_unit names)
@@ -247,7 +247,7 @@ data.df[, variables][grepl("[:alpha:]|\\[|\\*", data.df[, variables])]
   mutate_at(variables, as.numeric) # This convert all NVs into numeric 
 
 
-# 2.4.	Units of measurements
+#├  2.4 Unit of measurement  ----
 # The next step is to check whether each variable (food component) has the correct units
 # Some variable may be in non-standard units: Eg. Iron from mcg to mg
             
@@ -260,7 +260,7 @@ data.df[, variable] <- data.df[, variable]/1000
 #Then, other might be also a different denominator: 
 # Amino acid in g/100g of protein to mg or EP.
 
-#Unit conversion and in new column of Amino Acids
+# Unit conversion and in new column of Amino Acids
 # multiplying AA*Protein/10 (Eq.2.3)
 aa_prot <- grep( "_100gPROTCNT", names(data.df), value = TRUE) # Getting AA variables
 aa_mg <- gsub("g_100gPROTCNT", "mg", aa_prot) # Getting the new variable name [NV+unit]
