@@ -3,8 +3,57 @@
 #QC 
 library(gt)
 #If data is not loaded 
-#source("merging_all.R") #original fct
-source("missing.R") #added missing
+source("merging_all.R") #original fct
+#source("missing.R") #added missing
+
+## Checking Ash by difference  ----
+
+# Proximate variables
+
+proxi <- c( "WATERg", "PROCNTg",  "FATg",  "CHOAVLg", "FIBTGg", "ALCg", "ASHg" )
+
+# Converting them into numeric
+fct_cover[, proxi] <- apply(fct_cover[, proxi], 2, as.numeric)
+
+# Creating a dataset for comparisson (only when Ash & CHO were analysed)
+## Realised that there were some cases that proximate (realised some analysed values were 
+# not accurated) 
+# Removed those with SOP below acceptable range.
+
+datadf <- fct_cover %>% select(fdc_id, food_desc, food_group, source_fct, proxi) %>% 
+  filter(source_fct %in% c("AU19",  "NZ18", "IN17")) %>% 
+  drop_na(c( "WATERg", "PROCNTg",  "FATg",  "CHOAVLg", "FIBTGg", "ALCg")) %>% 
+  mutate(ASHDFg = (100-(WATERg+ PROCNTg+ CHOAVLg+ FATg+ FIBTGg+ALCg)),
+         CHOAVLDFg = (100-(WATERg+ PROCNTg+ ASHg+ FATg+ FIBTGg+ALCg)),
+         SOP = (WATERg+ PROCNTg+ CHOAVLg+ ASHg+ FATg+ FIBTGg+ALCg),
+         ASHDFg = ifelse(ASHDFg<0, 0, ASHDFg),
+         CHOAVLDFg = ifelse(CHOAVLDFg<0, 0, CHOAVLDFg)) %>% 
+        filter(SOP<105 & SOP> 95) # Removing items above below acceptable range. 
+
+## comparing accuracy of Ash by difference vs CHO by difference ----
+
+par(mfrow = c(1, 2))
+hist(datadf$ASHDFg)
+hist(datadf$ASHg)
+
+par(mfrow = c(2, 2))
+plot(datadf$ASHg, datadf$ASHDFg)
+plot(datadf$CHOAVLg, datadf$CHOAVLDFg)
+hist(datadf$ASHDFg)
+hist(datadf$CHOAVLDFg)
+
+
+plot(datadf$ASHg, datadf$ASHDFg)
+qqplot(datadf$ASHg, datadf$ASHDFg)
+cor(datadf$ASHg, datadf$ASHDFg)
+
+plot(datadf$CHOAVLg, datadf$CHOAVLDFg)
+qqplot(datadf$CHOAVLg, datadf$CHOAVLDFg)
+cor(datadf$CHOAVLg, datadf$CHOAVLDFg)
+
+subset(datadf, ASHDFg>40 & ASHg<40) %>%  View()
+subset(datadf, SOP<95 |SOP>105) %>%  View()
+
 
 
 #1) Checking the fisheries dataset
@@ -828,6 +877,8 @@ fao_fish_fct %>% filter(!is.na(ALCg)) %>% select(source_fct, ALCg)
 ###  Ash ------
 fao_fish_fct %>% filter(is.na(ASHg)) %>% count(source_fct)
 fao_fish_fct %>% filter(is.na(ASHg)) %>% count(source_fct)
+
+
 
 ## Checking Sum of Proximate  ----
 

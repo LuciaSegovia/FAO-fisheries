@@ -1,0 +1,138 @@
+---
+title: "Untitled"
+author: "Segovia de la Revilla, Lucia"
+date: "2023-09-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+#0) Loading the data ----
+#NOTE: For the images to be saved create a folder called "images"
+
+# NCT harmnonisation ----
+
+#If data is not loaded 
+source("merging.R")
+library(gt)
+library(gtExtras)
+library(ggplot2)
+
+```
+
+
+
+
+```{r incl-excl-bar,  echo=FALSE}
+
+## Figure 3 - presentation ----
+
+# Checking fish included vs total (other food/fish) in FCTS
+
+fish_fct %>% distinct(source_fct, fdc_id) %>%            # removing duplicated items (fish)
+  group_by(source_fct) %>% count() %>% rename(Nfish = "n") %>%  # count of included foods (fish) by FCT & renaming variable
+  left_join(., fct_cover %>% group_by(source_fct) %>% count()) %>%  #adding total food items in each FCT
+  rename(Total = "n") %>%             #renaming variable
+  mutate(Nothers = Total-Nfish) %>%   # calculating other foods (excluded items)
+  pivot_longer(cols = c(Nfish, Nothers),  # combining counts variables (two variables into one (columns to rows))
+               names_to = "Foods", 
+               values_to = "counts") %>% 
+  mutate(perc = (counts/Total*100)) %>%  # calculating perc. 
+  select(!Total) %>%                    # excluding unnecessary variable
+  arrange(source_fct, desc(Foods)) %>%  
+  mutate(lab_ypos = cumsum(perc) - 0.5 * perc) %>% # generating the position of the labels
+  ggplot(aes(x = source_fct, y = perc)) +            # visualisation of variables
+  geom_col(aes(fill = Foods), alpha =.7, width = 0.8) + # Changing colour fill, transparency and bin width
+  geom_text(aes(y = lab_ypos, label = counts, group =Foods),
+            color = "black", size = 4) +
+  coord_flip() +
+  theme_light()
+
+```
+
+
+
+```{r missing-values, echo=FALSE, width = 12, height = 7}
+
+#├ Plot (heat map):  % of missing values  per FCT ----
+
+# Proximate
+proxi <- c( "WATERg", "PROCNTg",  "FATg",  "CHOAVLg", "FIBTGg", "ALCg", "ASHg" )
+
+vit <- c("VITB6Amg", "NIAmg",  "VITB12mcg",   "VITA_RAEmcg",  "CARTBmcg",
+         "CARTBEQmcg", "RETOLmcg")
+
+mine <- c( "FEmg", "CAmg", "MGmg", "ZNmg", "Pmg", "Kmg", "CUmg","SEmcg","IDmcg")
+
+fish_fct %>% 
+  select(proxi, source_fct) %>% 
+#  rename_all(., ~components_longname) %>%  
+  naniar::gg_miss_fct(., fct = source_fct) +
+ # geom_rect(aes(xmin = 0.5, ymin = -Inf, xmax = 1.5, ymax =Inf), #AU19
+  #          linetype = "dotted",alpha = 0, colour = "red", size = 2.5) +
+    labs( x= "", y= "",
+        title = "Data Gaps: Percentage (%) of missing values of food components per FCT")
+
+#Perfect for ppt (width = 12, height = 7)
+# ggsave(here::here("images", "missing-values-fct.png"), width = 12, height = 7)
+
+```
+
+
+
+
+
+```{r}
+
+library(tidyverse)
+library(ggridges)
+library(patchwork)
+#library(camcorder)
+
+spam_long <- spam %>% 
+  select(-crl.tot) %>% 
+  pivot_longer(1:make) %>% 
+  mutate(
+    value_log = log10(value),
+    yesno = if_else(yesno == "y", "Spam", "Not\nSpam")
+    ) %>% 
+  filter(value_log > -Inf)
+  
+f1 <- "DIN Condensed"
+f2 <- "Outfit"
+
+pal <- RColorBrewer::brewer.pal(3, "Pastel2") %>% 
+  colorspace::darken(., 0.5)
+
+ggplot(fct_cover) +
+  geom_density_ridges(aes(ASHg, y = food_group, fill = food_group, color = after_scale(colorspace::darken(fill, 0.5))), quantile_lines = TRUE, quantiles = 2, jittered_points = TRUE, scale = 1, rel_min_height = .01, point_shape = "|", point_size = 3, size = 0.25, position = position_points_jitter(height = 0, yoffset = -0.2)) +
+  scale_fill_brewer(palette = "Pastel2") +
+  coord_cartesian(clip = "off") +
+  facet_wrap(vars(food_group), ncol = 1, scales = "free_x") +
+  labs(
+    title = "Spam E-mail",
+    subtitle = "Occurrences of '!', '$', 'make', 'money', and '000' as a percent of total number of words\nin 4601 emails, of which 1813 were identified as spam",
+    caption = "Source: UCI Repository Of Machine Learning Databases · Graphic: Georgios Karamanis"
+  ) +
+  theme_minimal(base_family = f1) +
+  theme(
+    legend.position = "none",
+    plot.background = element_rect(fill = "grey99", color = NA),
+    axis.title = element_blank(),
+    axis.text = element_text(size = 12),
+    axis.text.y = element_text(color = pal),
+    axis.text.x = element_text(color = "grey50"),
+    panel.grid.major.y = element_blank(),
+    strip.text = element_text(size = 12, family = f2, face = "bold"),
+    plot.margin = margin(10, 30, 10, 30),
+    plot.title = element_text(family = f2, face = "bold", size = 16),
+    plot.title.position = "plot",
+    plot.subtitle = element_text(family = f2, margin = margin(0, 0, 20, 0)),
+    plot.caption = element_text(family = f2, margin = margin(20, 0, 0, 0))
+  )
+
+
+
+```
+

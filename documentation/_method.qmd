@@ -303,6 +303,14 @@ Two variables were created for data visualisation purposes (fish type and fish p
 it to the final dataset: Fisheries Global NCT (Oct., 2022). We used histograms and boxplot to identify extreme values by plotting
 the different components by fish type and fish preparation. 
 
+##### 4.2.1. Proximates (TO-DO)
+
+Proximate values are important nutrient, and are used independently (i.e., estimate the protein or fat content), but also for calculating other components, for instance *Energy (kcal/kj)*, or *Carbohydrates, by difference*, or as proposed here *Ash, by difference*, and the sum of proximate, which is often used as measurement of quality of the data. 
+
+However, due to the nature of the equation used for the carbohydrates and ash by difference (Eq.x and Eq.Z), we raise the question regarding how good is that variable for accounting for data quality when using those variable for calculation. Hence, we propose that it should only be used when analytically values are available. 
+
+Within this framework, only XX FCTs provided measured CHO. 
+
 ### 5. Exporting data and metadata
 
 All these steps would allow to replicate the process and to re-generate the table with the same format for future updates. 

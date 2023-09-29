@@ -8,12 +8,11 @@ NZ18_Raw <- readxl::read_excel(here::here('NZ18', "Standard DATA.AP.xlsx"), skip
 NZ18_sources <- readxl::read_excel(here::here('NZ18', "Standard DATA.FT.xlsx"), skip = 1) #Reads the sources excel document and assigns the relevant sheet to an R data frame, skipping the first row
 
 
-
 # Column Renaming (General) ----
 
 column_names <- names(NZ18_Raw) # Creates a list of all column names
 for (i in 1:length(column_names)){ #iterates through that list
-  current_name <- names(NZ18_Raw[,i]) #takes the column name from the dataset which curresponds with the position in the list
+  current_name <- names(NZ18_Raw[,i]) #takes the column name from the dataset which corresponds with the position in the list
   missing_unit <- toString(NZ18_Raw[1,i]) #Reads the first row of that column, where the units are for the data
   if(identical(current_name, missing_unit)){ #Metadata columns have the column name and first row identical; this checks for that and skips if true
     next
@@ -91,7 +90,7 @@ col_tagname <- c("fdc_id", #A list of the desired column names in order. NA entr
                  "food_group",
                  "source_fct", 
                  "nutrient_data_source", #change for nutrient_source / FEmg_source ?
-                 "ALC_g",
+                 "ALCg",
                  "CARTAmcg",
                  "TOCPHAmg",
                  "ASHg",
@@ -134,8 +133,8 @@ col_tagname <- c("fdc_id", #A list of the desired column names in order. NA entr
                  "FASATg", 
                  "FATRNg", 
                  "FIBTGg", 
-                 NA, 
-                 NA, 
+                 "FIBINSg", 
+                 "FIBSOLg", 
                  "FOLFDmg",
                  "FOLmg", 
                  "FOLACmg", 
@@ -159,9 +158,9 @@ col_tagname <- c("fdc_id", #A list of the desired column names in order. NA entr
                  "RIBFmg", 
                  "SEmcg", 
                  "NAmg", 
-                 NA, 
-                 NA,  
-                 NA, 
+                 "STARCHg", 
+                 "SUCSg",  
+                 "SUGADg", 
                  NA, 
                  "SUGARg", 
                  "THIAmg", 

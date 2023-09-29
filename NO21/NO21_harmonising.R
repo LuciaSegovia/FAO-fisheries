@@ -162,7 +162,7 @@ dim(no21_fish)
 ## Identification of the ICS fish category in the NO21  
 
 dim(no21_fish)
-#Raw  (1)
+# Raw  (1)
 no21_fish  %>% 
   filter(str_detect(food_desc, " raw")) %>% 
   filter(!str_detect(food_desc, "slice|fillet")) %>%

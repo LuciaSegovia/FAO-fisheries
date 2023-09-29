@@ -245,6 +245,10 @@ sum(is.na(data.df$F12D0g)) #96
 sum(is.na(data.df$Edible_factor_in_FCT) | data.df$Edible_factor_in_FCT == "M") #88 NA +M 140
 sum(is.na(data.df$Edible_factor_in_FCT)) #88 NA +M 140
 
+# Changing M to NA
+data.df$Edible_factor_in_FCT[data.df$Edible_factor_in_FCT == "M"] <-  NA
+
+# Changing food components to numeric
 data.df[, variables] <- apply(data.df[, variables], 2, as.numeric)
 
 #├  2.4 Unit of measurement  ----
@@ -256,7 +260,7 @@ data.df$Edible_factor_in_FCT <- data.df$Edible_factor_in_FCT/100
 # 2.5. Data output for harmonisation ----
 
 # Saving the NO21, we kept all fishery product (w/ and w/o ICS code)
-NO_FCT_Data %>% 
+data.df %>% 
   #select(fdc_id:IDmcg, alpha_code, source_fct ) %>% 
   write.csv(., file = here::here("Output", "NO21_FCT_FAO_Tags.csv"),
             row.names = FALSE)

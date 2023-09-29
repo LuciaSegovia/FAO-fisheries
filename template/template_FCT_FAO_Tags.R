@@ -15,15 +15,16 @@
 #
 # If the data is publicly available online (from source of the data see README) - Uncomment!
 # Only need to do it the first time to obtain the raw files!
-# 
-# Here's the link to the online file
-#f <- "http://www.the-source-of-the-data/.../the-file-data.xlsx"
 
-#download.file(f,  # the location where is downloaded from
-#             destfile = here::here('template', "the-file-name-of-data.xlsx"), # the location where is stored in your terminal
-#             method="wininet", # use "curl" for OS X / Linux, "wininet" for Windows
-#            mode="wb")
-#
+
+# Here's the link to the online file
+f <- "http://www.the-source-of-the-data/.../the-file-data.xlsx"
+
+download.file(f,  # the location where is downloaded from
+             destfile = here::here('template', "the-file-name-of-data.xlsx"), # the location where is stored in your terminal
+             method="wininet", # use "curl" for OS X / Linux, "wininet" for Windows
+            mode="wb")
+
 
 #
 # Loading libraries
@@ -159,43 +160,44 @@ for( i in 8:62){ #Loops through each column between column 8 and 64 - this is sp
 
 data.df <- data.df %>%  
   dplyr::rename(
-  ENERCkJ = "kilojoules", 
-  ENERCkcal = "kilocalories", 
-  WATERg = "water", 
-  FAT_g = "fat", 
-  FASATg = "sat_fa",
-  FAMSg = "mu_fa",
-  FAPUg = "pu_fa",
-  F22D6N3g = "c22_6n_3_dha", 
-  F20D5N3g = "c20_5n_3_epa", 
-  CHOLEmg = "cholesterol",
-  CHOAVLg = "carbo", 
-  SUGARg = "sugar", 
-  FIBTGg = "dietary_fibre", 
-  PROCNTg = "protein",
-  ALCg = "alcohol", 
-  VITA_RAEmcg = "vitamin_a", 
-  RETOLmcg = "retinol",
-  CARTBmcg = "beta_carotene",
-  VITDmcg = "vitamin_d", 
-  VITEmg = "vitamin_e", 
-  THIAmg ="thiamin",
-  RIBFmg = "riboflavin",
-  NIAmg = "niacin", 
-  VITB6_mg = "vitamin_b6",
-  FOLmcg = "folate", 
-  VITB12mcg = "vitamin_b12", 
-  VITCmg = "vitamin_c", 
-  CAmg = "calcium",
-  FEmg = "iron",
-  NAmg = "sodium", 
-  Kmg = "potassium", 
-  MGmg = "magnesium",
-  Pmg = "phosphorus", 
-  SEmcg = "selenium", 
-  CUmg = "copper", 
-  IDmcg = "iodine",
-  ZNmg = "zinc")
+  ENERCkJ = "Energy kcal", 
+  ENERCkcal = "Energy kJ", 
+  WATERg = "Water", 
+  FAT_g = "Fat", 
+  FASATg = "Saturated Fat",
+  FAMSg = "Mono-unsaturated Fat",
+  FAPUg = "Poly-unsaturated Fat",
+  F22D6N3g = "DHA", 
+  F20D5N3g = "EPA", 
+  CHOLEmg = "Cholesterol",
+  CHOAVLg = "Carbohydrates, availables", 
+  CHOAVLDg = "Carbohydrates, availables by difference", 
+  SUGARg = "Sgar", 
+  FIBTGg = "Dietary fibre", 
+  PROCNTg = "Protein",
+  ALCg = "Alcohol", 
+  VITA_RAEmcg = "Vitamin A (RAE)", 
+  RETOLmcg = "Retinol",
+  CARTBmcg = "beta-Carotene",
+  VITDmcg = "Vitamin D", 
+  VITEmg = "Vitamin E", 
+  THIAmg ="Thiamine",
+  RIBFmg = "Riboflavin",
+  NIAmg = "Niacin", 
+  VITB6Cmg = "Vitamin B6, calculated",
+  FOLmcg = "Folate", 
+  VITB12mcg = "Vitamin B12", 
+  VITCmg = "Vitamin C", 
+  CAmg = "Calcium",
+  FEmg = "Iron",
+  NAmg = "Sodium", 
+  Kmg = "Potassium", 
+  MGmg = "Magnesium",
+  Pmg = "Phosphorus", 
+  SEmcg = "Selenium", 
+  CUmg = "Copper", 
+  IDmcg = "Iodine",
+  ZNmg = "Zinc")
 
 # Renaming the other variables (food code/id, food name, etc.)
 data.df <- data.df %>%  
