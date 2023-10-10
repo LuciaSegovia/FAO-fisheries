@@ -42,19 +42,6 @@ source(here::here("functions.R")) # Loading nutrition functions (change to packa
 ics_code <- readRDS(here::here("data", "ics-code.RDS"))
 
 
-#├  FAO data - ISSCAAP codes and Scientific names ----
-
-#reading excel
-readxl::excel_sheets(here::here("data",
-                                "ASFIS-production_FAO-NFISS.xlsx"))
-#loading the data
-isscaap <- readxl::read_excel(here::here("data",
-                                         "ASFIS-production_FAO-NFISS.xlsx"),
-                              sheet = 1) %>% 
-  rename(alpha_code = "3A_CODE") #rename bc R doesn't like variable names 
-#starting w/ a number
-
-
 #├  Norwegian FCDB data (NO21) ----
 
 #reading excel
@@ -77,7 +64,8 @@ grep("ref", names(no21), value = TRUE, invert = TRUE)
 #├  NO21 - Scientific names ----
 
 # Loading the data
-sci_no21 <- readRDS(here::here("NO21", "scientific-name_NO21.RDS"))
+sci_no21 <- readRDS(here::here("NO21", 
+                               "scientific-name_NO21.RDS"))
                               
 #  2.	Cleaning and standardising FCT   ----
 
@@ -115,6 +103,14 @@ for(i in 1:nrow(data.df)){
   
 }
 
+## ├ 2.1.2 Scientific name ----
+
+names(sci_no21)
+
+data.df <- data.df %>% 
+  left_join(., sci_no21 %>% select(fdc_id, Scientific_name),
+                      by = c("food_id" = "fdc_id"))
+
 # Checking the data
 data.df %>% filter(foodgroup == "Infant food")
 
@@ -123,6 +119,7 @@ data.df %>% filter(foodgroup == "Infant food")
 data.df <- data.df %>%  rename(
   fdc_id = "food_id",
   food_desc = "food_item",
+  scientific_name = "Scientific_name", 
   Edible_factor_in_FCT = "edible_part", 
   ENERCkJ = "kilojoules", 
   ENERCkcal = "kilocalories", 

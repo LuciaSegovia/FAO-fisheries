@@ -1,7 +1,28 @@
 
+# Loading libraries
+## Note: if it is the first time: install.packages() first
+library(dplyr) # For data cleaning (wrangling)
+library(stringr) # For string manipulation (data cleaning)
 
 
 # 3. Data compilation and harmonisation ----
+
+# Loading the data
+
+data.df <- read.csv(here::here("Output", "NO21_FCT_FAO_Tags.csv"))
+
+#├  FAO data (ASFIS) - ISSCAAP codes and Scientific names ----
+
+#reading excel
+readxl::excel_sheets(here::here("data",
+                                "ASFIS-production_FAO-NFISS.xlsx"))
+#loading the data
+isscaap <- readxl::read_excel(here::here("data",
+                                         "ASFIS-production_FAO-NFISS.xlsx"),
+                              sheet = 1) %>% 
+  rename(alpha_code = "3A_CODE", 
+         scientific_name = "Scientific_name") #rename bc R doesn't like variable names starting w/ a number
+
 
 ## Extracting only fishery products 
 
@@ -19,33 +40,20 @@ no21_fish <- data.df %>% slice(row1:row2) %>%
 
 #Checking the result
 colnames(no21_fish)
-head(sci_no21)
 dim(no21_fish) #232
-
+head(no21_fish)
 
 #├  3.4. Food name/ description standardisation and food matching ----
-
 
 #├├  Merging fish names w/ scientific names (no21)  ----
 
 ### List of fishery entries without Scientific name
-no21_fish %>% left_join(., sci_no21, by = "fdc_id") %>% 
-  mutate(Scientific_name = case_when(
-    str_detect(food_desc, "cod|Cod|Stockfish") ~ "Gadus morhua",
-    str_detect(food_desc, "Anchovy") ~ "Engraulis encrasicolus",
-    str_detect(food_desc, "Saithe|saithe") ~ "Pollachius virens",
-    str_detect(food_desc, "Capelin|capelin") ~ "Mallotus villosus",
-    str_detect(food_desc, "Polar|polar") ~ "Boreogadus saida",
-    str_detect(food_desc, "Salmon|salmon") ~ "Salmo salar",
-    str_detect(food_desc, "Herring|herring") ~ "Clupea harengus", 
-    str_detect(food_desc, "Mackerel|mackerel") ~ "Scomber scombrus", 
-    str_detect(food_desc, "Lobster|lobster") ~ "Homarus gammarus",
-    TRUE ~ Scientific_name)) %>% filter(is.na(Scientific_name))
-
+no21_fish %>% filter(is.na(scientific_name)) %>% count()
 
 ## Fixing scientific names by fish name (NO21) 
-no21_fish <- no21_fish %>% left_join(., sci_no21, by = "fdc_id") %>% 
-  mutate(Scientific_name = case_when(
+no21_fish <- no21_fish %>% 
+  mutate(scientific_name = ifelse(is.na(scientific_name), 
+                                  case_when(
     str_detect(food_desc, "cod|Cod|Stockfish") ~ "Gadus morhua",
     str_detect(food_desc, "Anchovy") ~ "Engraulis encrasicolus",
     str_detect(food_desc, "Saithe|saithe") ~ "Pollachius virens",
@@ -55,9 +63,9 @@ no21_fish <- no21_fish %>% left_join(., sci_no21, by = "fdc_id") %>%
     str_detect(food_desc, "Herring|herring") ~ "Clupea harengus", 
     str_detect(food_desc, "Mackerel|mackerel") ~ "Scomber scombrus", 
     str_detect(food_desc, "Lobster|lobster") ~ "Homarus gammarus",
-    TRUE ~ Scientific_name)) %>% 
-  select(-name)
+    TRUE ~ scientific_name), scientific_name))
 
+sum(is.na(no21_fish$scientific_name))
 
 #checking results
 head(no21_fish)
@@ -67,15 +75,16 @@ subset(no21_fish, !is.na(Scientific_name)) #No of fish w/ scientific name
 ## Merging the corresponding ISSCAAP to Scientific names 
 
 #checking variables in isscaap
-str(isscaap)
+names(isscaap)
+head(isscaap)
 #checking variable names in no21_fish
 colnames(no21_fish)
 
-## Merging the two datasets and tidying the dataset
+## Merging the FCT with the ASFIS info to obtain ISSCAAP code
 
 no21_fish <- no21_fish %>% 
   left_join(., isscaap %>% select(1:5)) %>%
-  relocate(any_of(c("Scientific_name", "Ref", "ISSCAAP")),
+  relocate(any_of(c("scientific_name", "ISSCAAP")),
            .after = food_desc)
 
 #checking results
@@ -85,35 +94,48 @@ dim(no21_fish) # shouldn't add/remove any obs (rows) but add 4 variables (cols)
 #├├ Fixing ISSCAAP code by Scientific name ----
 
 #Checking the fish with scientific name w/o ISSCAAP
-no21_fish %>% filter(!is.na(Scientific_name), is.na(ISSCAAP)) %>% 
-  distinct(fdc_id, Scientific_name) 
+no21_fish %>% filter(!is.na(scientific_name), is.na(ISSCAAP)) %>% 
+  distinct(fdc_id, scientific_name) 
 
 #List of fish with Scientific name w/o ISSCAAP
-fish.name <- no21_fish  %>% filter(!is.na(Scientific_name), is.na(ISSCAAP)) %>% 
-  distinct(Scientific_name) %>% pull()
+fish.name <- no21_fish  %>% filter(!is.na(scientific_name), is.na(ISSCAAP)) %>% 
+  distinct(scientific_name) 
 
-#Identifying the ISSCAAP of the fish by fist name of the fish w/o ISSCAAP
-fish.isscaap <- isscaap %>% 
-  filter(str_detect(Scientific_name, "Theragra")) %>%
-  distinct(ISSCAAP) %>% pull()
-fish.isscaap[2] <-  isscaap %>% 
-  filter(str_detect(Scientific_name, "Anarhichas")) %>% 
-  distinct(ISSCAAP) %>% pull()
-fish.isscaap[3] <- isscaap %>%
-  filter(str_detect(Scientific_name, "Pangasius")) %>% 
-  distinct(ISSCAAP) %>% pull()
-fish.isscaap[4] <- isscaap %>% 
-  filter(str_detect(Scientific_name, "Sebastes")) %>% 
-  distinct(ISSCAAP) %>% pull()
-#isscaap %>% filter(str_detect(Scientific_name, "maxima")) 
-fish.isscaap[5] <- isscaap %>%
+#Identifying the ISSCAAP of the fish by scientific name of the fish w/o ISSCAAP
+
+fish.name$ISSCAAP <- NA
+
+for(j in 1:2){
+  
+for(i in 1:nrow(fish.name)){
+  
+  if(is.na(fish.name$ISSCAAP[i])){
+
+    fish.name$ISSCAAP[i] <- isscaap %>% 
+  filter(str_detect(scientific_name, word(fish.name$scientific_name, j)[i])) %>%
+  distinct(ISSCAAP) %>% pull() %>% toString()
+   
+   fish.name$ISSCAAP[i][fish.name$ISSCAAP[i] == ""] <-  NA
+
+  }
+
+  print(paste("fish", i, "word", j))
+
+  }  
+}
+
+# Those with multiple ISSCAAP were manually explored and change usig
+# the English name
+
+fish.name$ISSCAAP[5] <- isscaap %>%
   filter(str_detect(English_name, "Turbot")) %>% 
   distinct(ISSCAAP) %>% pull()
 
 #Adding the ISSCAAP codes for the fish identified above
-for(i in 1:length(fish.name)){
-  no21_fish$ISSCAAP[grep(fish.name[i], no21_fish$Scientific_name)] <- fish.isscaap[i]
-  print(i)}
+for(i in 1:nrow(fish.name)){
+  no21_fish$ISSCAAP[no21_fish$scientific_name == fish.name$scientific_name[i]] <- fish.name$ISSCAAP[i]
+  print(i)
+  }
 
 #checking results
 head(no21_fish)
