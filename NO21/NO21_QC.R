@@ -4,15 +4,39 @@
 library(tidyverse)
 
 # Restore the NO21 fish object
-data.df <- readRDS(file = "NO21/fish_NO21.rds")
+#data.df <- readRDS(file = "NO21/fish_NO21.rds")
+
+# Loading the data
+
+data.df <- read.csv(here::here("Output", "NO21_FCT_FAO_Tags.csv"))
 
 names(data.df)
+str(data.df)
 
-names(data.df)[11:67]
+# Checking food component variables
+
+names(data.df)[4:60]
+n1 <- 4
+n2 <- 60
 
 # Converting as numeric
+data.df[, c(n1:n2)] <- apply(data.df[, c(n1:n2)], 2, as.numeric)
 
-data.df[, c(11:67)] <- apply(data.df[, c(11:67)], 2, as.numeric)
+# Checking food groups
+
+unique(data.df$foodgroup)
+
+#  
+## Checking proximate values by foodgroup ----
+## Change the name of the food component to check
+
+nv <- "WATERg"
+
+
+ggplot(data.df, aes(x = !!sym(nv), fill = foodgroup)) +
+  geom_density() +
+  facet_wrap(~foodgroup)
+
 
 #04.208, 04.313
 

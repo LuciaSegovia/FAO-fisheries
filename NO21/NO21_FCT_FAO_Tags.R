@@ -71,6 +71,77 @@ sci_no21 <- readRDS(here::here("NO21",
 
 #├  2.1	Formatting FCT   ----
 
+## ├ 2.1.1 Food groups ----
+
+# Getting the food groups
+# foodgroup <- no21 %>% filter(is.na(edible_part) & grepl("^\\d{1,2}$", food_id)) %>% .[,1:2]
+
+
+no21 %>% filter(is.na(edible_part) & !is.na(food_id)) %>% .[,1:2] %>% View()
+
+# String with the locations of the empty rows (separating the food groups and subgroups)
+rows <- which(is.na(no21$food_item))
+which(!is.na(no21$edible_part))
+
+n <- 3
+
+no21$food_item[n+1]
+no21$food_id[n+1]
+
+no21$food_id[1:20]
+
+# Creating the variable for food groups and subgroups
+no21$foodgroup <- NA
+no21$food_subgroup <- NA
+no21$food_subgroup2 <- NA
+
+# Loop to allocate the food groups
+
+j <- 0
+foodgroups <- NA
+f <- 0
+food_subgroups <- NA
+
+for(i in 1:length(rows)){
+
+if(grepl("^\\d{1,2}$", no21$food_id[rows[i]+1])){
+  
+  j <- j+1
+  foodgroups[j] <- no21$food_item[rows[i]+1]
+  no21$foodgroup[rows[i]:rows[i+1]] <- no21$food_item[rows[i]+1]
+
+  
+}
+
+if(grepl("^\\d{1,2}\\.\\d{1,2}$", no21$food_id[rows[i]+1])){
+  
+  f <- f+1
+  food_subgroups[f] <- no21$food_item[rows[i]+1]
+  no21$food_subgroup[rows[i]:rows[i+1]]  <- no21$food_item[rows[i]+1]
+  no21$foodgroup[rows[i]:rows[i+1]]  <- foodgroups[[j]]
+  
+}
+  
+  if(grepl("^\\d{1,2}\\.\\d{1,2}\\.", no21$food_id[rows[i]+1])){
+    
+    no21$food_subgroup2[rows[i]:rows[i+1]]  <- no21$food_item[rows[i]+1]
+    no21$foodgroup[rows[i]:rows[i+1]]  <- foodgroups[[j]]
+    no21$food_subgroup[rows[i]:rows[i+1]]  <- food_subgroups[[f]]
+    
+  }
+  
+  
+}
+
+no21 %>% filter(is.na(food_subgroup) & 
+                  is.na(foodgroup)) %>% View()
+
+no21[which(is.na(no21$food_subgroup)),] %>% View()
+
+unique(no21$food_subgroup)
+unique(no21$foodgroup)
+
+
 data.df <- no21
 
 names(data.df)
@@ -83,25 +154,9 @@ data.df %>% filter(is.na(kilojoules))
 
 data.df  <- data.df %>% filter(!is.na(food_id) & !is.na(food_item))
 
-## ├ 2.1.1 Food groups ----
+sum(is.na(data.df$foodgroup))
 
-# Getting the food groups
-foodgroup <- no21 %>% filter(is.na(edible_part) & grepl("^\\d{1,2}$", food_id)) %>% .[,1:2]
-
-# Creating the variable for food groups
-data.df$foodgroup <- NA
-
-# Loop to allocate the food groups
-for(j in 1:nrow(foodgroup)){
-  
-for(i in 1:nrow(data.df)){
-  
-  if(as.numeric(str_extract(data.df$food_id[i], "^[[:digit:]]{1,2}")) == j){
-    data.df$foodgroup[i] <- toString(foodgroup[j,2])
-  }
-}
-  
-}
+data.df %>% filter(is.na(foodgroup))
 
 ## ├ 2.1.2 Scientific name ----
 
@@ -112,7 +167,7 @@ data.df <- data.df %>%
                       by = c("food_id" = "fdc_id"))
 
 # Checking the data
-data.df %>% filter(foodgroup == "Infant food")
+data.df %>% filter(foodgroup %in% foodgroups[4]) %>% View()
 
 #├  2.2 Renaming variables ----
 
@@ -158,7 +213,7 @@ data.df <- data.df %>%  rename(
   CUmg = "copper", 
   IDmcg = "iodine",
   ZNmg = "zinc") %>% 
-  relocate(foodgroup, .after = food_desc) #relocating food group variable
+  relocate(c(foodgroup, food_subgroup), .after = food_desc) #relocating food group variable
 
 # Renaming Fatty Acids (FA)
 
@@ -238,7 +293,7 @@ data.df[, variables][grepl("[:alpha:]|\\[|\\*", data.df[, variables])]
 data.df[, variables][grepl("M", data.df[, variables])]  # M is the code for missing values (M == NA)
 grep("M|-", data.df$F12D0g, value = TRUE) # From scientific notation
 
-sum(is.na(data.df$F12D0g)) #96
+sum(is.na(data.df$F12D0g)) # 96
 sum(is.na(data.df$Edible_factor_in_FCT) | data.df$Edible_factor_in_FCT == "M") #88 NA +M 140
 sum(is.na(data.df$Edible_factor_in_FCT)) #88 NA +M 140
 

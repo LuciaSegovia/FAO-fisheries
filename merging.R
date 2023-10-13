@@ -36,6 +36,7 @@ ics_code_file <- readRDS(here::here("data", "ics-code_fish-code.RDS"))
 
 # Checking that we have loaded all the FCT/FCDBs (n=11, excluding UK21 & NO21)
 fct_cover %>% distinct(source_fct) 
+fct_cover %>% count(source_fct) 
 
 names(ics_code_file)
 length(unique(ics_code_file$ICS.FAOSTAT.SUA.Current.Code))
