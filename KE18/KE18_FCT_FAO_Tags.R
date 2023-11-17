@@ -73,6 +73,8 @@ colnames(KE18_Raw_FCT) <- unique_column_names
 # creating variable 'foodgroups' ----
 
 KE18_Raw_FCT_FoodGroup <- KE18_Raw_FCT %>%  filter(code %in% c(1:15)) %>% pull(fooditem) #This pulls the food group names by
+# Fixing a typo in the food groups name
+KE18_Raw_FCT_FoodGroup[4] <-  "VEGETABLE AND VEGETABLE PRODUCTS"
 
 KE18_Raw_FCT <- KE18_Raw_FCT %>% mutate(foodgroup = case_when( #This creates the foodgroup column, and assigns the values based on what the code starts with,
   str_detect(code, "[:digit:]{5}") & str_starts(code, '10') ~ KE18_Raw_FCT_FoodGroup[10], # which correlates directly with the food group
