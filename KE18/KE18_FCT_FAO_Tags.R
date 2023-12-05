@@ -12,8 +12,8 @@ rm(list = ls())
 #
 # Library loading 
 
-library(tidyverse)
-library(visdat)
+library(dplyr) # Data wrangling
+library(visdat) 
 
 # 0) Accessing the data (for source of the data see README) - Uncomment!
 # Only need to do it the first time to obtain the raw files!
@@ -21,9 +21,9 @@ library(visdat)
 # f <- "http://www.nutritionhealth.or.ke/wp-content/uploads/Downloads/Kenya%20Food%20Composition%20Tables%20Excel%20files%202018.xlsx"
 # 
 # download.file(f, 
-#              destfile = here::here('KE18', "MOH-KENFCT_2018.xlsx"),
-#              method="wininet", #use "curl" for OS X / Linux, "wininet" for Windows
-#             mode="wb")
+#            destfile = here::here('KE18', "MOH-KENFCT_2018.xlsx"),
+#            method="wininet", #use "curl" for OS X / Linux, "wininet" for Windows
+#            mode="wb")
 # 
 
 # Data Import ----
@@ -241,7 +241,7 @@ names(KE18_Raw_FCT)
 
 glimpse(KE18_Raw_FCT) #Optional - check the data before saving 
 
-write.csv(KE18_Raw_FCT, file = here::here("FCTs", "KE18_FCT_FAO_Tags.csv"), row.names = FALSE)  #Saves the newly-cleaned table to the Output folder 
+write.csv(KE18_Raw_FCT, file = here::here("Output", "KE18_FCT_FAO_Tags.csv"), row.names = FALSE)  #Saves the newly-cleaned table to the Output folder 
 
 #Run this to clean the environment
 rm(list = ls())

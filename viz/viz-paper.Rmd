@@ -11,13 +11,16 @@ knitr::opts_chunk$set(echo = TRUE)
 #0) Loading the data ----
 #NOTE: For the images to be saved create a folder called "images"
 
-# NCT harmnonisation ----
-
-#If data is not loaded 
-source("merging.R")
+# Loading libraries
 library(gt)
 library(gtExtras)
 library(ggplot2)
+library(cowplot)
+library(ggpubr)
+
+# Loading data
+fish_fct <- readRDS(here::here("data", "FAO-fish-standardised_v1.0.0.RDS"))
+
 
 ```
 
@@ -58,28 +61,95 @@ fish_fct %>% distinct(source_fct, fdc_id) %>%            # removing duplicated i
 #├ Plot (heat map):  % of missing values  per FCT ----
 
 # Proximate
-proxi <- c( "WATERg", "PROCNTg",  "FATg",  "CHOAVLg", "FIBTGg", "ALCg", "ASHg" )
+proxi <- c( "WATERg", "PROCNTg", "FATg", "CHOAVLDFg", "FIBTGg", "ALCg", "ASHg")
 
 vit <- c("VITB6Amg", "NIAmg",  "VITB12mcg",   "VITA_RAEmcg",  "CARTBmcg",
          "CARTBEQmcg", "RETOLmcg")
 
 mine <- c( "FEmg", "CAmg", "MGmg", "ZNmg", "Pmg", "Kmg", "CUmg","SEmcg","IDmcg")
 
-fish_fct %>% 
-  select(proxi, source_fct) %>% 
+components <- list(proxi, vit, mine)
+
+fig3 <- list()
+
+for(i in 1:length(components)){
+  
+fig3[[i]] <- fish_fct %>% 
+  select(components[[i]], source_fct) %>% 
 #  rename_all(., ~components_longname) %>%  
   naniar::gg_miss_fct(., fct = source_fct) +
  # geom_rect(aes(xmin = 0.5, ymin = -Inf, xmax = 1.5, ymax =Inf), #AU19
   #          linetype = "dotted",alpha = 0, colour = "red", size = 2.5) +
     labs( x= "", y= "",
-        title = "Data Gaps: Percentage (%) of missing values of food components per FCT")
+        #title = "Data Gaps: Percentage (%) of missing values of food components per FCT"
+        ) 
+#+
+ # theme(legend.position="none")
 
 #Perfect for ppt (width = 12, height = 7)
-# ggsave(here::here("images", "missing-values-fct.png"), width = 12, height = 7)
+ ggsave(here::here("images", 
+            paste0("missing-values-fct_", i,"_", Sys.Date(), ".png")), 
+        width = 12, height = 7)
+
+}
 
 ```
 
 
+
+
+
+```{r}
+
+
+# plot_grid(fig3[[1]], fig3[[2]], fig3[[3]], nrow = 3)
+
+ggarrange(fig3[[1]], fig3[[2]], fig3[[3]], common.legend = TRUE,
+          nrow = 1)
+
+```
+
+
+
+```{r missing-values, echo=FALSE, width = 12, height = 7}
+
+#├ Plot (heat map):  % of missing values  per FCT ----
+
+# Proximate
+proxi <- c("WATERg", "PROCNTg", "FAT_g_standardised", "CHOAVLDFg_standardised", 
+           "FIBTGg", "ALCg", "ASHg")
+
+vit <- c("VITB6Amg", "NIAmg",  "VITB12mcg",   "VITA_RAEmcg",  "CARTBmcg",
+         "CARTBEQmcg", "RETOLmcg")
+
+mine <- c( "FEmg", "CAmg", "MGmg", "ZNmg", "Pmg", "Kmg", "CUmg","SEmcg","IDmcg")
+
+components <- list(proxi, vit, mine)
+
+fig3 <- list()
+
+for(i in 1:length(components)){
+  
+fig3[[i]] <- fish_fct %>% 
+  select(components[[i]], source_fct) %>% 
+#  rename_all(., ~components_longname) %>%  
+  naniar::gg_miss_fct(., fct = source_fct) +
+ # geom_rect(aes(xmin = 0.5, ymin = -Inf, xmax = 1.5, ymax =Inf), #AU19
+  #          linetype = "dotted",alpha = 0, colour = "red", size = 2.5) +
+    labs( x= "", y= "",
+        #title = "Data Gaps: Percentage (%) of missing values of food components per FCT"
+        ) 
+#+
+ # theme(legend.position="none")
+
+#Perfect for ppt (width = 12, height = 7)
+ ggsave(here::here("images", 
+            paste0("missing-values-fct_", i,"_", Sys.Date(), ".png")), 
+        width = 12, height = 7)
+
+}
+
+```
 
 
 

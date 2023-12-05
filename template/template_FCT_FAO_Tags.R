@@ -69,7 +69,7 @@ tail(data.df) # Checking the last rows and columns
 
 # data.df <- data.df %>% slice(1:300) # Removing the last row, if needed adjust for your dataset
 
-### 2.1.1. Creating food_groups variable and tidying ----
+###├ 2.1.1. Creating food_groups variable and tidying ----
 
 # Extracting food group names
 fgroup <- data.df %>% filter(is.na(food_desc), !is.na(fdc_id)) %>% pull(fdc_id) %>%
@@ -139,7 +139,7 @@ names(data.df) # Are the variable names = column names?
 
 #If yes, 
 # are the food component variable names using INFOODS tagnames & units
-# e.g. [Variable]_[unit] (NA_mg)? Then, rename other variables:
+# e.g. [Variable][unit] (NAmg)? Then, rename other variables:
 
 
 # If not, do they provide INFOODS tagname information? 
@@ -249,7 +249,7 @@ data.df[, variables][grepl("[:alpha:]|\\[|\\*", data.df[, variables])]
   mutate_at(variables, as.numeric) # This convert all NVs into numeric 
 
 
-#├  2.4 Unit of measurement  ----
+##  2.4 Unit of measurement  ----
 # The next step is to check whether each variable (food component) has the correct units
 # Some variable may be in non-standard units: Eg. Iron from mcg to mg
             

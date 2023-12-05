@@ -8,8 +8,10 @@ rm(list = ls())
 ## Note: if it is the first time: install.packages() first
 library(dplyr) # For data cleaning (wrangling)
 library(stringr) # For string manipulation (data cleaning)
+library(purrr) # Map function
+library(readr) # Reading data in
 library(measurements) # For unit conversion
-source(here::here("functions.R")) # Loading nutrition functions (change to package when ready)
+# source(here::here("functions.R")) # Loading nutrition functions (change to package when ready)
 library(visdat) # Data visualisation
 
 #0) Only run if first time or updated original FCDB scripts ----
@@ -18,6 +20,7 @@ library(visdat) # Data visualisation
 #JA15/JA15_FCT_FAO_Tags.R
 #US19/US19_FCT_FAO_Tags.R
 #BR11/BR11_FCT_FAO_Tags.R
+
 
 #To run, remove the # and run
 
@@ -41,10 +44,10 @@ library(visdat) # Data visualisation
 
 #1) Loading all FCDBs into one single database ----
 
-#finding all the cleaned FCTs/FCDBs from the output folder
-list.files("Output/", pattern = "*_FCT_FAO_Tags", recursive=FALSE, #so it is not taking the fcts in the folder
-           full.names=TRUE) %>% 
-  map_df(~read_csv(., col_types = cols(.default = "c"), locale = locale(encoding = "Latin1")))  
+# finding all the cleaned FCTs/FCDBs from the output folder
+# list.files("Output/", pattern = "*_FCT_FAO_Tags", recursive=FALSE, #so it is not taking the fcts in the folder
+#            full.names=TRUE) %>% 
+#   map_df(~read_csv(., col_types = cols(.default = "c"), locale = locale(encoding = "Latin1")))  
 
 #saving all the cleaned FCTs/FCDBs into one single object (data.frame)
 fct_cover <- list.files("Output/", pattern = "*_FCT_FAO_Tags", recursive=FALSE, full.names=TRUE) %>% 
@@ -71,7 +74,7 @@ col_names <- c("fdc_id",
                "specific_gravity",
                "SOPg",
                "ASHg",
-               "ASHg_bydiff",
+               #"ASHg_bydiff",
                "ENERCkJ",
                "ENERCkcal",
                "WATERg",
@@ -134,7 +137,7 @@ col_names <- c("fdc_id",
                "VITCmg",
                "ASCLmg",
                "VITDEQmcg",
-                "VITDmcg",
+               "VITDmcg",
                "CHOCALmcg",
                "ERGCALmcg",
                "CHOCALOHmcg",
@@ -288,3 +291,8 @@ subset(fao_fish_fct, is.na(ISSCAAP.Group))
 #Checking scientific names
 subset(fao_fish_fct, !is.na(scientific_name)) %>% 
   group_by(source_fct) %>% count()
+
+table(!is.na(fao_fish_fct$scientific_name), fish_fct$source_fct)
+
+saveRDS(fao_fish_fct, here::here("data", "FAO-fish-standardised-updated_v1.0.0.RDS"))
+

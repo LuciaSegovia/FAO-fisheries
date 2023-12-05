@@ -604,3 +604,4 @@ dim(NO_FCT_Data) # No. of rows and columns
 subset(NO_FCT_Data, !is.na(ics_faostat_sua_english_description))
 
 # 5. Exporting data and metadata  ----
+

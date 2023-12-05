@@ -8,8 +8,10 @@ rm(list = ls())
 ## Note: if it is the first time: install.packages() first
 library(dplyr) # For data cleaning (wrangling)
 library(stringr) # For string manipulation (data cleaning)
-library(measurements) # For unit conversion
-source(here::here("functions.R")) # Loading nutrition functions (change to package when ready)
+library(purrr) # Map function (for combining the datasets)
+library(readr) # Reading in data
+# library(measurements) # For unit conversion
+# source(here::here("functions.R")) # Loading nutrition functions (change to package when ready)
 library(visdat) # Data visualisation
 
 # 0) Only run if first time or updated original FCDB scripts ----
@@ -20,10 +22,10 @@ library(visdat) # Data visualisation
 # This is possible because all the FCTs have been standardised previously.
 
 # finding all the cleaned FCTs/FCDBs from the output folder
-list.files("Output/", pattern = "*_FCT_FAO_Tags", recursive=FALSE, # so it is not taking the fcts in the folder
-           full.names=TRUE) %>% 
-  map_df(~read_csv(., col_types = cols(.default = "c"), 
-                   locale = locale(encoding = "Latin1")))  
+# list.files("Output/", pattern = "*_FCT_FAO_Tags", recursive=FALSE, # so it is not taking the fcts in the folder
+#            full.names=TRUE) %>% 
+#   map_df(~read_csv(., col_types = cols(.default = "c"), 
+#                   locale = locale(encoding = "Latin1")))  
 
 # Importing all the cleaned FCTs/FCDBs into one single object (data.frame)
 fct_cover <- list.files("Output/", pattern = "*_FCT_FAO_Tags", recursive=FALSE, full.names=TRUE) %>% 
@@ -70,3 +72,12 @@ fish_fct %>% group_by(ICS.FAOSTAT.SUA.Current.Code) %>%
   count() %>% pull() %>% max()
 
 table(!is.na(fish_fct$scientific_name), fish_fct$source_fct)
+
+fish_fct %>%
+  cbind(str_split_fixed(fao_fish_fct$ics_faostat_sua_english_description, ", " , n=2)) %>% 
+  rename(fish_type = "1", 
+         fish_prep = "2")  %>% 
+  relocate(c(n1:n2), .before = fdc_id) %>% 
+  mutate_at("fish_prep", str_squish)
+
+saveRDS(fish_fct, here::here("data", "FAO-fish-standardised_v1.0.0.RDS"))
