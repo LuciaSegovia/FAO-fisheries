@@ -242,7 +242,14 @@ THIAmg_std_creator <- function(dataset) {
         dataset %>%
             as_tibble() %>%
             mutate_at(.vars = columns, .funs = as.numeric) %>%
-            mutate(THIAmg_std = case_when(
+            mutate(comments = case_when(
+            !is.na(THIAmg) & !is.na(comments) ~  paste0(comments,
+              " ; THIAmg_standardised equals to THIAmg"),
+            !is.na(THIAmg) & is.na(comments) ~ "THIAmg_standardised equals to THIAmg",
+            is.na(THIAmg) & !is.na(THIAHCLmg) & !is.na(comments) ~  paste0(comments, 
+                " ; THIAmg_standardised equals to THIAHCLmg"), 
+            is.na(THIAmg) & !is.na(THIAHCLmg) ~  "THIAmg_standardised equals to THIAHCLmg"),
+            THIAmg_std = case_when(
                 !is.na(THIAmg) ~ THIAmg,
                 is.na(THIAmg) ~ THIAHCLmg
             )),
