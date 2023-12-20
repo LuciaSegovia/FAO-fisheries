@@ -19,8 +19,9 @@ library(cowplot)
 library(ggpubr)
 
 # Loading data
-fish_fct <- readRDS(here::here("data", "FAO-fish-standardised_v1.0.0.RDS"))
+stand_fct <- readRDS(here::here("data", "FAO-fish-standardised_v1.0.0.RDS"))
 
+harmo_fct <- readRDS(here::here("data", "FAO-fish-harmonised_v1.0.0.RDS"))
 
 ```
 
@@ -33,7 +34,7 @@ fish_fct <- readRDS(here::here("data", "FAO-fish-standardised_v1.0.0.RDS"))
 
 # Checking fish included vs total (other food/fish) in FCTS
 
-fish_fct %>% distinct(source_fct, fdc_id) %>%            # removing duplicated items (fish)
+stand_fct %>% distinct(source_fct, fdc_id) %>%            # removing duplicated items (fish)
   group_by(source_fct) %>% count() %>% rename(Nfish = "n") %>%  # count of included foods (fish) by FCT & renaming variable
   left_join(., fct_cover %>% group_by(source_fct) %>% count()) %>%  #adding total food items in each FCT
   rename(Total = "n") %>%             #renaming variable
@@ -63,6 +64,7 @@ fish_fct %>% distinct(source_fct, fdc_id) %>%            # removing duplicated i
 # Proximate
 proxi <- c( "WATERg", "PROCNTg", "FATg", "CHOAVLDFg", "FIBTGg", "ALCg", "ASHg")
 
+
 vit <- c("VITB6Amg", "NIAmg",  "VITB12mcg",   "VITA_RAEmcg",  "CARTBmcg",
          "CARTBEQmcg", "RETOLmcg")
 
@@ -74,7 +76,7 @@ fig3 <- list()
 
 for(i in 1:length(components)){
   
-fig3[[i]] <- fish_fct %>% 
+fig3[[i]] <- stand_fct %>% 
   select(components[[i]], source_fct) %>% 
 #  rename_all(., ~components_longname) %>%  
   naniar::gg_miss_fct(., fct = source_fct) +
@@ -82,13 +84,14 @@ fig3[[i]] <- fish_fct %>%
   #          linetype = "dotted",alpha = 0, colour = "red", size = 2.5) +
     labs( x= "", y= "",
         #title = "Data Gaps: Percentage (%) of missing values of food components per FCT"
-        ) 
+        ) +
+  theme(text = element_text(size = 23))  
 #+
  # theme(legend.position="none")
 
 #Perfect for ppt (width = 12, height = 7)
  ggsave(here::here("images", 
-            paste0("missing-values-fct_", i,"_", Sys.Date(), ".png")), 
+            paste0("missing-values-standardised-fct_", i,"_", Sys.Date(), ".png")), 
         width = 12, height = 7)
 
 }
@@ -116,38 +119,63 @@ ggarrange(fig3[[1]], fig3[[2]], fig3[[3]], common.legend = TRUE,
 #├ Plot (heat map):  % of missing values  per FCT ----
 
 # Proximate
-proxi <- c("WATERg", "PROCNTg", "FAT_g_standardised", "CHOAVLDFg_standardised", 
-           "FIBTGg", "ALCg", "ASHg")
+proxi <- c("WATERg", "PROCNTg", "FAT_g_standardised", "CHOAVLDFg_std", 
+           "FIBTGg_std", "ALCg", "ASHg")
 
-vit <- c("VITB6Amg", "NIAmg",  "VITB12mcg",   "VITA_RAEmcg",  "CARTBmcg",
-         "CARTBEQmcg", "RETOLmcg")
+vit <- c("VITB6_mg_standardised", "NIAmg_std",  "VITB12mcg",   "VITA_RAEmcg_std",  "CARTBmcg",
+         "CARTBEQmcg_std", "RETOLmcg")
 
 mine <- c( "FEmg", "CAmg", "MGmg", "ZNmg", "Pmg", "Kmg", "CUmg","SEmcg","IDmcg")
 
 components <- list(proxi, vit, mine)
 
+leg <- c("none", "bottom", "none")
+
 fig3 <- list()
 
 for(i in 1:length(components)){
   
-fig3[[i]] <- fish_fct %>% 
+fig3[[i]] <- harmo_fct %>% 
   select(components[[i]], source_fct) %>% 
 #  rename_all(., ~components_longname) %>%  
   naniar::gg_miss_fct(., fct = source_fct) +
  # geom_rect(aes(xmin = 0.5, ymin = -Inf, xmax = 1.5, ymax =Inf), #AU19
   #          linetype = "dotted",alpha = 0, colour = "red", size = 2.5) +
-    labs( x= "", y= "",
+    labs( x= "", y= ""
         #title = "Data Gaps: Percentage (%) of missing values of food components per FCT"
-        ) 
-#+
- # theme(legend.position="none")
+        ) +
+  guides(fill=guide_legend(title="Missing values (%)")) +
+#  scale_fill_continuous(name = "Missing values (%)") +
+  theme(text = element_text(size = 23),
+        legend.position=leg[i]) 
 
 #Perfect for ppt (width = 12, height = 7)
  ggsave(here::here("images", 
-            paste0("missing-values-fct_", i,"_", Sys.Date(), ".png")), 
+            paste0("missing-values-harmonised-fct_", i,"_", Sys.Date(), ".png")), 
         width = 12, height = 7)
 
 }
+
+```
+
+
+```{r}
+
+harmo_fct %>% 
+  ggplot(aes(SOP_std)) + geom_histogram() +
+ # geom_rect(aes(xmin = 95, ymin = -Inf, xmax = 95, ymax =Inf), 
+  #          linetype = "dotted",alpha = 0, colour = "red", size = 2) +
+  geom_rect(aes(xmin = 105, ymin = -Inf, xmax = 105, ymax =Inf), 
+            linetype = "dotted",alpha = 0, colour = "red", size = 2) +
+   theme_minimal() +
+  theme(text = element_text(size = 23)) +
+  labs(x="", y = "") 
+ 
+
+#Perfect for ppt (width = 12, height = 7)
+ ggsave(here::here("images", 
+            paste0("hist-SOPb", "_", Sys.Date(), ".png")), 
+        width = 12, height = 7)
 
 ```
 

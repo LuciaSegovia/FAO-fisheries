@@ -23,7 +23,7 @@ check_columns <- function(dataset, columns) {
 
 
 SOP_std_creator <- function(dataset) {
-    #' @description Calculates SOP_std = (WATERg + PROCNTg + FAT_g_standardised + CHOAVLg + #` FIBTGg + ALCg +ASHg).
+    #' @description Calculates SOP_std = (WATERg + PROCNTg + FAT_g_standardised + CHOAVLg + #` FIBTGg_std + ALCg +ASHg).
     #' Column names are case sensitive and error is thrown if not found.
     #' @param dataset :Required (FCT dataset to be checked)
     #' @param SOP_std Sum of Proximate in g per 100g EP as reported in the original FCT
@@ -31,9 +31,9 @@ SOP_std_creator <- function(dataset) {
     #' @param PROCNTg Protein in g per 100g of EP, as reported in the original FCT and assumed to be calculated from nitrogen (NTg) content
     #' @param FAT_g_standardised fat content unknown method of calculation in g per 100g of EP
     #' @param CHOAVLDFg_std Available carbohydrates calculated by difference in g per 100g of EP
-    #' @param FIBTGg Total dietary fibre by AOAC Prosky method expressed in g per 100g of EP
+    #' @param FIBTGg_std Fibre content from combined Tagnames, with preference of Total dietary fibre by AOAC Prosky method, expressed in g per 100g of EP
     #' @param ALCg Alcohol in g per 100g
-    #' @param ASHg_std Ashes in g per 100g of EP
+    #' @param ASHg Ashes in g per 100g of EP
     #' @return Original FCT dataset with SOP_std column added
     #' @examples
     # Check presence of required columns
@@ -42,9 +42,9 @@ SOP_std_creator <- function(dataset) {
         "PROCNTg",
         "FAT_g_standardised",
         "CHOAVLDFg_std",
-        "FIBTGg",
+        "FIBTGg_std",
         "ALCg",
-        "ASHg_std"
+        "ASHg"
     )
     check_columns(dataset = dataset, columns = columns)
     tryCatch(
@@ -68,9 +68,9 @@ SOP_std_creator <- function(dataset) {
                     PROCNTg,
                     FAT_g_standardised,
                     CHOAVLDFg_std,
-                    FIBTGg,
+                    FIBTGg_std,
                     ALCg,
-                    ASHg_std,
+                    ASHg,
                     na.rm = TRUE
                 )
             )) %>%
@@ -127,7 +127,7 @@ CARTBEQmcg_std_creator <- function(dataset) {
                 comments,
                 paste0(
                     comments,
-                    " | CARTBEQmcg_std calculated from CARTBmcg, CARTAmcg and CRYPXBmcg"
+                    " ; CARTBEQmcg_std calculated from CARTBmcg, CARTAmcg and CRYPXBmcg"
                 )
             )) %>%
             # ! Check which components of the calculation were used. If only CARTB was used. Append the comments to reflect that.
@@ -137,9 +137,11 @@ CARTBEQmcg_std_creator <- function(dataset) {
                         !is.na(CARTBmcg) &
                         is.na(CARTAmcg) & is.na(CRYPXBmcg)
                 ),
-                paste0(comments, " but only CARTB was used"),
-                comments
-            )) %>%
+                paste0(
+                  comments,
+                  " ; CARTBEQmcg_std calculated only from CARTBmcg (missing CARTAmcg and CRYPXBmcg)"
+  
+            ))) %>%
             # ! remove the temp column
             select(-temp) %>%
             ungroup(),
@@ -271,9 +273,9 @@ CHOAVLDFg_std_creator <- function(dataset) {
     #' @param WATERg Water/ moisture content in g per 100g of EP
     #' @param PROCNTg Protein in g per 100g of EP, as reported in the original FCT and assumed to be calculated from nitrogen (NTg) content
     #' @param FAT_g_standardised fat content unknown method of calculation in g per 100g of EP
-    #' @param FIBTGg Total dietary fibre by AOAC Prosky method expressed in g per 100g of EP
+    #' @param FIBTGg_std Fibre content from combined Tagnames, with preference of Total dietary fibre by AOAC Prosky method, expressed in g per 100g of EP
     #' @param ALCg Alcohol in g per 100g
-    #' @param ASHg_std Ashes in g per 100g of EP
+    #' @param ASHg Ashes in g per 100g of EP
     #' @return Original FCT dataset with SOP_std column added
     #' @examples
 
@@ -281,8 +283,8 @@ CHOAVLDFg_std_creator <- function(dataset) {
         "WATERg",
         "PROCNTg",
         "FAT_g_standardised",
-        "FIBTGg",
-        "ASHg_std",
+        "FIBTGg_std",
+        "ASHg",
         "ALCg"
     )
     check_columns(dataset = dataset, columns = columns)
@@ -305,8 +307,8 @@ CHOAVLDFg_std_creator <- function(dataset) {
                     -WATERg,
                     -PROCNTg,
                     -FAT_g_standardised,
-                    -FIBTGg,
-                    -ASHg_std,
+                    -FIBTGg_std,
+                    -ASHg,
                     -ALCg,
                     na.rm = TRUE
                 )
@@ -525,7 +527,7 @@ CARTBEQmcg_std_to_zero <- function(dataset) {
 
 
 ASHDFg_calculator <- function(dataset) {
-  #' @description Calculates ASHDFg = 100-(WATERg + PROCNTg + FAT_g_standardised + CHOAVLg + FIBTGg + ALCg).
+  #' @description Calculates ASHDFg = 100-(WATERg + PROCNTg + FAT_g_standardised + CHOAVLg + FIBTGg_std + ALCg).
   #' Column names are case sensitive and error is thrown if not found.
   #' @param dataset :Required (FCT dataset to be checked)
   #' @param ASHDFg Ash calculated by difference in g per 100g EP 
@@ -533,7 +535,7 @@ ASHDFg_calculator <- function(dataset) {
   #' @param PROCNTg Protein in g per 100g of EP, as reported in the original FCT and assumed to be calculated from nitrogen (NTg) content
   #' @param FAT_g_standardised fat content compiled from all tagnames in g per 100g of EP
   #' @param CHOAVLg Available carbohydrates calculated by weight in g per 100g of EP
-  #' @param FIBTGg Total dietary fibre by AOAC Prosky method expressed in g per 100g of EP
+  #' @param FIBTGg_std Fibre content from combined Tagnames, with preference of Total dietary fibre by AOAC Prosky method, expressed in g per 100g of EP
   #' @param ALCg Alcohol in g per 100g
   #' @return Original FCT dataset with SOP_std column added
   #' @examples
@@ -543,7 +545,7 @@ ASHDFg_calculator <- function(dataset) {
     "PROCNTg",
     "FAT_g_standardised",
     "CHOAVLg",
-    "FIBTGg",
+    "FIBTGg_std",
     "ALCg"
     )
   check_columns(dataset = dataset, columns = columns)
@@ -568,7 +570,7 @@ ASHDFg_calculator <- function(dataset) {
           PROCNTg,
           FAT_g_standardised,
           CHOAVLg,
-          FIBTGg,
+          FIBTGg_std,
           ALCg,
           na.rm = TRUE
         )

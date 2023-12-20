@@ -1,7 +1,9 @@
 
 # This function replace "trace" ('tr|[tr]|Tr') to zero 
 # the string for trace "tr|[tr]|Tr" can be modified
-# as well as the zero to any other value. 
+# as well as the zero to any other value.
+# TODO: change the string1 to "tr|[tr]|trace" & change ignore.case = TRUE 
+### str_which(pull(dataset[, var1]), regex(string1, ignore.case = TRUE))
 
 TraceToZero <- function(dataset, vars.column, string1 = 'tr|[tr]|Tr', string2 = "0"){
   

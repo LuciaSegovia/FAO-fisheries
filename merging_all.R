@@ -14,15 +14,15 @@ library(measurements) # For unit conversion
 # source(here::here("functions.R")) # Loading nutrition functions (change to package when ready)
 library(visdat) # Data visualisation
 
-#0) Only run if first time or updated original FCDB scripts ----
-#There are four scripts that need to run from the file
-#AU19/AU19_FCT_FAO_Tags.R
-#JA15/JA15_FCT_FAO_Tags.R
-#US19/US19_FCT_FAO_Tags.R
-#BR11/BR11_FCT_FAO_Tags.R
+# 0) Only run if first time or updated original FCDB scripts ----
+# There are four scripts that need to run from the file
+# AU19/AU19_FCT_FAO_Tags.R
+# JA15/JA15_FCT_FAO_Tags.R
+# US19/US19_FCT_FAO_Tags.R
+# BR11/BR11_FCT_FAO_Tags.R
 
 
-#To run, remove the # and run
+# To run, remove the # and run
 
 ##Checking and loading updates
 
@@ -42,23 +42,23 @@ library(visdat) # Data visualisation
 #}
 
 
-#1) Loading all FCDBs into one single database ----
+# 1) Loading all FCDBs into one single database ----
 
 # finding all the cleaned FCTs/FCDBs from the output folder
 # list.files("Output/", pattern = "*_FCT_FAO_Tags", recursive=FALSE, #so it is not taking the fcts in the folder
 #            full.names=TRUE) %>% 
 #   map_df(~read_csv(., col_types = cols(.default = "c"), locale = locale(encoding = "Latin1")))  
 
-#saving all the cleaned FCTs/FCDBs into one single object (data.frame)
+# saving all the cleaned FCTs/FCDBs into one single object (data.frame)
 fct_cover <- list.files("Output/", pattern = "*_FCT_FAO_Tags", recursive=FALSE, full.names=TRUE) %>% 
  map_df(~read_csv(., col_types = cols(.default = "c"), locale = locale(encoding = "Latin1"))) 
 
-#checking that we have loaded all the FCT/FCDBs (n=13)
+# checking that we have loaded all the FCT/FCDBs (n=13)
 fct_cover %>% distinct(source_fct) 
 colnames(fct_cover)
 
-#creating a vector with all the variables of interest
-#identification variables, components that were included in the Global FCT plus new components
+# creating a vector with all the variables of interest
+# identification variables, components that were included in the Global FCT plus new components
 
 col_names <- c("fdc_id",
                "food_desc",
@@ -155,7 +155,8 @@ col_names <- c("fdc_id",
                "IDmcg")
 
 #checking and counting No. of items (before filtering only fish)
-fct_cover %>% select(col_names) %>% count(source_fct) 
+fct_cover %>% dplyr::select(col_names) %>% 
+  count(source_fct) 
 
 #Filtering out components that are not used and removing "_FCT" from the FCTs/FCDB name
 #added quality for NO21
@@ -181,7 +182,7 @@ fish_fct <- fct_cover %>%
   filter(!is.na(ICS.FAOSTAT.SUA.Current.Code) | source_fct %in% c("NO21") |
            food_group %in% c("JA", "JC", "JK", "JM", "JR")) 
 
-#checking the ICS FAO code in NO21
+# checking the ICS FAO code in NO21
 fish_fct %>% filter(!is.na(ICS_FAOSTAT)) %>% distinct(ICS_FAOSTAT)
 
 fish_fct %>% filter(source_fct == "NO21") %>% distinct(ICS_FAOSTAT)

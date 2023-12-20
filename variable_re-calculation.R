@@ -67,20 +67,20 @@ dim(data.df) # same rows, one more column
 ##├ ) Fibre - standardised  ---- 
 
 # No other fibre fractions available (See "QC.R")
-fao_fish_fct$FIBTGg_std <- fao_fish_fct$FIBTGg 
+data.df$FIBTGg_std <- data.df$FIBTGg 
 
 data.df %>% filter()
 
 ##├ ) Ash - standardised  ---- 
 # NOTE: Combining Tagnames (after back-calculating ASHDFg)
-
-subset(fao_fish_fct, !is.na(ASHg)) %>% count(source_fct)
-subset(fao_fish_fct, !is.na(ASHg_bydiff)) %>% count(source_fct)
-
-fao_fish_fct$ASHg_std <- ifelse(is.na(fao_fish_fct$ASHg), fao_fish_fct$ASHg_bydiff, fao_fish_fct$ASHg )
-fao_fish_fct$comment <- ifelse(!is.na(fao_fish_fct$ASHg_bydiff), "Ash values were calculated by difference, see documentation", NA)
-
-subset(fao_fish_fct, is.na(ASHg_std)) %>% count(source_fct)
+# 
+# subset(fao_fish_fct, !is.na(ASHg)) %>% count(source_fct)
+# subset(fao_fish_fct, !is.na(ASHg_bydiff)) %>% count(source_fct)
+# 
+# fao_fish_fct$ASHg_std <- ifelse(is.na(fao_fish_fct$ASHg), fao_fish_fct$ASHg_bydiff, fao_fish_fct$ASHg )
+# fao_fish_fct$comment <- ifelse(!is.na(fao_fish_fct$ASHg_bydiff), "Ash values were calculated by difference, see documentation", NA)
+# 
+# subset(fao_fish_fct, is.na(ASHg_std)) %>% count(source_fct)
 
 ##├ ) Vitamin B6 - standardised  ----
 
@@ -95,101 +95,105 @@ var3 <- "VITB6_mg"
 # New variable (where to be stored) (check with documentation)
 new_var <- "VITB6_mg_standardised"
 
-test <- combiner(data.df, "VITB6Amg", 
+data.df <- nutri_combiner(data.df, "VITB6Amg", 
                  "VITB6Cmg", "VITB6_mg", "VITB6_mg_standardised")
 
 # Checking that the changes are performed
-names(test)
-test[, c(var1, var2, var3, new_var, "comments")] #checking the new variable w/ other
+names(data.df)
+data.df[, c(var1, var2, var3, new_var, "comments")] #checking the new variable w/ other
 dim(data.df) # same rows, one more column
 
 
 
-for(i in 1:nrow(fao_fish_fct)){
-  print(i)
-  if (!is.na(fao_fish_fct$VITB6Amg[i])) {
-    print(!is.na(fao_fish_fct$VITB6Amg[i]))
-    fao_fish_fct$VITB6_mg_standardised[i] <- fao_fish_fct$VITB6Amg[i]
-  }  
-  if (is.na(fao_fish_fct$VITB6Amg[i])) { 
-    fao_fish_fct$VITB6_mg_standardised[i] <- fao_fish_fct$VITB6Cmg[i]
-  } 
-  if (is.na(fao_fish_fct$VITB6Amg[i]) & is.na(fao_fish_fct$VITB6Cmg[i])) {
-    fao_fish_fct$VITB6_mg_standardised[i] <- fao_fish_fct$VITB6_mg[i]
-  }
-  if (is.na(fao_fish_fct$VITB6Amg[i]) & is.na(fao_fish_fct$VITB6Cmg[i]) & is.na(fao_fish_fct$VITB6_mg[i])) {
-    fao_fish_fct$VITB6_mg_standardised[i] <- NA
-  }
-  print(fao_fish_fct$VITB6_mg_standardised[i])
-}
+# for(i in 1:nrow(fao_fish_fct)){
+#   print(i)
+#   if (!is.na(fao_fish_fct$VITB6Amg[i])) {
+#     print(!is.na(fao_fish_fct$VITB6Amg[i]))
+#     fao_fish_fct$VITB6_mg_standardised[i] <- fao_fish_fct$VITB6Amg[i]
+#   }  
+#   if (is.na(fao_fish_fct$VITB6Amg[i])) { 
+#     fao_fish_fct$VITB6_mg_standardised[i] <- fao_fish_fct$VITB6Cmg[i]
+#   } 
+#   if (is.na(fao_fish_fct$VITB6Amg[i]) & is.na(fao_fish_fct$VITB6Cmg[i])) {
+#     fao_fish_fct$VITB6_mg_standardised[i] <- fao_fish_fct$VITB6_mg[i]
+#   }
+#   if (is.na(fao_fish_fct$VITB6Amg[i]) & is.na(fao_fish_fct$VITB6Cmg[i]) & is.na(fao_fish_fct$VITB6_mg[i])) {
+#     fao_fish_fct$VITB6_mg_standardised[i] <- NA
+#   }
+#   print(fao_fish_fct$VITB6_mg_standardised[i])
+# }
+
 
 ##├ )  Niacin - standardised  ----
 
-fao_fish_fct <- fao_fish_fct %>% 
+data.df <- data.df %>% 
   nia_conversion_creator()
 
 
 # Re-calculating variables ----
 
 ##├ ) Carbohydrates - standardised ----
+# CHOAVLDFg_std
 
-
-fao_fish_fct  <- fao_fish_fct %>% CHOAVLDFg_std_creator()
+data.df  <- data.df %>%
+  CHOAVLDFg_std_creator()
 
 ##├├ Plot: Missing values for carbohydrates by difference in each FCT ----
-fao_fish_fct[,c("CHOAVLDFg_std",  "source_fct")] %>%  #selecting variables
+data.df[,c("CHOAVLDFg_std",  "source_fct")] %>%  #selecting variables
   naniar::gg_miss_fct(., fct = source_fct) #making the plot
 
 ##├├ Hist: Carbohydrates by difference ----
 # before assumning zero of the negative values
-hist(fao_fish_fct$CHOAVLDFg_std)
+hist(data.df$CHOAVLDFg_std)
 
 #No. negative value
-sum(fao_fish_fct$CHOAVLDFg_std < 0)
+sum(data.df$CHOAVLDFg_std < 0)
+#Perc. of negative values
+sum(data.df$CHOAVLDFg_std < 0)/nrow(data.df)*100
 
 #Checking negative values 
-n1 <- which(fao_fish_fct$CHOAVLDFg_std< 0)
+n1 <- which(data.df$CHOAVLDFg_std< 0)
 
-fao_fish_fct$comment[n1] <- ifelse(is.na(fao_fish_fct$comment[n1]),
-                                   "CHOAVLDFg_std assumed zero", paste(fao_fish_fct$comment, "| CHOAVLDFg_std assumed zero") )
-fao_fish_fct$CHOAVLDFg_std[fao_fish_fct$CHOAVLDFg_std< 0] <- 0
+data.df$comments[n1] <- ifelse(is.na(data.df$comments[n1]),
+                                   "CHOAVLDFg_std assumed zero", paste(data.df$comments, "; CHOAVLDFg_std assumed zero") )
+data.df$CHOAVLDFg_std[data.df$CHOAVLDFg_std< 0] <- 0
 
 
 ##├ ) Energy - standardised ----
 
 # Energy in kcal
-fao_fish_fct$ENERCkcal_std <- ENERCKcal_standardised(
-  fao_fish_fct$PROCNTg,fao_fish_fct$FAT_g_standardised,
-  fao_fish_fct$CHOAVLDFg_std, fao_fish_fct$FIBTGg_std,
-  fao_fish_fct$ALCg)
+data.df$ENERCkcal_std <- ENERCKcal_standardised(
+  data.df$PROCNTg,data.df$FAT_g_standardised,
+  data.df$CHOAVLDFg_std, data.df$FIBTGg_std,
+  data.df$ALCg)
 
 # Energy in kJ
-fao_fish_fct$ENERCkJ_std <-  ENERCKj_standardised(
-  fao_fish_fct$PROCNTg, fao_fish_fct$FAT_g_standardised,
-  fao_fish_fct$CHOAVLDFg_std, fao_fish_fct$FIBTGg_std,
-  fao_fish_fct$ALCg)
+data.df$ENERCkJ_std <-  ENERCKj_standardised(
+  data.df$PROCNTg, data.df$FAT_g_standardised,
+  data.df$CHOAVLDFg_std, data.df$FIBTGg_std,
+  data.df$ALCg)
 
 ##├ ) Sum of proximate  ----
 
-fao_fish_fct  <- fao_fish_fct %>% SOP_std_creator() 
+data.df  <- data.df %>% SOP_std_creator() 
 
 #├ ) Retinol - recalculated ---- 
 # Back-calculating 
 
-fao_fish_fct <- RETOLmcg_calculator(fao_fish_fct)
+data.df <- RETOLmcg_calculator(data.df)
 
 
 #├ ) Beta - Carotene eq. - standardised ---- 
 
-fao_fish_fct <- fao_fish_fct %>% 
+data.df <- data.df %>% 
   CARTBEQmcg_std_creator() %>% # Calculate CARTBEQmcg & store it in CARTBEQmcg_std
   CARTBEQmcg_std_imputer_with_CARTBEQmcg() %>% # New imputer of CARTBEQmcg into CARTBEQmcg_std when they are NAs.
-  CARTBEQmcg_std_back_calculator_VITA_RAEmcg() %>% # This requires values created in RETOLmcg_Recalculator
+  CARTBEQmcg_backcalculator() %>% # This requires values created in RETOLmcg_Recalculator
   CARTBEQmcg_std_to_zero()   # changing negative values to zero # This handles better and adds comments
 
 #├ )  Vitamin A - standardised ----  
 
-fao_fish_fct  <- fao_fish_fct %>%
+data.df  <- data.df %>%
 VITA_RAEmcg_std_creator() %>%  # This function recalculate VITA_RAEmcg_std (standardised)
   VITAmcg_std_creator()   # This function recalculate VITAmcg_std (standardised)
   
@@ -197,10 +201,10 @@ VITA_RAEmcg_std_creator() %>%  # This function recalculate VITA_RAEmcg_std (stan
 
 #├ ) Thiamine - standardised  ----
 
-fao_fish_fct  <- fao_fish_fct %>%
+data.df  <- data.df %>%
   THIAmg_std_creator() 
 
-saveRDS(fao_fish_fct, here::here("data", "FAO-fish-harmonised_v1.0.0.RDS"))
+saveRDS(data.df, here::here("data", "FAO-fish-harmonised_v1.0.0.RDS"))
 
 
 
