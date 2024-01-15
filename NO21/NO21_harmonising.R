@@ -20,8 +20,15 @@ readxl::excel_sheets(here::here("data",
 isscaap <- readxl::read_excel(here::here("data",
                                          "ASFIS-production_FAO-NFISS.xlsx"),
                               sheet = 1) %>% 
-  rename(alpha_code = "3A_CODE", 
+  rename(X3.alpha.code = "3A_CODE", 
          scientific_name = "Scientific_name") #rename bc R doesn't like variable names starting w/ a number
+
+
+# Importing the ICS Codes 
+
+ics_code <- readxl::read_excel(here::here("data", "List_SUA_ICS_fish.xlsx"), 
+                               sheet = 1) %>% janitor::clean_names() %>% 
+  filter(!is.na(ics_faostat_sua_english_description))
 
 
 ## Extracting only fishery products 
@@ -70,7 +77,7 @@ sum(is.na(no21_fish$scientific_name))
 #checking results
 head(no21_fish)
 dim(no21_fish) #shouldn't add/remove any obs (rows) but add 2 variables (cols)
-subset(no21_fish, !is.na(Scientific_name)) #No of fish w/ scientific name
+subset(no21_fish, !is.na(scientific_name)) #No of fish w/ scientific name
 
 ## Merging the corresponding ISSCAAP to Scientific names 
 
@@ -142,8 +149,8 @@ head(no21_fish)
 dim(no21_fish) #shouldn't add/remove any obs (rows) but add 4 variables (cols)
 
 # Checking results:  all entries w/ scientific name have an ISSCAAP code
-no21_fish %>% filter(!is.na(Scientific_name), is.na(ISSCAAP)) %>% 
-  distinct(fdc_id, Scientific_name)
+no21_fish %>% filter(!is.na(scientific_name), is.na(ISSCAAP)) %>% 
+  distinct(fdc_id, scientific_name)
 
 #├├ Fixing ISSCAAP code by fish name ----
 
@@ -242,6 +249,7 @@ no21_fish  <- no21_fish   %>% mutate(
   mutate(product_type = ifelse(product_type == "NA", "7", product_type))
 
 dim(no21_fish)
+
 #Adding the fillet
 no21_fish$product_type[no21_fish$food_desc == "Cod, slices, raw"] <- "3"
 
@@ -285,7 +293,7 @@ no21_fish <- no21_fish  %>% filter(product_type %in% c("1", "3")) %>%
   mutate(product_type = ifelse(product_type == "1", 
                                "2", "4")) %>% 
   rbind(., no21_fish) %>% 
-  relocate("product_type", .after = Scientific_name) %>% 
+  relocate("product_type", .after = scientific_name) %>% 
   arrange(fdc_id, product_type)
 
 
@@ -300,14 +308,14 @@ dim(no21_fish) #this should be +21 "new" entries
 
 #├├  Matching NO21 fish to ICS FAOSTAT fish category ----
 
-isscaap_group <- list(unique(ics_code$isscaap_group[grepl("Freshwater & ",
-                                                          ics_code$ics_faostat_sua_english_description)]))
-
-isscaap_group[2] <- list(unique(ics_code$isscaap_group[grepl("Freshwater fish",
-                                                             ics_code$ics_faostat_sua_english_description)]))
+# isscaap_group <- list(unique(ics_code$isscaap_group[grepl("Freshwater & ",
+#                                                           ics_code$ics_faostat_sua_english_description)]))
+# 
+# isscaap_group[2] <- list(unique(ics_code$isscaap_group[grepl("Freshwater fish",
+                                                       #      ics_code$ics_faostat_sua_english_description)]))
 
 #ISSCAAP of each fish category (e.g, Freshwater & diadromous fish)
-fresh_dia <- c(11, 12, 13, 21, 22, 23, 24, 25)
+fresh_dia<- c(11, 12, 13, 21, 22, 23, 24, 25)
 deme <- c(31, 32, 33, 34, 38)
 pela <- c(35, 36, 37)
 marine <- 39
@@ -330,7 +338,7 @@ ics_code %>%
 
 no21_fish <- no21_fish %>% relocate(product_type, .before = "ISSCAAP") %>% 
   mutate(
-    ICS_FAOSTAT = case_when(
+    ICS.FAOSTAT.SUA.Current.Code = case_when(
       ISSCAAP %in% fresh_dia & product_type == 1 ~ "1501", 
       ISSCAAP %in% fresh_dia & product_type == 2 ~ "1502", 
       ISSCAAP %in% fresh_dia & product_type == 3 ~ "1503", 
@@ -340,7 +348,7 @@ no21_fish <- no21_fish %>% relocate(product_type, .before = "ISSCAAP") %>%
       ISSCAAP %in% fresh_dia & product_type == 7 ~ "1507", 
       TRUE ~ "NA")) %>%   
   mutate(
-    ICS_FAOSTAT = case_when(
+    ICS.FAOSTAT.SUA.Current.Code = case_when(
       ISSCAAP %in% deme & product_type == 1 ~ "1514", 
       ISSCAAP %in% deme & product_type == 2 ~ "1515", 
       ISSCAAP %in% deme & product_type == 3 ~ "1516", 
@@ -348,9 +356,9 @@ no21_fish <- no21_fish %>% relocate(product_type, .before = "ISSCAAP") %>%
       ISSCAAP %in% deme & product_type == 5 ~ "1518", 
       ISSCAAP %in% deme & product_type == 6 ~ "1519", 
       ISSCAAP %in% deme & product_type == 7 ~ "1520", 
-      TRUE ~ ICS_FAOSTAT)) %>%
+      TRUE ~ ICS.FAOSTAT.SUA.Current.Code)) %>%
   mutate(
-    ICS_FAOSTAT = case_when(
+    ICS.FAOSTAT.SUA.Current.Code = case_when(
       ISSCAAP %in% pela & product_type == 1 ~ "1527", 
       ISSCAAP %in% pela & product_type == 2 ~ "1528", 
       ISSCAAP %in% pela & product_type == 3 ~ "1529", 
@@ -358,9 +366,9 @@ no21_fish <- no21_fish %>% relocate(product_type, .before = "ISSCAAP") %>%
       ISSCAAP %in% pela & product_type == 5 ~ "1531", 
       ISSCAAP %in% pela & product_type == 6 ~ "1532", 
       ISSCAAP %in% pela & product_type == 7 ~ "1533", 
-      TRUE ~ ICS_FAOSTAT))  %>% 
+      TRUE ~ ICS.FAOSTAT.SUA.Current.Code))  %>% 
   mutate(
-    ICS_FAOSTAT = case_when(
+    ICS.FAOSTAT.SUA.Current.Code = case_when(
       ISSCAAP %in% marine & product_type == 1 ~ "1540", 
       ISSCAAP %in% marine & product_type == 2 ~ "1541", 
       ISSCAAP %in% marine & product_type == 3 ~ "1542", 
@@ -368,37 +376,37 @@ no21_fish <- no21_fish %>% relocate(product_type, .before = "ISSCAAP") %>%
       ISSCAAP %in% marine & product_type == 5 ~ "1544", 
       ISSCAAP %in% marine & product_type == 6 ~ "1545", 
       ISSCAAP %in% marine & product_type == 7 ~ "1546", 
-      TRUE ~ ICS_FAOSTAT)) %>%
+      TRUE ~ ICS.FAOSTAT.SUA.Current.Code)) %>%
   mutate(
-    ICS_FAOSTAT = case_when(
+    ICS.FAOSTAT.SUA.Current.Code = case_when(
       ISSCAAP %in% crus & product_type == 1 ~ "1553", 
       ISSCAAP %in% crus & product_type == 2 ~ "1554", 
       ISSCAAP %in% crus & product_type == 5 ~ "1555", 
       ISSCAAP %in% crus & product_type == 6 ~ "1556", 
       ISSCAAP %in% crus & product_type == 7 ~ "1557", 
-      TRUE ~ ICS_FAOSTAT)) %>%
+      TRUE ~ ICS.FAOSTAT.SUA.Current.Code)) %>%
   mutate(
-    ICS_FAOSTAT = case_when(
+    ICS.FAOSTAT.SUA.Current.Code = case_when(
       ISSCAAP %in% moll & product_type == 1 ~ "1562", 
       ISSCAAP %in% moll & product_type == 2 ~ "1563", 
       ISSCAAP %in% moll & product_type == 5 ~ "1564", 
       ISSCAAP %in% moll & product_type == 6 ~ "1565", 
-      TRUE ~ ICS_FAOSTAT)) %>%
+      TRUE ~ ICS.FAOSTAT.SUA.Current.Code)) %>%
   mutate(
-    ICS_FAOSTAT = case_when(
+    ICS.FAOSTAT.SUA.Current.Code = case_when(
       ISSCAAP %in% cepha & product_type == 1 ~ "1570", 
       ISSCAAP %in% cepha & product_type == 2 ~ "1571", 
       ISSCAAP %in% cepha & product_type == 5 ~ "1572", 
       ISSCAAP %in% cepha & product_type == 6 ~ "1573", 
       ISSCAAP %in% cepha & product_type == 7 ~ "1574", 
-      TRUE ~ ICS_FAOSTAT)) 
+      TRUE ~ ICS.FAOSTAT.SUA.Current.Code)) 
 
 #Checking the results - All items w/ ISSCAAP and product_type has a ICS code
 no21_fish %>% filter(!is.na(ISSCAAP), !is.na(product_type),
-                     ICS_FAOSTAT == "NA")
+                     ICS.FAOSTAT.SUA.Current.Code == "NA")
 
 #Checking the results - Missing ICS code (overall)
-no21_fish %>% filter(ICS_FAOSTAT == "NA") %>%  pull(food_desc)
+no21_fish %>% filter(ICS.FAOSTAT.SUA.Current.Code == "NA") %>%  pull(food_desc)
 
 
 #Checking ICS FAOSTAT codes (future) by fish category
@@ -515,11 +523,11 @@ subset(no21_fish, fdc_id %in% c("04.265", "04.079"))
 # Excluded: Crabstick, fish balls (acc. to FAO advise) from 1520
 
 no21_fish <- no21_fish %>% mutate(
-  ICS_FAOSTAT = case_when(
+  ICS.FAOSTAT.SUA.Current.Code = case_when(
     str_detect(food_desc, "burger|Surimi") ~ "1520", 
     str_detect(food_desc, "Lutef") ~ "1518", 
     str_detect(food_desc, "Snails, canned") ~ "1562", 
-    TRUE ~ ICS_FAOSTAT),
+    TRUE ~ ICS.FAOSTAT.SUA.Current.Code),
   ICS_FAOSTAT_future = case_when(
     str_detect(food_desc, "burger|Surimi") ~ "15200", 
     str_detect(food_desc, "Lutef") ~ "15180", 
@@ -529,10 +537,11 @@ no21_fish <- no21_fish %>% mutate(
 #Adding the ICS FAOSTAT description for the "current" and "Future" code
 #And tidying the columns
 dim(no21_fish)
+
 no21_fish <- no21_fish  %>%
   left_join(., ics_code %>% select(1,ics_faostat_sua_english_description) %>%
               mutate_at("ics_faostat_sua_current_code", as.character), 
-            by = c("ICS_FAOSTAT" = "ics_faostat_sua_current_code")) %>% 
+            by = c("ICS.FAOSTAT.SUA.Current.Code" = "ics_faostat_sua_current_code")) %>% 
   left_join(., ics_code %>% select(2,ics_faostat_sua_english_description) %>%
               mutate_at("ics_faostat_sua_future_code", as.character), 
             by = c("ICS_FAOSTAT_future" = "ics_faostat_sua_future_code")) %>%
@@ -543,27 +552,33 @@ no21_fish <- no21_fish  %>%
              ics_faostat_sua_english_description.x)) %>% 
   select(-c("ics_faostat_sua_english_description.x", 
             "ics_faostat_sua_english_description.y")) %>% 
-  relocate(any_of(c("ISSCAAP","ICS_FAOSTAT", "ICS_FAOSTAT_future",
+  relocate(any_of(c("ISSCAAP","ICS.FAOSTAT.SUA.Current.Code", "ICS_FAOSTAT_future",
                     "ics_faostat_sua_english_description")), 
-           .before = "fdc_id") %>% 
-  rename(scientific_name = "Scientific_name")
+           .before = "fdc_id") 
 
 #├├ Adding Quality Code for the matching ----
 
 no21_fish <- no21_fish %>% 
   mutate(quality = 
-           ifelse(ICS_FAOSTAT != "NA",
+           ifelse(ICS.FAOSTAT.SUA.Current.Code != "NA",
                   "A2",      #We are adding A2 to all, as the matches were good 
-                  NA)) %>%   #to be identified by the description provided and most of them by scientific name
+                  NA)) %>%   # to be identified by the description provided and most of them by scientific name
   relocate(any_of(c("quality")), 
            .after = "product_type") 
 
-#Converting NA into `NA` and checking the no. of fish w/o ICS code
-NO_FCT_Data %>% naniar::replace_with_na(replace = list(ICS_FAOSTAT = "NA")) %>% 
-  filter(is.na(ICS_FAOSTAT))
+# Converting NA into `NA` and checking the no. of fish w/o ICS code
+sum(is.na(no21_fish$ICS.FAOSTAT.SUA.Current.Code))
+no21_fish %>% naniar::replace_with_na(replace = list(ICS.FAOSTAT.SUA.Current.Code = "NA")) %>% 
+  filter(is.na(ICS.FAOSTAT.SUA.Current.Code))
+
+no21_fish <- no21_fish %>% 
+  naniar::replace_with_na(replace = list(ICS.FAOSTAT.SUA.Current.Code = c("NA"),
+                                         ICS_FAOSTAT_future = c("NA")))
+
+sum(is.na(no21_fish$ICS_FAOSTAT_future))
 
 # Save an NO21 to a R file - for QC.
-saveRDS(NO_FCT_Data, file = "NO21/fish_NO21.rds")
+# saveRDS(no21_fish, file = paste0("NO21/fish-NO21_", Sys.Date(),  ".RDS"))
 
 #├ 3.6. Dealing with missing values ----
 
@@ -571,16 +586,16 @@ saveRDS(NO_FCT_Data, file = "NO21/fish_NO21.rds")
 
 # Generating the ASHg_bydiff variable to be used in calculations
 
-proximates <- c("WATERg", "PROCNTg", "FAT_g",  "CHOAVLg", "FIBTGg", "ALCg")
-
-NO_FCT_Data[, proximates] <- apply(NO_FCT_Data[, proximates], 2, as.numeric)
-
-
-NO_FCT_Data$ASHg_bydiff <-  100-(NO_FCT_Data$WATERg + NO_FCT_Data$PROCNTg + 
-                                   NO_FCT_Data$FAT_g + NO_FCT_Data$FIBTGg + 
-                                   NO_FCT_Data$ALCg + NO_FCT_Data$CHOAVLg)
-
-
+# proximates <- c("WATERg", "PROCNTg", "FAT_g",  "CHOAVLg", "FIBTGg", "ALCg")
+# 
+# NO_FCT_Data[, proximates] <- apply(NO_FCT_Data[, proximates], 2, as.numeric)
+# 
+# 
+# NO_FCT_Data$ASHg_bydiff <-  100-(NO_FCT_Data$WATERg + NO_FCT_Data$PROCNTg + 
+#                                    NO_FCT_Data$FAT_g + NO_FCT_Data$FIBTGg + 
+#                                    NO_FCT_Data$ALCg + NO_FCT_Data$CHOAVLg)
+# 
+# 
 # 4. Data visualisation & Quality Checks ----
 
 #Excluding fishery entries w/ extreme values from the final selection
@@ -594,14 +609,20 @@ NO_FCT_Data$ASHg_bydiff <-  100-(NO_FCT_Data$WATERg + NO_FCT_Data$PROCNTg +
 
 excluded <- c("04.366", "04.373", "04.307", "04.089", "04.323")
 
-NO_FCT_Data$ICS_FAOSTAT[NO_FCT_Data$fdc_id %in% excluded] <- NA
-NO_FCT_Data$ics_faostat_sua_english_description[NO_FCT_Data$fdc_id %in% excluded] <- NA
+no21_fish$ICS.FAOSTAT.SUA.Current.Code[no21_fish$fdc_id %in% excluded] <- NA
+no21_fish$ics_faostat_sua_english_description[no21_fish$fdc_id %in% excluded] <- NA
 
 #Final checks
-head(NO_FCT_Data) # First 6 rows of the data
-dim(NO_FCT_Data) # No. of rows and columns
+head(no21_fish) # First 6 rows of the data
+dim(no21_fish) # No. of rows and columns
 
-subset(NO_FCT_Data, !is.na(ics_faostat_sua_english_description))
+subset(no21_fish, !is.na(ics_faostat_sua_english_description))
 
 # 5. Exporting data and metadata  ----
+
+no21_fish %>% 
+  select(ICS.FAOSTAT.SUA.Current.Code,  source_fct, fdc_id, food_desc,
+         scientific_name, ISSCAAP,  X3.alpha.code, ICS_FAOSTAT_future) %>% 
+  distinct() %>% mutate_at("ICS.FAOSTAT.SUA.Current.Code", as.integer) %>% 
+  saveRDS( file = "data/ics-code_NO21-code.RDS")
 

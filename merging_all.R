@@ -57,6 +57,12 @@ fct_cover <- list.files("Output/", pattern = "*_FCT_FAO_Tags", recursive=FALSE, 
 fct_cover %>% distinct(source_fct) 
 colnames(fct_cover)
 
+# Importing the ICS Codes for all the fisheries
+ics_code_file <- readRDS(here::here("data", "ics-code_fish-code.RDS")) %>%  # FAO Fisheries
+  rename(food_desc = "Food.description", scientific_name = "Scientific.name",
+          ISSCAAP = "ISSCAAP.Group") %>% 
+  bind_rows(., readRDS(here::here("data", "ics-code_NO21-code.RDS"))) # Plus NO21
+
 # creating a vector with all the variables of interest
 # identification variables, components that were included in the Global FCT plus new components
 
@@ -176,31 +182,47 @@ fct_cover %>% str()
 fct_cover %>% filter(source_fct == "UK21",
                      food_group %in% c("JA", "JC", "JK", "JM", "JR")) 
 
-fish_fct <- fct_cover %>% 
+fct_cover %>% 
   left_join(., ics_code_file, by = c("source_fct",
                                      "fdc_id")) %>% 
-  filter(!is.na(ICS.FAOSTAT.SUA.Current.Code) | source_fct %in% c("NO21") |
-           food_group %in% c("JA", "JC", "JK", "JM", "JR")) 
+  filter(!is.na(ICS.FAOSTAT.SUA.Current.Code))  %>% 
+  count(source_fct) 
 
+fish_fct <-  fct_cover %>% 
+  left_join(., ics_code_file %>% select(-c(food_desc, ISSCAAP)), 
+            by = c("source_fct", "fdc_id")) %>% 
+  filter(!is.na(ICS.FAOSTAT.SUA.Current.Code) | !is.na(ICS_FAOSTAT_future)) 
+  
+
+length(unique(fish_fct$fdc_id))
+
+fish_fct %>% count(ICS.FAOSTAT.SUA.Current.Code) %>% pull(n) %>% max()
+  
+
+#fish_fct <- fct_cover %>% 
+#  left_join(., ics_code_file, by = c("source_fct",
+#                                     "fdc_id")) %>% 
+#  filter(!is.na(ICS.FAOSTAT.SUA.Current.Code) | source_fct %in% c("NO21") |
+#           food_group %in% c("JA", "JC", "JK", "JM", "JR")) 
+#
 # checking the ICS FAO code in NO21
-fish_fct %>% filter(!is.na(ICS_FAOSTAT)) %>% distinct(ICS_FAOSTAT)
-
-fish_fct %>% filter(source_fct == "NO21") %>% distinct(ICS_FAOSTAT)
+#fish_fct %>% filter(!is.na(ICS_FAOSTAT)) %>% distinct(ICS_FAOSTAT)
+#fish_fct %>% filter(source_fct == "NO21") %>% distinct(ICS_FAOSTAT)
 
 #Getting the ICS FAOSTAT code, ISSCAAP, and alpha code  for NO21 that 
 #was added "manually"
-fish_fct <- fish_fct %>% 
-  mutate(ICS.FAOSTAT.SUA.Current.Code = ifelse(source_fct == "NO21",
-                                               ICS_FAOSTAT,
-                                               ICS.FAOSTAT.SUA.Current.Code)) %>% 
-  mutate(ISSCAAP.Group = ifelse(source_fct == "NO21",
-                                ISSCAAP,
-                                ISSCAAP.Group)) %>% 
-  mutate(X3.alpha.code = ifelse(source_fct == "NO21",
-                                alpha_code,
-                                X3.alpha.code)) %>% 
-  select(-c(ISSCAAP, alpha_code))
-
+# fish_fct <- fish_fct %>% 
+#   mutate(ICS.FAOSTAT.SUA.Current.Code = ifelse(source_fct == "NO21",
+#                                                ICS_FAOSTAT,
+#                                                ICS.FAOSTAT.SUA.Current.Code)) %>% 
+#   mutate(ISSCAAP.Group = ifelse(source_fct == "NO21",
+#                                 ISSCAAP,
+#                                 ISSCAAP.Group)) %>% 
+#   mutate(X3.alpha.code = ifelse(source_fct == "NO21",
+#                                 alpha_code,
+#                                 X3.alpha.code)) %>% 
+#   select(-c(ISSCAAP, alpha_code))
+# 
 #Checking the no. of entries after filtering out all foods but fish
 fish_fct %>% group_by(source_fct) %>% count()
 

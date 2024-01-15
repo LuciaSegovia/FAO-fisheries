@@ -220,6 +220,14 @@ Documentation in GitHub
 
 Once the FCTs were loaded and harmonised, we combined them into a single data library. 
 
+```{r}
+
+source(here::here("merging_all.R"))
+
+
+```
+
+
 #### 3.4.	Food name/ description standardisation and food matching  <br>
 
 #### 3.6. Dealing with missing values <br>
