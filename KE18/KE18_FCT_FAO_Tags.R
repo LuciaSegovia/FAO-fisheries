@@ -228,7 +228,7 @@ KE18_Raw_FCT <- KE18_Raw_FCT %>% rename( #Renames a number of variables - e.g. "
   Edible_factor_in_FCT = "EDIBLE", 
   PROCNTg = "PROTCNTg", 
   NAmg = "NA.mg") %>% #selecting the variables of interest
-  dplyr::select(source_fct:PHYTCPPDmg, TRPmg, FASATgstandardized:FATRNgstandardized,
+  dplyr::select(source_fct:FATRNgstandardized,
                 F20D5g, F22D6g, ALCg) 
 
 # This can only be done here, otherwise some of the FAs would have the same name

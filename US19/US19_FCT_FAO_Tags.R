@@ -91,6 +91,30 @@ Composite_Table$source_fct <- "US19" #Creates the source_fct column, populates i
 
 Composite_Table$EDIBLE <- 1-(Composite_Table$Refuse/100) #Edible fraction is calculated from the Refuse value
 
+# Rename AA names
+aa_table <- as.data.frame(cbind(sort(names(Composite_Table)[81:99]), sort(c("ILEg", 	"LEUg",	"LYSg", 	"METg", "CYSg", "PHEg",	"TYRg", 
+                                                                            "THRg", "TRPg", "VALg", 	"ARGg", 	"HISg", 	"ALAg", 	"ASPg",
+                                                                            "GLUg", 	"GLYg", 	"PROg", "SERg", "HYPg"))))
+
+names(aa_table) <- c("aa_name", "aa_tagname")
+
+for(i in 1:nrow(aa_table)){
+  names(Composite_Table)[names(Composite_Table) %in% as.vector(aa_table[i,1])] <- aa_table[i,2]
+}
+
+# Measurement units ---- 
+
+## AAs from g to mg
+# New columns for the mg variable 
+n1 <- ncol(Composite_Table)+1
+n2 <- ncol(Composite_Table)+nrow(aa_table)
+# Changing units
+Composite_Table[, c(n1:n2)] <- Composite_Table[, c(81:99)]*1000
+# Changing names of the variables
+names(Composite_Table)[n1:n2] <- gsub("g", "mg", names(Composite_Table[, c(n1:n2)]))
+names(Composite_Table)[n1:n2] <- gsub(".1", "", names(Composite_Table[, c(n1:n2)]))
+# Checking
+names(Composite_Table)[n1:n2]
 
 
 # Output Table renaming & tidying ----
@@ -153,7 +177,7 @@ Output_table <- Composite_Table %>%
     THIAmg = "Thiamin (mg)",
     RIBFmg = "Riboflavin (mg)", 
     NIAmg = "Niacin (mg)", 
-    TRPg = "Tryptophan (g)", 
+   # TRPg = "Tryptophan (g)", 
     VITB6Amg = "Vitamin B-6 (mg)",
     #phyticacid_in_mg = "PHYTCPPD"), - not present
     FOLmcg = "Folate, total (µg)", 
@@ -164,7 +188,7 @@ Output_table <- Composite_Table %>%
     SUGARg = "Sugars, total (g)",
     F22D6N3g = "22:6 n-3 (DHA) (g)", 
     F20D5N3g = "20:5 n-3 (EPA) (g)") %>%
-  mutate( TRPmg =  TRPg*1000, #convert TRP from g to mg
+  mutate( #TRPmg =  TRPg*1000, #convert TRP from g to mg
           comment = NA) %>%   
   #CARTBEQmcg_std_creator() %>%
   #  rename(CARTBEQmcg = "CARTBEQmcg_std") %>%   #Changing name of re-calculated variable for making VITA f(x) to work)
@@ -188,12 +212,12 @@ Output_table <- Composite_Table %>%
 #Recalculating - FAO/ INFOODS Guidelines for Converting Units, Denominators and Expressions Version 1.0
 #suggested converting when no other info is available and "assuming" all VITA is retinol.
 #Creating VITAmcg so VITAmcg_std is not over-written by the use of VITAmcg_std_creator() in compilation
-Output_table$VITAmcg <-  NA
-Output_table[n, "VITAmcg"] <- Output_table[n, "Vitamin A, IU (IU)"]*0.3
-
-#Adding info into comment variable
-Output_table$comment <-  NA
-Output_table[n, "comment"] <- "VITAmcg was recalculated from Vitamin A, IU (IU)*03. See documentation for more information"
+# Output_table$VITAmcg <-  NA
+# Output_table[n, "VITAmcg"] <- Output_table[n, "Vitamin A, IU (IU)"]*0.3
+# 
+# #Adding info into comment variable
+# Output_table$comment <-  NA
+# Output_table[n, "comment"] <- "VITAmcg was recalculated from Vitamin A, IU (IU)*03. See documentation for more information"
 
 #Optional - check data before saving
 glimpse(Output_table)

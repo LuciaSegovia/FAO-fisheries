@@ -75,9 +75,9 @@ col_names <- c("fdc_id",
                "source_fct",
                "nutrient_data_source",
                "Edible_factor_in_FCT",
-               "ICS_FAOSTAT", # we need for NO21
+              # "ICS_FAOSTAT", # we need for NO21
                #"Edible_desc",
-               "specific_gravity",
+              # "specific_gravity",
                "SOPg",
                "ASHg",
                #"ASHg_bydiff",
@@ -98,7 +98,7 @@ col_names <- c("fdc_id",
                "FIBCg",
                "NSPg",
                "ALCg",
-               "ALCg_100mL",
+              # "ALCg_100mL",
                "SUGARg",  
                "FASATg",
                "FAMSg",
@@ -160,9 +160,19 @@ col_names <- c("fdc_id",
                "SEmcg",
                "IDmcg")
 
+# AAs
+aa <- c("ILEmg", 	"LEUmg",	"LYSmg", 	"METmg", "CYSmg", "PHEmg",	"TYRmg", 
+  "THRmg", "TRPmg", "VALmg", 	"ARGmg", 	"HISmg", 	"ALAmg", 	"ASPmg",
+  "GLUmg", 	"GLYmg", 	"PROmg", "SERmg", "HYPmg")
+
+
 #checking and counting No. of items (before filtering only fish)
 fct_cover %>% dplyr::select(col_names) %>% 
   count(source_fct) 
+
+fct_cover %>% dplyr::select(col_names, aa) %>% 
+write.csv(., here::here("Output", paste0(Sys.Date(), "_standardised-FCT.csv")),
+          row.names = FALSE) 
 
 #Filtering out components that are not used and removing "_FCT" from the FCTs/FCDB name
 #added quality for NO21

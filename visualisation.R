@@ -147,13 +147,16 @@ fao_fish_fct %>% select(components) %>% vis_miss(sort_miss = T)
 
 #├ Plot (heat map): % of missing values per FCT ----
 
-fao_fish_fct %>% select(components, source_fct) %>% 
+#fao_fish_fct 
+fct_cover %>% #select(components, source_fct) %>% 
+# select(aa, source_fct) %>% 
+    select(x[120:130], source_fct) %>% 
 #  rename_all(., ~components_longname) %>%  
   naniar::gg_miss_fct(., fct = source_fct) +
  # geom_rect(aes(xmin = 0.5, ymin = -Inf, xmax = 1.5, ymax =Inf), #AU19
   #          linetype = "dotted",alpha = 0, colour = "red", size = 2.5) +
-  geom_rect(aes(xmin = 0.5, ymin = 3.5, xmax = Inf, ymax =5.5), #DHA & EPA
-            linetype = "dotted",alpha = 0, colour = "red", size = 2.5) +
+  # geom_rect(aes(xmin = 0.5, ymin = 3.5, xmax = Inf, ymax =5.5), #DHA & EPA
+    #        linetype = "dotted",alpha = 0, colour = "red", size = 2.5) +
     labs( x= "", y= "",
         title = "Data Gaps: Percentage (%) of missing values of selected components in each FCT")
 

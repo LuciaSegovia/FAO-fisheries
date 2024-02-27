@@ -18,6 +18,16 @@ Output_table <- DK19_Raw %>% slice(-1) #Before removing the row the column names
 Output_table$source_fct <- "DK19" #Creates the source FCT column, and populates it with "DK19"
 Output_table$nutrient_data_source <- "None listed" #Creates the nutrient data source column, and notifies no data sources are listed
 
+# Rename AA names
+aa_table <- as.data.frame(cbind(sort(names(DK19_Raw)[183:201]), sort(c("ILEmg", 	"LEUmg",	"LYSmg", 	"METmg", "CYSmg", "PHEmg",	"TYRmg", 
+                                                                       "THRmg", "TRPmg", "VALmg", 	"ARGmg", 	"HISmg", 	"ALAmg", 	"ASPmg",
+                                                                       "GLUmg", 	"GLYmg", 	"PROmg", "SERmg", "HYPg"))))
+
+names(aa_table) <- c("aa_name", "aa_tagname")
+
+for(i in 1:nrow(aa_table)){
+  names(Output_table)[names(Output_table) %in% as.vector(aa_table[i,1])] <- aa_table[i,2]
+}
 
 
 # Column Relocating ----
@@ -126,7 +136,7 @@ col_tagname <- c("fdc_id", "food_group", #List of FAO tagnames, in the same orde
                  NA, NA,
                  NA, NA,
                  NA, NA,
-                 "TRPmg", NA,
+                 NA, NA,
                  NA, NA,
                  NA, NA,
                  NA, NA,
@@ -156,7 +166,10 @@ Output_table <- Output_table %>%
 
 Output_table[Output_table == "nv"] <- NA #Sets no value entries to NA
 
+# Measurement units ----
+#"Hydroxyproline (g)" --> HYP
 
+Output_table$HYPmg <- as.numeric(Output_table$HYPg)*1000
 
 # Data Output ----
 

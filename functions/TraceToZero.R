@@ -14,7 +14,7 @@ TraceToZero <- function(dataset, vars.column, string1 = 'tr|[tr]|Tr', string2 = 
   for(i in 1:length(vars.column)){
     var1 <- vars.column[i]
     
-    if(grepl(string1, wafct[, var1]) == FALSE){next}
+    if(grepl(string1, dataset[, var1]) == FALSE){next}
     
     else{
     #  text <- paste0(var1, " changed ", string1, " to ", string2) 
@@ -23,7 +23,7 @@ TraceToZero <- function(dataset, vars.column, string1 = 'tr|[tr]|Tr', string2 = 
       
       for(j in 1:length(row1)){
         dataset$comments[row1][j] <- ifelse(!is.na(dataset$comments[row1][j]), 
-                                            paste0(dataset$comments[row1][j], ";", text), 
+                                            paste0(dataset$comments[row1][j], "; ", text), 
                                             paste0(text))
         
         dataset[row1[j], var1] <- gsub(string1, string2, dataset[row1[j], var1])

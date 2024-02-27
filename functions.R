@@ -31,8 +31,11 @@ source(here::here("functions","nutri_combiner.R"))
 # source(here::here("functions","Group_Summariser.R"))
 # source(here::here("functions", "Summarised_Row_Recalculator.R"))
 
-
-
+#Remove "*" to avoid conversion to NA
+RemoveStar <- function(x){
+  x <- gsub("\\*", "", x)
+  return(x) 
+}
 
 # Function that replace "trace" values to zero
 ## zero can be substituted to a different value
@@ -45,7 +48,7 @@ source(here::here("functions", "TraceToZero.R"))
 #Function to remove brackets
 #The following f(x) removes [] 
 
-no_brackets_tr <- function(i){
+no_brackets <- function(i){
     case_when(
     str_detect(i, '\\[.*?\\]')  ~ str_extract(i, '(?<=\\[).*?(?=\\])'),
     TRUE ~ i)
