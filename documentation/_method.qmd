@@ -172,8 +172,10 @@ All the steps were done and documented in the `merging_all.R` script.
 According to most food composition compilation, including the FAO/ INFOODS guidelines (Stadlmayr et al., 2012), some food components are re-calculated from other food components even when they are reported in the original FCT. Some of those were: *Sum of proximate*, *Energy* (kcal, kJ), or *carbohydrates available, by difference* among others (See Eq.4-6.3). Furthermore, there are instances when the food components needed for the re-calculation are not present in the original FCTs, hence alternative approaches are developed within this framework to address those cases and to reduce the number of missing values (See section 3.4). In this section, we provide a description and rationale of the scripts and functions that are included in this framework to perform these tasks.
 
 
-**Eq.4** Sum of Proximate (g/100g) = Sum of water + protein + fat +
-available carbohydrates + dietary fibre + alcohol + ash
+**Eq.4** Sum of Proximate (g/100g) = water (g/100g) + protein (g/100g) + total fat (g/100g)+ available carbohydrates (g/100g) + dietary fibre (g/100g) + alcohol (g/100g) + ash (g/100g)
+
+\Eq.5: Carbohydrates available by difference (g/100g) = 100 - (sum
+of water + protein + fat + ash + alcohol + dietary fibre)
 
 
 **Eq.6.1** Energy (kJ/100g EP): sum of protein (g/100g EP)\*17 + available carbohydate (g/100g EP)\*17 + fat(g/100g EP)\*37 +  alcohol (g/100g EP)\*29 + dietary fibre (g/100g EP)\*8
@@ -222,9 +224,6 @@ Back calculation defined as inferring or calculating one nutrient from other(s) 
 
 **b. Ash**: These values are needed to calculate *Available carbohydrate by difference*, however, in some FCTs (NO21), are not reported. When, available carbohydrates are analysed, we could use an iteration of the \Eq.5 to calculate ash concentration (Eq.5a).
 
-\Eq.5: Carbohydrates available by difference (g/100g) = 100 - (sum
-of water + protein + fat + ash + alcohol + dietary fibre)
-
 \Eq.5b: Ash by difference (g/100g) = 100 - (sum of water + protein +
 fat + *available carbohydrate* + alcohol + dietary fibre)
 
@@ -234,7 +233,16 @@ fat + *available carbohydrate* + alcohol + dietary fibre)
 (mcg/100g) + 0.5\* Alpha-carotene (mcg/100g) + 0.5\* Beta-cryptoxanthin
 (mcg/100g)
 
+\Eq.7a: Beta-Carotene eq. (mcg/100g) = 6\*(Vitamin A, retinol activity (RE) (mcg/100g EP) - Retinol (mcg/100g EP))
+
 \Eq.7b: Beta-Carotene eq. (mcg/100g) = 12\*(Vitamin A, retinol activity eq. (RAE) (mcg/100g EP) - Retinol (mcg/100g EP))
+
+::: {.callout-warning}::
+
+The back-calculation using vitamin A (RAE) provide less accurate results, with a tendency for overestimation of the beta-carotene eq. content, because small differences (e.g., 0.5 on the rounding) would have a great impact when multiply by 12. Hence, it should be the least preferred and avoided when possible. 
+
+
+:::
 
 
 **d. Retinol**: Similarly, when the retinol values are missing, we suggest the use of the Equation 9a, whereas if beta-carotene eq. are not available, then retinol values could be back-calculated using Equation 9b, which is a combination of the equations to calculate *Vitamin A (RAE)* (Eq.X) and *Vitamin A (RAE)* (Eq.X). 

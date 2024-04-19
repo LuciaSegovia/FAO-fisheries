@@ -49,7 +49,7 @@ library(visdat) # Data visualisation
 #            full.names=TRUE) %>% 
 #   map_df(~read_csv(., col_types = cols(.default = "c"), locale = locale(encoding = "Latin1")))  
 
-# saving all the cleaned FCTs/FCDBs into one single object (data.frame)
+# reading all the cleaned FCTs/FCDBs into one single object (data.frame)
 fct_cover <- list.files("Output/", pattern = "*_FCT_FAO_Tags", recursive=FALSE, full.names=TRUE) %>% 
  map_df(~read_csv(., col_types = cols(.default = "c"), locale = locale(encoding = "Latin1"))) 
 
@@ -170,9 +170,9 @@ aa <- c("ILEmg", 	"LEUmg",	"LYSmg", 	"METmg", "CYSmg", "PHEmg",	"TYRmg",
 fct_cover %>% dplyr::select(col_names) %>% 
   count(source_fct) 
 
-fct_cover %>% dplyr::select(col_names, aa) %>% 
-write.csv(., here::here("Output", paste0(Sys.Date(), "_standardised-FCT.csv")),
-          row.names = FALSE) 
+# fct_cover %>% dplyr::select(col_names, aa) %>% 
+# write.csv(., here::here("Output", paste0(Sys.Date(), "_standardised-FCT.csv")),
+#           row.names = FALSE) 
 
 #Filtering out components that are not used and removing "_FCT" from the FCTs/FCDB name
 #added quality for NO21
@@ -199,12 +199,13 @@ fct_cover %>%
   count(source_fct) 
 
 fish_fct <-  fct_cover %>% 
-  left_join(., ics_code_file %>% select(-c(food_desc, ISSCAAP)), 
+  left_join(., ics_code_file %>% select(-c(food_desc, ISSCAAP, scientific_name)), 
             by = c("source_fct", "fdc_id")) %>% 
   filter(!is.na(ICS.FAOSTAT.SUA.Current.Code) | !is.na(ICS_FAOSTAT_future)) 
   
 
 length(unique(fish_fct$fdc_id))
+unique(fish_fct$source_fct)
 
 fish_fct %>% count(ICS.FAOSTAT.SUA.Current.Code) %>% pull(n) %>% max()
   
@@ -319,13 +320,13 @@ fao_fish_fct %>% count(fish_type, fish_prep) %>% arrange(desc(n))
 
 #Check ISSCAAP code and groups
 colnames(fao_fish_fct)
-subset(fao_fish_fct, is.na(ISSCAAP.Group))
+# subset(fao_fish_fct, is.na(ISSCAAP.Group))
 
 #Checking scientific names
 subset(fao_fish_fct, !is.na(scientific_name)) %>% 
   group_by(source_fct) %>% count()
 
-table(!is.na(fao_fish_fct$scientific_name), fish_fct$source_fct)
+table(!is.na(fao_fish_fct$scientific_name), fao_fish_fct$source_fct)
 
-saveRDS(fao_fish_fct, here::here("data", "FAO-fish-standardised-updated_v1.0.0.RDS"))
+#saveRDS(fao_fish_fct, here::here("data", "FAO-fish-standardised-updated_v1.1.0.RDS"))
 

@@ -58,3 +58,4 @@ LS06/
 images/
 *.csv
 *.zip
+Output/*.csv

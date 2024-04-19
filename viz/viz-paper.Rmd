@@ -17,11 +17,12 @@ library(gtExtras)
 library(ggplot2)
 library(cowplot)
 library(ggpubr)
+library(patchwork)
 
 # Loading data
-stand_fct <- readRDS(here::here("data", "FAO-fish-standardised_v1.0.0.RDS"))
+stand_fct <- readRDS(here::here("data", "FAO-fish-standardised-updated_v1.1.0.RDS"))
 
-harmo_fct <- readRDS(here::here("data", "FAO-fish-harmonised_v1.0.0.RDS"))
+harmo_fct <- readRDS(here::here("data", "FAO-fish-harmonised_v1.1.0.RDS"))
 
 ```
 
@@ -78,27 +79,60 @@ for(i in 1:length(components)){
   
 fig3[[i]] <- stand_fct %>% 
   select(components[[i]], source_fct) %>% 
-#  rename_all(., ~components_longname) %>%  
   naniar::gg_miss_fct(., fct = source_fct) +
- # geom_rect(aes(xmin = 0.5, ymin = -Inf, xmax = 1.5, ymax =Inf), #AU19
-  #          linetype = "dotted",alpha = 0, colour = "red", size = 2.5) +
-    labs( x= "", y= "",
-        #title = "Data Gaps: Percentage (%) of missing values of food components per FCT"
-        ) +
-  theme(text = element_text(size = 23))  
-#+
- # theme(legend.position="none")
+    labs( x= "", y= "") +
+  theme(text = element_text(size = 23),
+   legend.position = "none",
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+ #   panel.grid = element_blank(),
+    axis.text.y = element_text(face = "italic"),
+  #  axis.text.x = element_text(size =12),
+    plot.margin = margin(15, 10, 10, 15)) 
+
+if(i<3){
+  
+  fig3[[i]] <- fig3[[i]] +
+    theme(axis.text.x = element_blank())
+  
+} else {
+  
+  fig3[[i]] <- fig3[[i]]
+  
+}
 
 #Perfect for ppt (width = 12, height = 7)
- ggsave(here::here("images", 
-            paste0("missing-values-standardised-fct_", i,"_", Sys.Date(), ".png")), 
-        width = 12, height = 7)
-
+# ggsave(here::here("images", 
+#            paste0("missing-values-standardised-fct_", i,"_", Sys.Date(), ".png")), 
+#        width = 12, height = 7)
+#
 }
+
+fig4A <- fig3
+
+(fig3[[1]] / fig3[[2]] / fig3[[3]]) / plot_layout(axes = "collect_y")
+
+(fig4a[[1]] / fig4a[[2]] / fig4a[[3]]) + theme(plot.margin = unit(c(0,0,0,0), "pt"))
+
+(fig4a[[1]] + theme(plot.margin = unit(c(0,0,0,0), "pt"))) / (fig4a[[2]]  + theme(plot.margin = unit(c(0,0,0,0), "pt"))) / (fig4a[[3]] + theme(plot.margin = unit(c(0,0,0,0), "pt"))) 
+
+
+G1 + plot_spacer() + G2 + plot_layout(widths = c(4, -1.1 ,4.5),guides = "collect") & theme(legend.position = "top")
+
+(fig4a[[1]] + fig4a[[2]] + fig4a[[3]]) + plot_layout(heights = c(4, 4, 4 ))
+
+
+fig4a <- fig3[[1]] / plot_spacer() / fig3[[2]]/ plot_spacer() / fig3[[3]] + plot_layout(heights = c(4,-1.5, 4, -1.5, 4 ))
+
+# Saving the multi-plot
+ggsave(here::here("images", paste0("missing-values-standardised-fct-all_", Sys.Date(), ".png")), 
+                         width = 12, height = 7)
 
 ```
 
 
+A) column is for standardised (non-harmonisation)
 
 
 
@@ -107,8 +141,15 @@ fig3[[i]] <- stand_fct %>%
 
 # plot_grid(fig3[[1]], fig3[[2]], fig3[[3]], nrow = 3)
 
-ggarrange(fig3[[1]], fig3[[2]], fig3[[3]], common.legend = TRUE,
-          nrow = 1)
+#ggarrange(fig3[[1]], fig3[[2]], fig3[[3]], common.legend = TRUE, nrow = 1)
+
+
+#((fig4a[[1]] + theme(plot.margin = unit(c(0,0,0,0), "pt"))) / (fig4a[[2]]  + theme(plot.margin #= unit(c(0,0,0,0), "pt"))) / (fig3[[3]] + theme(plot.margin = unit(c(0,0,0,0), "pt")))) # + #plot_annotation(tag_levels = 'a')
+
+#fig4a[[1]] / plot_spacer() / fig4a[[2]]/ plot_spacer() / fig3[[3]] + plot_layout(heights = #c(4,-1.5, 4, -1.5, 4 )) + 
+#  plot_annotation(title = "a",
+#                  theme = theme(plot.title = element_text(size = 23)))
+
 
 ```
 
@@ -119,7 +160,7 @@ ggarrange(fig3[[1]], fig3[[2]], fig3[[3]], common.legend = TRUE,
 #├ Plot (heat map):  % of missing values  per FCT ----
 
 # Proximate
-proxi <- c("WATERg", "PROCNTg", "FAT_g_standardised", "CHOAVLDFg_std", 
+proxi <- c("WATERg", "PROCNTg", "FAT_g_standardised", "CHOAVLDFg_standardised", 
            "FIBTGg_std", "ALCg", "ASHg")
 
 vit <- c("VITB6_mg_standardised", "NIAmg_std",  "VITB12mcg",   "VITA_RAEmcg_std",  "CARTBmcg",
@@ -129,12 +170,118 @@ mine <- c( "FEmg", "CAmg", "MGmg", "ZNmg", "Pmg", "Kmg", "CUmg","SEmcg","IDmcg")
 
 components <- list(proxi, vit, mine)
 
-leg <- c("none", "bottom", "none")
+#leg <- c("none", "bottom", "none")
+leg <- c("top", "none", "none")
 
 fig3 <- list()
 
 for(i in 1:length(components)){
   
+  fig3[[i]] <- harmo_fct %>% 
+  select(components[[i]], source_fct) %>% 
+  naniar::gg_miss_fct(., fct = source_fct) +
+    labs( x= "", y= "") +
+     scale_y_discrete(position = "right") +
+  theme(text = element_text(size = 23),
+    legend.position = "none",
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+ #   panel.grid = element_blank(),
+    axis.text.y = element_text(face = "italic"),
+  #  axis.text.x = element_text(size =12),
+    plot.margin = margin(15, 10, 10, 15)) 
+
+  if(i<3){
+    
+      fig3[[i]] <- fig3[[i]] +
+    theme(axis.text.x = element_blank())
+  
+  } else{
+  
+       fig3[[i]] <- fig3[[i]]
+   
+}
+
+#Perfect for ppt (width = 12, height = 7)
+# ggsave(here::here("images", 
+#            paste0("missing-values-harmonised-fct_", i,"_", Sys.Date(), ".png")), 
+#        width = 12, height = 7)
+
+}
+
+fig4B <- fig3
+
+fig4a[[1]] / plot_spacer() / fig4a[[2]]/ plot_spacer() / fig3[[3]] + plot_layout(heights = c(4,-1.5, 4, -1.5, 4 )) + 
+  plot_annotation(title = "a",
+                  theme = theme(plot.title = element_text(size = 23)))
+
+ plot_layout(guides = 'collect')
+ 
+ 
+fig4b <- fig3[[1]] / plot_spacer() / fig3[[2]]/ plot_spacer() / fig3[[3]] + plot_layout(heights = c(4,-1.5, 4, -1.5, 4 )) + 
+  plot_annotation(title = "b",
+                  theme = theme(plot.title = element_text(size = 23))) + plot_layout(guides = 'collect')
+
+fig4b + plot_layout(guides = 'collect')
+
+
+fig3[[1]] / plot_spacer() / fig3[[2]]/ plot_spacer() / fig3[[3]] + plot_layout(heights = c(4,-1.5, 4, -1.5, 4 )) 
+# Saving the multi-plot
+ggsave(here::here("images", paste0("missing-values-harmonised-fct-all_", Sys.Date(), ".png")), 
+                         width = 12, height = 7)
+
+```
+
+
+
+```{r}
+
+
+(fig4A[[1]] / plot_spacer() / fig4A[[2]]/ plot_spacer() / fig4A[[3]] + plot_layout(heights = c(4,-1.5, 4, -1.5, 4 )) + plot_layout(guides = 'collect') &
+  theme(legend.position='top')) + (fig4B[[1]] / plot_spacer() / fig4B[[2]]/ plot_spacer() / fig4B[[3]] + plot_layout(heights = c(4,-1.5, 4, -1.5, 4 )) + plot_layout(guides = 'collect') &
+  theme(legend.position='top')) + plot_layout(guides = 'collect', ncol = 2)  &
+  theme(legend.position='top')
+
+
+fig4A[[1]] / plot_spacer()  +  fig4B[[1]] / plot_spacer()  +
+ 
+fig4A[[2]] / plot_spacer() + fig4B[[2]]/ plot_spacer()  + 
+  
+fig4A[[3]] + fig4B[[3]] +  
+    plot_layout(heights = c(4,4,-1.5,-1.5,4,4,-1.5,-1.5,4,4)) +
+  plot_layout(guides = 'collect', ncol = 2) & theme(legend.position='top') 
+ 
+((fig4A[[1]] | fig4B[[1]])/ plot_spacer() + plot_layout(heights =c(2,2, -1.5), guides = 'collect')& theme(legend.position='top') )/
+ 
+((fig4A[[2]] |  fig4B[[2]]) / plot_spacer() + plot_layout(heights =c(2,2,-1.5), guides = 'collect') & theme(legend.position='none') ) /
+  
+(fig4A[[3]] | fig4B[[3]] +  plot_layout(guides = 'collect') & theme(legend.position='none'))
+ 
+
+
+((fig4A[[1]] | fig4B[[1]]) + plot_layout(guides = 'collect')& theme(legend.position='top'))/
+ 
+((fig4A[[2]] |  fig4B[[2]])  + plot_layout(guides = 'collect') & theme(legend.position='none') ) /
+  
+((fig4A[[3]] | fig4B[[3]]) +  plot_layout(guides = 'collect') & theme(legend.position='none'))
+
+
+ (fig4a-fig4b) +  plot_layout(guides = 'collect') & theme(legend.position='top')
+
+```
+
+
+
+```{r}
+
+#TO-DO:
+#1) Change the names of the "standardised variables by adding a * to note that those were 
+# recalculated/standardised. So name are similar in length.
+#2) Find a way to add the legend maybe as an image to the mix or something along those lines. 
+#3) Try smaller font for food comoponents 
+
+
 fig3[[i]] <- harmo_fct %>% 
   select(components[[i]], source_fct) %>% 
 #  rename_all(., ~components_longname) %>%  
@@ -144,19 +291,49 @@ fig3[[i]] <- harmo_fct %>%
     labs( x= "", y= ""
         #title = "Data Gaps: Percentage (%) of missing values of food components per FCT"
         ) +
-  guides(fill=guide_legend(title="Missing values (%)")) +
+  
 #  scale_fill_continuous(name = "Missing values (%)") +
+  scale_y_discrete(position = "right") +
+#  guides(fill=guide_legend(title="Missing values (%)")) +
   theme(text = element_text(size = 23),
-        legend.position=leg[i]) 
+      #  legend.position=leg[i],
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+ #   panel.grid = element_blank(),
+    axis.text.y = element_text(face = "italic"),
+    axis.text.x=element_blank(),
+  #  axis.text.x = element_text(size =12),
+    plot.margin = margin(15, 10, 10, 15)) 
 
-#Perfect for ppt (width = 12, height = 7)
- ggsave(here::here("images", 
-            paste0("missing-values-harmonised-fct_", i,"_", Sys.Date(), ".png")), 
-        width = 12, height = 7)
+ fig3[[i]] <- data.df %>% 
+  select(components[[i]], source_fct) %>% 
+#  rename_all(., ~components_longname) %>%  
+  naniar::gg_miss_fct(., fct = source_fct) +
+ # geom_rect(aes(xmin = 0.5, ymin = -Inf, xmax = 1.5, ymax =Inf), #AU19
+  #          linetype = "dotted",alpha = 0, colour = "red", size = 2.5) +
+    labs( x= "", y= ""
+        #title = "Data Gaps: Percentage (%) of missing values of food components per FCT"
+        ) +
+#  scale_fill_continuous(name = "Missing values (%)") +
+      scale_y_discrete(position = "right") +
+    guides(fill=guide_legend(title="Missing values (%)")) +
+      theme(text = element_text(size = 23),
+        legend.position=leg[i],
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+ #   panel.grid = element_blank(),
+    axis.text.y = element_text(face = "italic"),
+  #  axis.text.x=element_blank(),
+  #  axis.text.x = element_text(size =12),
+    plot.margin = margin(15, 10, 10, 15)) 
 
-}
+
 
 ```
+
+
 
 
 ```{r}

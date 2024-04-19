@@ -517,6 +517,7 @@ no21_fish %>%
   filter(str_detect(food_desc, "Snails, canned"))
 
 subset(no21_fish, fdc_id %in% c("04.265", "04.079"))
+subset(no21_fish, fdc_id %in% c("04.009"))
 
 #├├ Adding extra ICS FAOSTAT codes - manually ----
 

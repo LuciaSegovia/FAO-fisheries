@@ -28,7 +28,7 @@ source(here::here("functions.R")) # Loading nutrition functions (change to packa
 #Uncommenting and running the following
 #source(here::here("merging_all.R"))
 
-data.df <- readRDS(here::here("data", "FAO-fish-standardised_v1.0.0.RDS"))
+data.df <- readRDS(here::here("data", "FAO-fish-standardised-updated_v1.1.0.RDS"))
 #data.df <- read.csv(here::here("Output", "template-name_FCT_FAO_Tags.csv"))
   
 # 0) Check that we have all FCTs merged ----
@@ -139,24 +139,43 @@ data.df  <- data.df %>%
   CHOAVLDFg_std_creator()
 
 ##├├ Plot: Missing values for carbohydrates by difference in each FCT ----
-data.df[,c("CHOAVLDFg_std",  "source_fct")] %>%  #selecting variables
+data.df[,c("CHOAVLDFg_standardised",  "source_fct")] %>%  #selecting variables
   naniar::gg_miss_fct(., fct = source_fct) #making the plot
 
 ##├├ Hist: Carbohydrates by difference ----
-# before assumning zero of the negative values
-hist(data.df$CHOAVLDFg_std)
+# before assuming zero of the negative values
+hist(data.df$CHOAVLDFg_standardised)
 
 #No. negative value
-sum(data.df$CHOAVLDFg_std < 0)
+sum(data.df$CHOAVLDFg_standardised < 0)
+
+# Checking negative outside range (-5g)
+sum(data.df$CHOAVLDFg_standardised < -5)
+unique(data.df$fdc_id[data.df$CHOAVLDFg_standardised < -5])
+data.df$source_fct[data.df$CHOAVLDFg_standardised < -5]
+data.df$CHOAVLDFg_standardised[data.df$CHOAVLDFg_standardised < -5]
+# QUALITY ASSURANCE
+# Marking FOOD ENTRIES  ----
+# Due to CHOAVLDFg_standardised < -5
+n1 <- which(data.df$CHOAVLDFg_standardised < -5)
+comment <- "Food entry to be excluded: CHOAVLDFg_standardised below - 5."
+
+data.df$comments[n1] <- ifelse(is.na(data.df$comments[n1]), comment,
+                               paste(comment, "; ", data.df$comments))
+
+
+# Checking the items
+#View(unique(subset(data.df,  fdc_id %in% unique(data.df$fdc_id[data.df$CHOAVLDFg_standardised < -5]))))
+
 #Perc. of negative values
-sum(data.df$CHOAVLDFg_std < 0)/nrow(data.df)*100
+sum(data.df$CHOAVLDFg_standardised < 0)/nrow(data.df)*100
 
 #Checking negative values 
-n1 <- which(data.df$CHOAVLDFg_std< 0)
+n1 <- which(data.df$CHOAVLDFg_standardised< 0)
 
 data.df$comments[n1] <- ifelse(is.na(data.df$comments[n1]),
-                                   "CHOAVLDFg_std assumed zero", paste(data.df$comments, "; CHOAVLDFg_std assumed zero") )
-data.df$CHOAVLDFg_std[data.df$CHOAVLDFg_std< 0] <- 0
+                                   "CHOAVLDFg_standardised assumed zero", paste(data.df$comments, "; CHOAVLDFg_standardised assumed zero") )
+data.df$CHOAVLDFg_standardised[data.df$CHOAVLDFg_standardised < 0] <- 0
 
 
 ##├ ) Energy - standardised ----
@@ -164,24 +183,23 @@ data.df$CHOAVLDFg_std[data.df$CHOAVLDFg_std< 0] <- 0
 # Energy in kcal
 data.df$ENERCkcal_std <- ENERCKcal_standardised(
   data.df$PROCNTg,data.df$FAT_g_standardised,
-  data.df$CHOAVLDFg_std, data.df$FIBTGg_std,
+  data.df$CHOAVLDFg_standardised, data.df$FIBTGg_std,
   data.df$ALCg)
 
 # Energy in kJ
 data.df$ENERCkJ_std <-  ENERCKj_standardised(
   data.df$PROCNTg, data.df$FAT_g_standardised,
-  data.df$CHOAVLDFg_std, data.df$FIBTGg_std,
+  data.df$CHOAVLDFg_standardised, data.df$FIBTGg_std,
   data.df$ALCg)
 
 ##├ ) Sum of proximate  ----
 
 data.df  <- data.df %>% SOP_std_creator() 
 
+# Back-calculating ----
 #├ ) Retinol - recalculated ---- 
-# Back-calculating 
 
 data.df <- RETOLmcg_calculator(data.df)
-
 
 #├ ) Beta - Carotene eq. - standardised ---- 
 
@@ -191,9 +209,10 @@ data.df <- data.df %>%
   CARTBEQmcg_backcalculator() %>% # This requires values created in RETOLmcg_Recalculator
   CARTBEQmcg_std_to_zero()   # changing negative values to zero # This handles better and adds comments
 
+
 #├ )  Vitamin A - standardised ----  
 
-data.df  <- data.df %>%
+data.df  <- data.df %>% 
 VITA_RAEmcg_std_creator() %>%  # This function recalculate VITA_RAEmcg_std (standardised)
   VITAmcg_std_creator()   # This function recalculate VITAmcg_std (standardised)
   
@@ -204,7 +223,8 @@ VITA_RAEmcg_std_creator() %>%  # This function recalculate VITA_RAEmcg_std (stan
 data.df  <- data.df %>%
   THIAmg_std_creator() 
 
-saveRDS(data.df, here::here("data", "FAO-fish-harmonised_v1.0.0.RDS"))
+
+#saveRDS(data.df, here::here("data", "FAO-fish-harmonised_v1.1.0.RDS"))
 
 
 
