@@ -23,7 +23,7 @@ fct_cover %>% ggplot(aes(source_fct)) +
   theme_light() +
   coord_flip() 
 
-## Figure 3 - Supplementary ----
+## Figure 3 - Supplementary (updated)----
 
 # Checking fish included vs total (other food/fish) in FCTS
 
@@ -58,6 +58,28 @@ fish_fct %>% distinct(source_fct, fdc_id) %>%            # removing duplicated i
    panel.grid = element_blank()
 )
 
+## Suppl.Figure 3 (old version) ----
+
+# Checking fish included vs total (other food/fish) in FCTS
+
+stand_fct %>% distinct(source_fct, fdc_id) %>%            # removing duplicated items (fish)
+  group_by(source_fct) %>% count() %>% rename(Nfish = "n") %>%  # count of included foods (fish) by FCT & renaming variable
+  left_join(., fct_cover %>% group_by(source_fct) %>% count()) %>%  #adding total food items in each FCT
+  rename(Total = "n") %>%             #renaming variable
+  mutate(Nothers = Total-Nfish) %>%   # calculating other foods (excluded items)
+  pivot_longer(cols = c(Nfish, Nothers),  # combining counts variables (two variables into one (columns to rows))
+               names_to = "Foods", 
+               values_to = "counts") %>% 
+  mutate(perc = (counts/Total*100)) %>%  # calculating perc. 
+  select(!Total) %>%                    # excluding unnecessary variable
+  arrange(source_fct, desc(Foods)) %>%  
+  mutate(lab_ypos = cumsum(perc) - 0.5 * perc) %>% # generating the position of the labels
+  ggplot(aes(x = source_fct, y = perc)) +            # visualisation of variables
+  geom_col(aes(fill = Foods), alpha =.7, width = 0.8) + # Changing colour fill, transparency and bin width
+  geom_text(aes(y = lab_ypos, label = counts, group =Foods),
+            color = "black", size = 4) +
+  coord_flip() +
+  theme_light()
 
 # NCT compilation ----
 
