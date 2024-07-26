@@ -1,15 +1,6 @@
----
-title: "Method: Standardisation and harmonisation of the food composition data"
-format: html
-editor: source
----
 
-```{r, set-up}
+# Method: Standardisation and harmonisation of the food composition data
 
-```
-
-
-## Standardisation of the food composition tables and databases 
 
 The standardisation required a number of step with are outlined in @fig-1.
 

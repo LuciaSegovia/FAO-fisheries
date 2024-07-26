@@ -175,7 +175,7 @@ Output_table$HYPmg <- as.numeric(Output_table$HYPg)*1000
 
 glimpse(Output_table)
 
-write.csv(Output_table, file = here::here("Output", "DK19_FCT_FAO_Tags.csv"),
+write.csv(Output_table, file = here::here("output", "DK19_FCT_FAO_Tags.csv"),
           row.names = FALSE) #Saves the newly-cleaned table to the Output folder 
 
 #clean environment

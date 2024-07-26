@@ -9,7 +9,7 @@ library(stringr) # For string manipulation (data cleaning)
 
 # Loading the data
 
-data.df <- read.csv(here::here("Output", "NO21_FCT_FAO_Tags.csv"))
+data.df <- read.csv(here::here("output", "NO21_FCT_FAO_Tags.csv"))
 
 #├  FAO data (ASFIS) - ISSCAAP codes and Scientific names ----
 

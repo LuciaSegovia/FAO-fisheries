@@ -29,7 +29,7 @@ source(here::here("functions.R")) # Loading nutrition functions (change to packa
 #source(here::here("merging_all.R"))
 
 data.df <- readRDS(here::here("data", "FAO-fish-standardised-updated_v1.1.0.RDS"))
-#data.df <- read.csv(here::here("Output", "template-name_FCT_FAO_Tags.csv"))
+#data.df <- read.csv(here::here("output", "template-name_FCT_FAO_Tags.csv"))
   
 # 0) Check that we have all FCTs merged ----
 data.df %>% 
@@ -223,7 +223,7 @@ VITA_RAEmcg_std_creator() %>%  # This function recalculate VITA_RAEmcg_std (stan
 data.df  <- data.df %>%
   THIAmg_std_creator() 
 
-
+# Saving the results of the harmnonised dataset
 #saveRDS(data.df, here::here("data", "FAO-fish-harmonised_v1.1.0.RDS"))
 
 

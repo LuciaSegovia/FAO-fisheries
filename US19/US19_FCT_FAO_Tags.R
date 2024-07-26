@@ -224,5 +224,5 @@ glimpse(Output_table)
 
 # Data Output ----
 
-write.csv(Output_table, file = here::here("Output", "US19_FCT_FAO_Tags.csv"), row.names = FALSE)  #Saves the newly-created data table to the Output folder 
+write.csv(Output_table, file = here::here("output", "US19_FCT_FAO_Tags.csv"), row.names = FALSE)  #Saves the newly-created data table to the Output folder 
 rm(list = ls())  #Removes all the environment variables - tidies up RStudio 

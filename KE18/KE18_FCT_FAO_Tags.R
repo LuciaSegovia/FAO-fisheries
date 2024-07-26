@@ -241,7 +241,7 @@ names(KE18_Raw_FCT)
 
 glimpse(KE18_Raw_FCT) #Optional - check the data before saving 
 
-write.csv(KE18_Raw_FCT, file = here::here("Output", "KE18_FCT_FAO_Tags.csv"), row.names = FALSE)  #Saves the newly-cleaned table to the Output folder 
+write.csv(KE18_Raw_FCT, file = here::here("output", "KE18_FCT_FAO_Tags.csv"), row.names = FALSE)  #Saves the newly-cleaned table to the Output folder 
 
 #Run this to clean the environment
 rm(list = ls())

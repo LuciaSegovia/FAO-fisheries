@@ -314,7 +314,7 @@ data.df$Edible_factor_in_FCT <- data.df$Edible_factor_in_FCT/100
 # Saving the NO21, we kept all fishery product (w/ and w/o ICS code)
 data.df %>% 
   #select(fdc_id:IDmcg, alpha_code, source_fct ) %>% 
-  write.csv(., file = here::here("Output", "NO21_FCT_FAO_Tags.csv"),
+  write.csv(., file = here::here("output", "NO21_FCT_FAO_Tags.csv"),
             row.names = FALSE)
 
 # Removing object// Cleaning environment

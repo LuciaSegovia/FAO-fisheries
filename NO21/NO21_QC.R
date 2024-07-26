@@ -8,7 +8,7 @@ library(tidyverse)
 
 # Loading the data
 
-data.df <- read.csv(here::here("Output", "NO21_FCT_FAO_Tags.csv"))
+data.df <- read.csv(here::here("output", "NO21_FCT_FAO_Tags.csv"))
 
 names(data.df)
 str(data.df)

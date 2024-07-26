@@ -246,7 +246,7 @@ Output_table <- Output_table %>%
 
 # Saving the output
 
-write.csv(Output_table, file = here::here("Output", "UK21_FCT_FAO_Tags.csv"),
+write.csv(Output_table, file = here::here("output", "UK21_FCT_FAO_Tags.csv"),
           row.names = FALSE) #Saves the newly-created data table to the Output folder
 
 #Run this to clean the environment

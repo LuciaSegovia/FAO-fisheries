@@ -152,7 +152,7 @@ IN17_Renamed$source_fct <- "IN17"
 IN17_Renamed %>% glimpse()
 
 write.csv(IN17_Renamed,
-          file = here::here("Output", 
+          file = here::here("output", 
                             "IN17_FCT_FAO_Tags.csv"), row.names = FALSE)
 
 #clean environment

@@ -142,7 +142,7 @@ wafct <- wafct %>% mutate_at(vars(wa_nut), as.numeric) # Converts certain column
 
 # Data Output ----
 
-write.csv(wafct, file = here::here("Output", "WA19_FCT_FAO_Tags.csv"), 
+write.csv(wafct, file = here::here("output", "WA19_FCT_FAO_Tags.csv"), 
           row.names = FALSE) #Saves the newly-created data table to the Output folder
 
 #Run this to clean the environment
