@@ -11,7 +11,12 @@ The standardisation required a number of step with are outlined in @fig-1.
 
 ![](../presentation/Framework-users_v2.png)
 
-### 1. Importing the data
+
+## Identifying and obtaining the data
+
+
+
+## Importing the data
 
 FCTs (datasets) were found in a variety of formats that needed to be imported
 and cleaned into a tabular format. E.g. one row per food item and one
@@ -22,14 +27,14 @@ the original FCT (raw files) in individual folders named with the
 BiblioID (See table 2) which is stored in the variable `source_fct` (See
 table 3).
 
-### 2. Cleaning (tidying) and standardising the data
+## Cleaning (tidying) and standardising the data
 
 The steps outlined in the following sections aim to obtain a clean and standardise FCT, which is necessary to merge all data, from various FCTs, into one common FCT data library. The overall steps that were taken are explained
 below and annotated scripts for each FCTs can be found in this repository in each corresponding folder, as well as template to serve as a guideline for processing new FCTs. Note that the order of the steps may change from script to script as the shape, format and type of data will influence the processing workflow. Similarly, based on the data structure some steps may not be necessary while other FCTs may require additional processing steps. 
 
-#### 2.1.	Formatting FCT into a tabular format
+###	Formatting FCT into a tabular format
 
-##### 2.1.1. Creating food groups variable and tidying
+#### Creating food groups variable and tidying
 
 Some food composition tables reported food
 groups that were placed as the first row of each category, however that it is not a data structure that can be used, as we need one column per variable. Hence, the food group names are extracted from the rows, and are allocated as a new attribute of each food (e.g., fish and fishery products to catfish). The food groups are stored in a new column (`food_group`).
