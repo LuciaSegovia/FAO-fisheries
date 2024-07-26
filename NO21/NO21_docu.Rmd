@@ -192,6 +192,20 @@ Some other fish entries needed further clarification: Excluded for now:
 
 Finally, ICS SUA fishery category were allocated using the scientific name and food description (e.g., "cured") leading to 234 fish and fishery products to be used in the NCT.
 
+In total, 4 foods were missclassified: 
+
+```{r, eval=FALSE}
+
+#Re-allocating products in group 7 to its corresponding
+no21_fish$product_type[no21_fish$food_desc == "Scallop, boiled"] <- "6"
+no21_fish$product_type[no21_fish$food_desc == "Periwinkle, common, Norwegian"] <- "1"
+
+# "04.307", - Caviar, cod roe with mayonnaise
+# "04.323 ", - Fish burger, breaded, --> Not only the fish burger
+
+```
+
+
 #### 3.6. Dealing with missing values <br>
 
 ##### 3.6.3. Back-calculating variables <br>

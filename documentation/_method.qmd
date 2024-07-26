@@ -1,5 +1,5 @@
 ---
-title: "Method: Harmonisation of the food composition tables and databases"
+title: "Method: Standardisation and harmonisation of the food composition data"
 format: html
 editor: source
 ---
@@ -9,12 +9,14 @@ editor: source
 ```
 
 
-## Harmonisation of the food composition tables and databases (method)
+## Standardisation of the food composition tables and databases 
 
-The harmonisation required two main steps: importing (loading) databases
-into R and cleaning and standardising the databases.
+The standardisation required a number of step with are outlined in @fig-1.
 
-![](../presentation/Workflow_v2.png)
+
+![](../presentation/Workflow_v6.0.0.jpg)
+
+
 
 ![](../presentation/Framework-users_v2.png)
 
