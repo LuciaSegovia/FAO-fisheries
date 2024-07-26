@@ -7,6 +7,9 @@ This repository contains the scripts necessary to adopt and adapt the open frame
 In summary, the framework consists in six steps (Figure 1). 
 
 
+![](presentation/Workflow_v6.0.0.jpg)
+
+
   1) For **identification of the FCTs**, we followed the “FAO/INFOODS Evaluation framework to assess the quality of published food composition tables and databases” (Charrondiere et al., 2023), and the list of FCTs included is available below. 
 
   2) The second and third steps, **importing** and **standardising** are FCT independent are performed by independent scripts, which are all contained in an individual folder. By using the script `merging_all.R` script all the FCTs available will be standardised and merged. For the addition of new FCTs a template folder (`00_template`) and accompanying script (`template_FCT_FAO_Tags.R`) is included for reference. 
@@ -17,10 +20,6 @@ In summary, the framework consists in six steps (Figure 1).
   
   5) Finally, this repository contains the script (`Summary_Table_Production.R`) to replicate the compilation of the fish and other aquatic products subset of the Global NCT for Food and Agriculture Organization of the United Nations (FAO) Supply and Utilization Accounts (SUAs) developed by FAO’s Food and Nutrition Division. As well, as the expansion of nine nutrients for the same subset.
   
-  
-
-![](presentation/Workflow_v6.0.0.jpg)
-
 
 
 Note: Those FCTs that are publicly available and accessible will be automatically standardised and merged, for the others, the user would need to get raw data into the folder. See the table below for more information on data provenance. 
