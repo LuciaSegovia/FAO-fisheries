@@ -20,7 +20,7 @@
 
 # RStudio files
 .Rproj.user/
-*.Rproj
+#*.Rproj
 .Rproj.user
 
 # produced vignettes
@@ -51,9 +51,13 @@ US19/SR-LEG_DB/
 *.xlsx
 LS06/
 
-#Outputs (e.g., documents, images, plots, etc.)
+LS06/
+
+# Outputs (e.g., documents, images, plots, etc.)
 *.docx
 *.pdf
 images/
 *.csv
-output/*.zip
+*.zip
+output/*.csv
+

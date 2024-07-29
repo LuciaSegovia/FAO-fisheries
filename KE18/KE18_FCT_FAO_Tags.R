@@ -1,6 +1,30 @@
-library(tidyverse)
-library(visdat)
 
+################################################################################
+#                                                                              #
+#                                                                              #                          
+#           Kenya Food Composition Table (KENFCT, 2018)                        #
+#                                                                              #
+#                                                                              #
+#                                                                              #
+################################################################################
+##Run this to clean the environment
+rm(list = ls())
+#
+# Library loading 
+
+library(dplyr) # Data wrangling
+library(visdat) 
+
+# 0) Accessing the data (for source of the data see README) - Uncomment!
+# Only need to do it the first time to obtain the raw files!
+# 
+# f <- "http://www.nutritionhealth.or.ke/wp-content/uploads/Downloads/Kenya%20Food%20Composition%20Tables%20Excel%20files%202018.xlsx"
+# 
+# download.file(f, 
+#            destfile = here::here('KE18', "MOH-KENFCT_2018.xlsx"),
+#            method="wininet", #use "curl" for OS X / Linux, "wininet" for Windows
+#            mode="wb")
+# 
 
 # Data Import ----
 
@@ -49,6 +73,8 @@ colnames(KE18_Raw_FCT) <- unique_column_names
 # creating variable 'foodgroups' ----
 
 KE18_Raw_FCT_FoodGroup <- KE18_Raw_FCT %>%  filter(code %in% c(1:15)) %>% pull(fooditem) #This pulls the food group names by
+# Fixing a typo in the food groups name
+KE18_Raw_FCT_FoodGroup[4] <-  "VEGETABLE AND VEGETABLE PRODUCTS"
 
 KE18_Raw_FCT <- KE18_Raw_FCT %>% mutate(foodgroup = case_when( #This creates the foodgroup column, and assigns the values based on what the code starts with,
   str_detect(code, "[:digit:]{5}") & str_starts(code, '10') ~ KE18_Raw_FCT_FoodGroup[10], # which correlates directly with the food group
@@ -109,14 +135,14 @@ KE18_Raw_FCT %>% str_which(.,"tr|[tr]|[*]|\\[.*?\\]")
 # Adding the reference (biblioID) and Scientific name ----
 
 KE18_Raw_FCT <- KE18_Raw_FCT %>% 
-  left_join(., readxl::read_excel(here::here('KE18', "MOH-KENFCT_2018.xlsx"), #Attaches sheet 7 to the main table
+  left_join(., readxl::read_excel(here::here( 'KE18', "MOH-KENFCT_2018.xlsx"), #Attaches sheet 7 to the main table
                                   sheet = 7, skip = 2) %>%
               janitor::clean_names() %>% 
               select(2, 4,5) %>% #Selects the columns to merge
               mutate_at("code_kfct18", as.character),
             by = c("code" = "code_kfct18")) #merges them based on the code
 
-KE18_Raw_FCT <- KE18_Raw_FCT[!duplicated(KE18_Raw_FCT), ] #Removwes the duplicates that the last batch of code introduces for whatever reason
+KE18_Raw_FCT <- KE18_Raw_FCT[!duplicated(KE18_Raw_FCT), ] #Removes the duplicates that the last batch of code introduces for whatever reason
 
 # Reordering variables and converting nutrient variables into numeric ----
 
@@ -150,12 +176,13 @@ KE18_Raw_FCT$ALCg[KE18_Raw_FCT$code == "12008"] <- (10.3*0.789/0.995)
 KE18_Raw_FCT$ALCg[KE18_Raw_FCT$code == "12009"] <- (10.2*0.789/1.015)
 
 
-
 # Renaming, Checking, and Selecting ----
 
 colnames(KE18_Raw_FCT)[8] <- "ENERCkJ" #Renames the Energy columns
 colnames(KE18_Raw_FCT)[9] <- "ENERCkcal"
 
+
+# Fixing spelling and typos in original KE18 file
 
 #Scientific names "issues"
 #Eggplant (4017) scientific name is "Solalum melongena", instead of 
@@ -188,6 +215,10 @@ KE18_Raw_FCT %>% glimpse() #Optional - used to check the column names, to check 
 KE18_Raw_FCT %>% dplyr::select(F20D5gstandardized:F22D6g) %>% #Optional - Visualise the number od missing and present values for a certain section of the table
   vis_miss()
 
+## Renaming 
+
+names(KE18_Raw_FCT)
+
 KE18_Raw_FCT <- KE18_Raw_FCT %>% rename( #Renames a number of variables - e.g. "code" is renamed as "fdc_id"
   fdc_id = "code", 
   food_desc = "fooditem",
@@ -197,16 +228,20 @@ KE18_Raw_FCT <- KE18_Raw_FCT %>% rename( #Renames a number of variables - e.g. "
   Edible_factor_in_FCT = "EDIBLE", 
   PROCNTg = "PROTCNTg", 
   NAmg = "NA.mg") %>% #selecting the variables of interest
-  dplyr::select(source_fct:PHYTCPPDmg, TRPmg, FASATgstandardized:FATRNgstandardized,
-                F20D5gstandardized, F22D6gstandardized) 
+  dplyr::select(source_fct:FATRNgstandardized,
+                F20D5g, F22D6g, ALCg) 
 
+# This can only be done here, otherwise some of the FAs would have the same name
+names(KE18_Raw_FCT) <- gsub("standardized", "", names(KE18_Raw_FCT))
 
+#Checking the renaming
+names(KE18_Raw_FCT)
 
 # Data Output ----
 
 glimpse(KE18_Raw_FCT) #Optional - check the data before saving 
 
-write.csv(KE18_Raw_FCT, file = here::here("Output", "KE18_FCT_FAO_Tags.csv"), row.names = FALSE)  #Saves the newly-cleaned table to the Output folder 
+write.csv(KE18_Raw_FCT, file = here::here("output", "KE18_FCT_FAO_Tags.csv"), row.names = FALSE)  #Saves the newly-cleaned table to the Output folder 
 
 #Run this to clean the environment
 rm(list = ls())

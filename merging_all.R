@@ -1,17 +1,28 @@
 
+##Run this to clean the environment
+rm(list = ls())
+#
+# Data Compilation ----
+#
+# Loading libraries
+## Note: if it is the first time: install.packages() first
+library(dplyr) # For data cleaning (wrangling)
+library(stringr) # For string manipulation (data cleaning)
+library(purrr) # Map function
+library(readr) # Reading data in
+library(measurements) # For unit conversion
+# source(here::here("functions.R")) # Loading nutrition functions (change to package when ready)
+library(visdat) # Data visualisation
+
+# 0) Only run if first time or updated original FCDB scripts ----
+# There are four scripts that need to run from the file
+# AU19/AU19_FCT_FAO_Tags.R
+# JA15/JA15_FCT_FAO_Tags.R
+# US19/US19_FCT_FAO_Tags.R
+# BR11/BR11_FCT_FAO_Tags.R
 
 
-library(tidyverse)
-library(visdat)
-
-#0) Only run if first time or updated original FCDB scripts ----
-#There are four scripts that need to run from the file
-#AU19/AU19_FCT_FAO_Tags.R
-#JA15/JA15_FCT_FAO_Tags.R
-#US19/US19_FCT_FAO_Tags.R
-#BR11/BR11_FCT_FAO_Tags.R
-
-#To run, remove the # and run
+# To run, remove the # and run
 
 ##Checking and loading updates
 
@@ -31,23 +42,29 @@ library(visdat)
 #}
 
 
-#1) Loading all FCDBs into one single database ----
+# 1) Loading all FCDBs into one single database ----
 
-#finding all the cleaned FCTs/FCDBs from the output folder
-list.files("Output/", pattern = "*_FCT_FAO_Tags", recursive=FALSE, #so it is not taking the fcts in the folder
-           full.names=TRUE) %>% 
-  map_df(~read_csv(., col_types = cols(.default = "c"), locale = locale(encoding = "Latin1")))  
+# finding all the cleaned FCTs/FCDBs from the output folder
+# list.files("Output/", pattern = "*_FCT_FAO_Tags", recursive=FALSE, #so it is not taking the fcts in the folder
+#            full.names=TRUE) %>% 
+#   map_df(~read_csv(., col_types = cols(.default = "c"), locale = locale(encoding = "Latin1")))  
 
-#saving all the cleaned FCTs/FCDBs into one single object (data.frame)
+# reading all the cleaned FCTs/FCDBs into one single object (data.frame)
 fct_cover <- list.files("Output/", pattern = "*_FCT_FAO_Tags", recursive=FALSE, full.names=TRUE) %>% 
  map_df(~read_csv(., col_types = cols(.default = "c"), locale = locale(encoding = "Latin1"))) 
 
-#checking that we have loaded all the FCT/FCDBs (n=13)
+# checking that we have loaded all the FCT/FCDBs (n=13)
 fct_cover %>% distinct(source_fct) 
 colnames(fct_cover)
 
-#creating a vector with all the variables of interest
-#identification variables, components that were included in the Global FCT plus new components
+# Importing the ICS Codes for all the fisheries
+ics_code_file <- readRDS(here::here("data", "ics-code_fish-code.RDS")) %>%  # FAO Fisheries
+  rename(food_desc = "Food.description", scientific_name = "Scientific.name",
+          ISSCAAP = "ISSCAAP.Group") %>% 
+  bind_rows(., readRDS(here::here("data", "ics-code_NO21-code.RDS"))) # Plus NO21
+
+# creating a vector with all the variables of interest
+# identification variables, components that were included in the Global FCT plus new components
 
 col_names <- c("fdc_id",
                "food_desc",
@@ -58,12 +75,12 @@ col_names <- c("fdc_id",
                "source_fct",
                "nutrient_data_source",
                "Edible_factor_in_FCT",
-               "ICS_FAOSTAT", #we need for NO21
+              # "ICS_FAOSTAT", # we need for NO21
                #"Edible_desc",
-               "specific_gravity",
+              # "specific_gravity",
                "SOPg",
                "ASHg",
-               "ASHg_bydiff",
+               #"ASHg_bydiff",
                "ENERCkJ",
                "ENERCkcal",
                "WATERg",
@@ -81,7 +98,7 @@ col_names <- c("fdc_id",
                "FIBCg",
                "NSPg",
                "ALCg",
-               "ALCg_100mL",
+              # "ALCg_100mL",
                "SUGARg",  
                "FASATg",
                "FAMSg",
@@ -126,7 +143,7 @@ col_names <- c("fdc_id",
                "VITCmg",
                "ASCLmg",
                "VITDEQmcg",
-                "VITDmcg",
+               "VITDmcg",
                "CHOCALmcg",
                "ERGCALmcg",
                "CHOCALOHmcg",
@@ -143,42 +160,31 @@ col_names <- c("fdc_id",
                "SEmcg",
                "IDmcg")
 
+# AAs
+aa <- c("ILEmg", 	"LEUmg",	"LYSmg", 	"METmg", "CYSmg", "PHEmg",	"TYRmg", 
+  "THRmg", "TRPmg", "VALmg", 	"ARGmg", 	"HISmg", 	"ALAmg", 	"ASPmg",
+  "GLUmg", 	"GLYmg", 	"PROmg", "SERmg", "HYPmg")
+
+
 #checking and counting No. of items (before filtering only fish)
-fct_cover %>% select(col_names) %>% count(source_fct) 
+fct_cover %>% dplyr::select(col_names) %>% 
+  count(source_fct) 
+
+# fct_cover %>% dplyr::select(col_names, aa) %>% 
+# write.csv(., here::here("Output", paste0(Sys.Date(), "_standardised-FCT.csv")),
+#           row.names = FALSE) 
 
 #Filtering out components that are not used and removing "_FCT" from the FCTs/FCDB name
 #added quality for NO21
-fct_cover <- fct_cover %>% select(col_names, quality) %>% 
-  mutate_at("source_fct", ~str_replace(., "_FCT", "")) 
+#fct_cover <- fct_cover %>% select(col_names, quality) %>% 
+#  mutate_at("source_fct", ~str_replace(., "_FCT", "")) 
 
 #Checking that we have all the variables of interest
 fct_cover %>% str()
 
-#2) Generating the Fish and Fishery FCBD ----
+# 2) Generating the Fish and Fishery FCBD ----
 
 #├ Extracting fish entries from each FCTs/FCDBs ----
-
-#├├ Preparing data frame that was prepared for the Global FCT (only fish) ----
-#contains information for each fish on ISSCAAP code, ICS FAOSTAT fish codes, and
-#alpha-three code, when available. 
-
-# Loading the file 
-ics_code_file <- read.csv(here::here("data", "ics-code_fish-code.csv")) %>% 
-  rename(source_fct = "Source.FCT.for.NVs") #renaming variable the FCT source (e.g. BA13, WA19)
-
-#fixing discrepancy between fcd_id in our dataframe (df) and Global FCT df for KE18 and US19
-#This is needed for merging and filtering the fish and adding the ICS FAOSTAT code
-
-ics_code_file %>% filter(str_detect(fdc_id, "^0")) 
-ics_code_file <- ics_code_file %>% mutate(fdc_id = ifelse(source_fct == "KE18",
-                         str_replace(fdc_id, "^0", ""), fdc_id))  %>%  #removing the 0 of the fdc_id
-  mutate(fdc_id = ifelse(source_fct == "US19",
-                         NDB_number , fdc_id)) #using NDB_number as the fdc_id
-
-#checking the US19 data from the FAO Global Fisheries data
-ics_code_file %>% filter(source_fct == "US19")
-
-
 
 #├├ Filtering only fish in all FCTs/FCDBs ----
 
@@ -186,31 +192,48 @@ ics_code_file %>% filter(source_fct == "US19")
 fct_cover %>% filter(source_fct == "UK21",
                      food_group %in% c("JA", "JC", "JK", "JM", "JR")) 
 
-fish_fct <- fct_cover %>% 
+fct_cover %>% 
   left_join(., ics_code_file, by = c("source_fct",
                                      "fdc_id")) %>% 
-  filter(!is.na(ICS.FAOSTAT.SUA.Current.Code) | source_fct %in% c("NO21") |
-           food_group %in% c("JA", "JC", "JK", "JM", "JR")) 
+  filter(!is.na(ICS.FAOSTAT.SUA.Current.Code))  %>% 
+  count(source_fct) 
 
-#checking the ICS FAO code in NO21
-fish_fct %>% filter(!is.na(ICS_FAOSTAT)) %>% distinct(ICS_FAOSTAT)
+fish_fct <-  fct_cover %>% 
+  left_join(., ics_code_file %>% select(-c(food_desc, ISSCAAP, scientific_name)), 
+            by = c("source_fct", "fdc_id")) %>% 
+  filter(!is.na(ICS.FAOSTAT.SUA.Current.Code) | !is.na(ICS_FAOSTAT_future)) 
+  
 
-fish_fct %>% filter(source_fct == "NO21") %>% distinct(ICS_FAOSTAT)
+length(unique(fish_fct$fdc_id))
+unique(fish_fct$source_fct)
+
+fish_fct %>% count(ICS.FAOSTAT.SUA.Current.Code) %>% pull(n) %>% max()
+  
+
+#fish_fct <- fct_cover %>% 
+#  left_join(., ics_code_file, by = c("source_fct",
+#                                     "fdc_id")) %>% 
+#  filter(!is.na(ICS.FAOSTAT.SUA.Current.Code) | source_fct %in% c("NO21") |
+#           food_group %in% c("JA", "JC", "JK", "JM", "JR")) 
+#
+# checking the ICS FAO code in NO21
+#fish_fct %>% filter(!is.na(ICS_FAOSTAT)) %>% distinct(ICS_FAOSTAT)
+#fish_fct %>% filter(source_fct == "NO21") %>% distinct(ICS_FAOSTAT)
 
 #Getting the ICS FAOSTAT code, ISSCAAP, and alpha code  for NO21 that 
 #was added "manually"
-fish_fct <- fish_fct %>% 
-  mutate(ICS.FAOSTAT.SUA.Current.Code = ifelse(source_fct == "NO21",
-                                               ICS_FAOSTAT,
-                                               ICS.FAOSTAT.SUA.Current.Code)) %>% 
-  mutate(ISSCAAP.Group = ifelse(source_fct == "NO21",
-                                ISSCAAP,
-                                ISSCAAP.Group)) %>% 
-  mutate(X3.alpha.code = ifelse(source_fct == "NO21",
-                                alpha_code,
-                                X3.alpha.code)) %>% 
-  select(-c(ISSCAAP, alpha_code))
-
+# fish_fct <- fish_fct %>% 
+#   mutate(ICS.FAOSTAT.SUA.Current.Code = ifelse(source_fct == "NO21",
+#                                                ICS_FAOSTAT,
+#                                                ICS.FAOSTAT.SUA.Current.Code)) %>% 
+#   mutate(ISSCAAP.Group = ifelse(source_fct == "NO21",
+#                                 ISSCAAP,
+#                                 ISSCAAP.Group)) %>% 
+#   mutate(X3.alpha.code = ifelse(source_fct == "NO21",
+#                                 alpha_code,
+#                                 X3.alpha.code)) %>% 
+#   select(-c(ISSCAAP, alpha_code))
+# 
 #Checking the no. of entries after filtering out all foods but fish
 fish_fct %>% group_by(source_fct) %>% count()
 
@@ -297,8 +320,13 @@ fao_fish_fct %>% count(fish_type, fish_prep) %>% arrange(desc(n))
 
 #Check ISSCAAP code and groups
 colnames(fao_fish_fct)
-subset(fao_fish_fct, is.na(ISSCAAP.Group))
+# subset(fao_fish_fct, is.na(ISSCAAP.Group))
 
 #Checking scientific names
 subset(fao_fish_fct, !is.na(scientific_name)) %>% 
   group_by(source_fct) %>% count()
+
+table(!is.na(fao_fish_fct$scientific_name), fao_fish_fct$source_fct)
+
+#saveRDS(fao_fish_fct, here::here("data", "FAO-fish-standardised-updated_v1.1.0.RDS"))
+

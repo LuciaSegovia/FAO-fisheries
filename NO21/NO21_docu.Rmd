@@ -22,11 +22,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Norwegian Food Composition Database
 
-### INTRO
+### 1. INTRO
 
 The Norwegian Food Composition Database (NO21) was accessed online and provided a wealth of information for raw fish as well as fish preparations (n=232). We also identified that the scientific name is provided in the [online version](www.matvaretabellen.no/?language=e) under the "classification". The scientific name is provided below the food entry name, the fish entry in our case. In addition, LanguaL codes are provided to classify the food entry, there we could obtain information, such as edible portion (i.e., skeletal meat part, without bones, without skin), whether it is drained or not.
 
-### Getting the data
+### 2. 1. Identifying and obtaining the food composition tables and databases
+
+### 2.2. Importing the data
 
 The Norwegian FCDB and the ICCAAP code dataset are publicly available and can be accessed here:
 
@@ -36,11 +38,11 @@ The Norwegian FCDB and the ICCAAP code dataset are publicly available and can be
 
 The dataset containing information about fishery product ICS codes was shared internally by the FAO for this project and hence shall remain private. Similarly, the Scientific names of the fish included in the Norwegian FCDB were shared internally through personal communication with the data owners. The dataset contained the fish id., fish description, scientific name and reference for most of the fish products in the NO21.
 
-### Tidying the data
+### 2.3. Data cleaning and standardisation
 
 Before renaming the variables in the Norwegian FCDB,a detailed characterisation of the food components of interest was needed for allocating the correct Tagnames.
 
-#### The identification of food components
+#### 2.3.2. Renaming variable names: Food components definition and re-naming
 
 Information on the food components and their description can be found [here](www.matportalen.no/verktoy/the_norwegian_food_composition_table/about_the_table_values).
 
@@ -74,21 +76,27 @@ Variables that were calculated:
 -   SOP: sum of proximate - Not included.
 -   Energy (see below)
 
-#### Renaming variables
+Fatty Acids were renamed following the string pattern.
 
-For ISSCAAP dataset, we only renamed one variable 3A_CODE to alpha_code because R does not allow variable names that start with a numeric character.
+#### 2.3. Standardising of values <br>
 
-For the NO21, we renamed the variables following the same procedure at was done for the other FCDBs and according to the information obtained from the identification of the food components (see section above).
+Missing values which were present only in the edible portion (coded as "M") were converted into `NA`.
 
-#### Transforming variables
+#### 2.4. Standardising unit of measurement <br>
 
-We converted edible portion from percentage to a faction. Also, missing values in the edible portion (coded as "M") were converted into `NA`.
+We converted edible portion from percentage to a faction (\Eq.3). Also, missing values in the edible portion (coded as "M") were converted into `NA`.
 
-### Generating the fish composition database
+\\Eq.3: Edible portion = Edible portion (%)/100
+
+### 3. Data compilation and harmonisation
+
+###### [Generating the fish composition database]{.underline}
 
 We filtered out all the other foods reported in the Norwegian FCDB, as we were only interested in fishery products.
 
-#### Fish name and description in the Norwegian FCDB
+#### 3.4. Food name/ description standardisation and food matching
+
+###### [Fish name and description in the Norwegian FCDB]{.underline}
 
 For identification of the fish, we merged the information on the scientific name of the fish for the correct identification of each fish. To do so, we used the dataset containing the scientific name of the fish reported in the Norwegian FCDBs (`sci_no21`).
 
@@ -104,16 +112,15 @@ Additionally, fish names were identified using the FAO fisheries database and so
 
 Finally, we identified ["Stockfish"](https://en.wikipedia.org/wiki/Stockfish) as cod fish.
 
-That lead to a total of 175 fish entries with a scientific name. 
+That lead to a total of 175 fish entries with a scientific name.
 
-
-### Fishery products matching
+###### [Fishery products matching]{.underline}
 
 ---Load flow diagram---
 
 We need to match each fishery product in the NO21 to one of the 95 ICS FAOSTAT fishery products' categories. To do so, two qualities were used to help with the matching: 1) the fishery product identification based on ISSCAAP code and, 2) the processing or state of the product (E.g., fresh, raw, fried, salted, etc.).
 
-#### Fish name and description
+###### [Fish name and description]{.underline}
 
 ###### Identifying fishery products by ISSCAAP codes
 
@@ -151,7 +158,7 @@ Table 1. Fish categories regarding their processing according to FAO fish descri
 | Body oils                | Oils extracted from the fish body (excluding of liver)                                                                                                                                                                | 8              |
 | Liver oils               | Liver oils (excludes fish body oil)                                                                                                                                                                                   | 9              |
 
-#### Allocating fishery products in NO21 to one of the processing group
+##### Allocating fishery products in NO21 to one of the processing group
 
 We classified each fish-related entry according to the type of processing (table 1) (i.e., fresh fish = 1, frozen fish =2, etc.). Since there was no information in regarding fresh/frozen, we used 1=2 and 3=4, following the protocol used in the previous version of the Fishery Global NCT.
 
@@ -163,7 +170,7 @@ Then, we check that the allocations were done correctly with special attention t
 
 Step 1: Indetifing the "processing" in each fishery product \>\>\> Step 2: Allocating each fish into one of the nine groups (as per above) \>\>\> Step 3: Reviewing processing codes (product_type) \>\>\> Step 4: Fixing some inconsistencies in the group allocation \>\>\> Step 3: reviewing processing codes (product_type)
 
-#### Matching fishery products in NO21 to one of ICS FAO codes
+##### Matching fishery products in NO21 to one of ICS FAO codes
 
 To match each fishery product to its correct ICS FAO current and future code we used the combined information from the processing group (product_type) and the ISSCAAP codes. This step was quite straight forward as many reviewing and fixing steps were taking to add the correct information regarding the ISSCAAP code and the processing group.
 
@@ -180,20 +187,48 @@ Some other fish entries needed further clarification: Excluded for now:
 -   04.100 - "Cod roe, compressed, canned"
 -   04.318 - "Cod roe, canned, fried in fat" I.e., inconsistency w/ canned description
 -   Sushi
+-   "04.265" - "Fish balls, canned, drained" - As advised by the FAO team
+-   "04.079 -"Crabsticks, frozen" - As advised by the FAO team
 
-Finally, ICS SUA fishery category were allocated using the scientific name and food description (e.g., “cured”) leading to 234 fish and fishery products to be used in the NCT.
+Finally, ICS SUA fishery category were allocated using the scientific name and food description (e.g., "cured") leading to 234 fish and fishery products to be used in the NCT.
 
-#### Quality Assessment
+In total, 4 foods were missclassified: 
 
-##### Quality of the match
+```{r, eval=FALSE}
+
+#Re-allocating products in group 7 to its corresponding
+no21_fish$product_type[no21_fish$food_desc == "Scallop, boiled"] <- "6"
+no21_fish$product_type[no21_fish$food_desc == "Periwinkle, common, Norwegian"] <- "1"
+
+# "04.307", - Caviar, cod roe with mayonnaise
+# "04.323 ", - Fish burger, breaded, --> Not only the fish burger
+
+```
+
+
+#### 3.6. Dealing with missing values <br>
+
+##### 3.6.3. Back-calculating variables <br>
+
+As it has previously mentioned in this report, ASHg were not available, however ash values are necessary to calculate carbohydrates by difference. This variable was calculated at (FAO) SUA fish category. Therefore, two approaches were tested: 1) the ASHg calculated for the SOP, and 2) because we had information on analysed carbohydrates (CHOAVLg), we used the CHOAVLDg formula (**Eq.2.1**) to calculate ash (`ASHg_bydiff`) (**Eq.2.2**).
+
+Eq.2.1: Available carbohydrates by difference (CHOVALDg) = 100 - Sum of water + protein + fat + dietary fibre + alcohol + ash
+
+Eq.2.2: Ash by difference (ASHg_bydiff) = 100 - Sum of water + protein + fat + dietary fibre + alcohol + available carbohydrates
+
+### 4. Data visualisation & Quality Checks
+
+Quality Assessment
+
+#### 4.1  Quality of the match
 
 Then, given that the names and description provided allowed an straight forward matching, we have assigned the corresponding quality score of A2.
 
-##### Evaluation of the components values
+#### 4.2 Evaluation of the components values
 
 The scripts for the quality assessment is "NO21_QC.R".
 
-##### Sum of Proximat (SOP)
+##### [Sum of Proximat (SOP)]{.underline}
 
 SOP is commonly calculated to check the quality of the data . Among other compononet, ash content (`ASHg`) is needed for its calculation, however ash contetn was not reported in the NO21. Although not ideal, a proxy for ash content (`ASHg_std`) was calculated using the mineral concentration (**Eq.1.1**) and, then used to calculate the SOP (`SOP_std`) (**Eq.1.2**). In general, despite the lack of ash data, results were good, with only 14 items falling outside the FAO/ INFOOD thresholds suggested in the FAO/INFOODS Guidelines for for Checking Food Composition Data prior to the Publication of a User Table/Database[@fao/info]. Most of the falling outside the range could still be attributed to the lack of accurate data on ash concentration (i.e.,missing `ASHg`). Only one item was extremely out of the range: "04.366 - Surimi, LobNobs" which was excluded from the final selection of fishery items.
 
@@ -201,21 +236,15 @@ Eq. 1.1: Ash value (g/100 g EP) = (CA (mg) + FE (mg) + MG (mg)+ P (mg) + K (mg) 
 
 Eq.1.2: SOP = Sum of water + protein + fat + available carbohydrates + dietary fibre + alcohol + ash
 
-##### CHOAVLg
+##### [CHOAVLg]{.underline}
 
 We are comparing extracting the "unique" ISSCAAP, product_type and ICS name of each fish product with the CHOAVLg \> 0 to compare the values with similar fishery products in the Fisheries Global NCT. When doing that, we unexpectedly identified two entries that were "raw" and "frozen" with CHOAVLg \> 0, which are "Periwinkle, common, Norwegian".
 
 Additionally, "04.373 - Caviar, polar" and "04.307- Caviar, cod roe with mayonnaise" were excluded because SOP_std was higher than standard and CHOAVLg was also very high compared with other values for caviar in Fisheries Global NCT, 2022, and the source reference (114a) was not very reliable. Similarly, "04.089 - Caviar, capelin roe" was excluded due to high CHO and weak source of the value. We also excluded the entry "04.323 Fish burger, breaded, fried, with bread, cheese, sauce, fast food restaurant" because it included bread sauce ect. and it was not only the fish burger.
 
-##### ASHg
+##### [ASHg]{.underline}
 
-As it has previously mentioned in this report, ASHg were not available, however ash values are necesary to calculate carbohydrates by difference. This variable was calculated at (FAO) SUA fish category. Therefore, two approaches were tested: 1) the ASHg calculated for the SOP, and 2) because we had information on analysed carbohydrates (CHOAVLg), we used the CHOAVLDg formula (**Eq.2.1**) to calculate ash (`ASHg_bydiff`) (**Eq.2.2**).
-
-We checked the mean difference in ash content by the two methods (`ASHg_bydiff`), and calculated the carbohydrates by difference (`CHOVALDg_std`) using the former method. Finally, we evaluated the mean difference in carbohydrates by difference and the analysed carbohydrate. After, all the tests, we decided that the later method for calculating ash content (`ASHg_bydiff`) would yield more accurated results.
-
-Eq.2.1: Available carbohydrates by difference (CHOVALDg) = 100 - Sum of water + protein + fat + dietary fibre + alcohol + ash
-
-Eq.2.2: Ash by difference (ASHg_bydiff) = 100 - Sum of water + protein + fat + dietary fibre + alcohol + available carbohydrates
+We checked the mean difference in ash content by the two methods (`ASHg_bydiff`), and calculated the carbohydrates by difference (`CHOVALDg_std`) using the former method. Finally, we evaluated the mean difference in carbohydrates by difference and the analysed carbohydrate. After, all the tests, we decided that the later method for calculating ash content (`ASHg_bydiff`) would yield more accurate results.
 
 Hence,`ASHg_bydiff` values were used then to recalculate CHOVALDg at (FAO) SUA fish category in the Fisheries Global NCT, 2022.
 
@@ -229,5 +258,8 @@ Hence,`ASHg_bydiff` values were used then to recalculate CHOVALDg at (FAO) SUA f
 
 Calculating Energy: If the NO21 would be used as stand-alone FCTs, we recommend to re-calculate energy.
 
-### References: 
+### Supporting data
 
+For ISSCAAP dataset, we only renamed one variable 3A_CODE to alpha_code because R does not allow variable names that start with a numeric character.
+
+### References:

@@ -1,11 +1,35 @@
+
+################################################################################
+#                                                                              #
+#                           FAO/INFOODS                                        #
+#        Western Africa Food Composition Table (WAFCT, 2019)                   #
+#                                                                              #
+#                                                                              #
+#                                                                              #
+################################################################################
+##Run this to clean the environment
+rm(list = ls())
+
+# Library loading 
+
 library(dplyr)
 library(stringr)
+source(here::here("functions.R")) # Loading nutrition functions (change to package when ready)
 
 
+# 0) Accessing the data (for source of the data see README) - Uncomment!
+# Only need to do it the first time to obtain the raw files!
+# 
+#f <- "https://www.fao.org/fileadmin/user_upload/faoweb/2020/WAFCT_2019.xlsx"
+# 
+# download.file(f, 
+#             destfile = here::here( 'WA19', "WAFCT_2019.xlsx"),
+#             method="wininet", #use "curl" for OS X / Linux, "wininet" for Windows
+#             mode="wb")
 
 # Data Import ----
 
-wafct <- readxl::read_excel(here::here('WA19', 'INFOODS-WAFCT_2019.xlsx'), sheet = 5) %>%  #Reads the excel document and assigns the relevant sheet to an R data frame
+wafct <- readxl::read_excel(here::here('WA19', 'WAFCT_2019.xlsx'), sheet = 5) %>%  #Reads the excel document and assigns the relevant sheet to an R data frame
   mutate(source_fct = 'WA19')  #Creates the source_fct column and fills it with "WA19_FCT"
 
 
@@ -58,7 +82,7 @@ wafct <- wafct %>% #Identifies the food group number from the fdc_id, and applie
 
 wafct <- wafct %>% slice(-1) #Removes the first row (which was used for the automatic renaming, and is now not useful)
 
-
+wafct$comments <-  NA
 
 # Creating low-quality dataset ----
 
@@ -70,6 +94,7 @@ wa_meta_quality <- wafct %>% mutate_at(wa_nut,  ~case_when(
   str_detect(. , '\\[.*?\\]') ~ "low_quality", #Looking for things in square brackets to mark as low quality
   str_detect(. , 'tr') ~ "trace", #Looking for things marked as "tr" and labels them as trace
   TRUE ~ "normal_value")) #Else it marks the entry as a normal value
+
 
 # Calculating with/tidying from low quality values ----
 
@@ -85,12 +110,14 @@ wafct <- wafct %>%
          FOLSUMmcg = str_extract(FOLmcg, '(?<=\\[).*?(?=\\])'), 
          PHYTCPPD_PHYTCPPImg = str_extract(PHYTCPPmg, '(?<=\\[).*?(?=\\])'))
 
+# Changing trace values to zero
 
-#The following f(x) removes [] and changing tr w/ 0
+wafct <- TraceToZero(wafct, vars.column = wa_nut)
+
+# The following f(x) removes [] and changing tr w/ 0
 
 no_brackets_tr <- function(i){
   case_when(
-    str_detect(i, 'tr|[tr]') ~ "0",
     str_detect(i, '\\[.*?\\]')  ~ str_extract(i, '(?<=\\[).*?(?=\\])'),
     TRUE ~ i)
 }
@@ -99,24 +126,23 @@ wafct <- wafct %>%
   mutate_at(wa_nut, no_brackets_tr) #This applies the above function
 
 
-
 # Reordering variables ----
 
-wafct <- wafct %>% dplyr::relocate(food_group, .after = nutrient_data_source) %>% #This moves food_group to after nutrient_data_source
-  dplyr::relocate(source_fct, .before = fdc_id) #This moves source_fct before fdc_id
-
+wafct <- wafct %>%
+  dplyr::relocate(food_group, .after = nutrient_data_source) %>% # This moves food_group to after nutrient_data_source
+  dplyr::relocate(source_fct, .before = fdc_id) # This moves source_fct before fdc_id
 
 
 # Converting to numeric ----
 
-wafct <- wafct %>% mutate_at(vars(`Edible_factor_in_FCT`:`PHYTCPPD_PHYTCPPImg`), as.numeric) #Converts certain columns (the data columns) to numeric
+wafct <- wafct %>% mutate_at(vars(wa_nut), as.numeric) # Converts certain columns (the data columns) to numeric
 
-#Optional - check the data before saving
-glimpse(wafct)
+# Optional - check the data before saving
+# glimpse(wafct)
 
 # Data Output ----
 
-write.csv(wafct, file = here::here("Output", "WA19_FCT_FAO_Tags.csv"), 
+write.csv(wafct, file = here::here("output", "WA19_FCT_FAO_Tags.csv"), 
           row.names = FALSE) #Saves the newly-created data table to the Output folder
 
 #Run this to clean the environment

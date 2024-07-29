@@ -1,5 +1,36 @@
+## Checking the results
 
-#Original 122 columns
+## Loading data
+
+stand_fct <- readRDS(here::here("data", "FAO-fish-standardised_v1.0.0.RDS"))
+
+harmo_fct <- readRDS(here::here("data", "FAO-fish-harmonised_v1.0.0.RDS"))
+
+# Checking Beta-Carotene sources
+grep("CARTBEQmcg_std imputed", harmo_fct$comments, value = TRUE)
+
+length(harmo_fct$fdc_id[(grep("Impausible value of CARTBEQmcg_std", harmo_fct$comments))])/nrow(harmo_fct)*100
+length(harmo_fct$fdc_id[(grep("CARTBEQmcg_std calculated", harmo_fct$comments))])
+
+# Checking SOP outside the range
+
+#No. of values
+# Checkig for NA
+sum(is.na(harmo_fct$SOP_std)) 
+
+#Checking values outside of range
+#acepatable (95-105) & prefered (97-103) (FAO)
+
+upper <- 103
+lower <- 97
+sum(harmo_fct$SOP_std<lower |  harmo_fct$SOP_std > upper) 
+
+hist(as.numeric(harmo_fct$SOP_std), main = "Sum of Proximate")
+abline(v = lower, col = 2, lwd=3, lty =2)
+abline(v = upper, col = 2, lwd=3, lty =2)
+
+
+# Original 122 columns
 fao_fish <- read.csv(here::here("data", "FISHERIES-GlobalNCT_ForSharing_Feb2022.csv"))
 #fao_fish <- readxl::read_excel(here::here("data", "FAO_fish.xlsx"))
 source(here::here("Summary_Table_Production.R"))

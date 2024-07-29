@@ -209,7 +209,7 @@ Output_table[9:ncol(Output_table)] %>% str_extract_all(.,"tr|[tr]|Tr|\\[.*?\\]")
 
 glimpse(Output_table)
 
-write.csv(Output_table, file = here::here("Output", "BA13_FCT_FAO_Tags.csv"),
+write.csv(Output_table, file = here::here("output", "BA13_FCT_FAO_Tags.csv"),
           row.names = FALSE) #This writes the Output table to a csv in the projects "Output" subfolder
 
 #Run this to clean the environment

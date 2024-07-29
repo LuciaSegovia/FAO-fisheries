@@ -1,7 +1,87 @@
 
 
-#0) Loading the data 
+# 0) Loading the data ----
 #NOTE: For the images to be saved create a folder called "images"
+
+# NCT harmnonisation ----
+
+# If data is not loaded 
+#source("merging.R")
+source("merging_all.R")
+library(gt)
+library(gtExtras)
+library(ggplot2) # Visualisation
+library(tidyr) # Tidying
+
+
+
+#Total count of the no. of food entries (not only fish)
+# Harmonised per FCT
+
+fct_cover %>% ggplot(aes(source_fct)) + 
+  geom_bar() + 
+  theme_light() +
+  coord_flip() 
+
+## Figure 3 - Supplementary (updated)----
+
+# Checking fish included vs total (other food/fish) in FCTS
+
+fish_fct %>% distinct(source_fct, fdc_id) %>%            # removing duplicated items (fish)
+  group_by(source_fct) %>% count() %>% rename(Nfish = "n") %>%  # count of included foods (fish) by FCT & renaming variable
+  left_join(., fct_cover %>% group_by(source_fct) %>% count()) %>%  #adding total food items in each FCT
+  rename(Total = "n") %>%             #renaming variable
+  mutate(Nothers = Total-Nfish) %>%   # calculating other foods (excluded items)
+  pivot_longer(cols = c(Nfish, Nothers),  # combining counts variables (two variables into one (columns to rows))
+               names_to = "Foods", 
+               values_to = "counts") %>% 
+  mutate(perc = (counts/Total*100)) %>%  # calculating perc. 
+  select(!Total) %>%                    # excluding unnecessary variable
+  arrange(source_fct, Foods) %>%  
+  mutate(lab_ypos = cumsum(perc) - 0.5 * perc) %>% # generating the position of the labels
+  ggplot(aes(x = source_fct, y = perc)) +            # visualisation of variables
+  geom_col(aes(fill = Foods), position = position_stack(reverse = TRUE), width = 0.8) + # Changing colour fill, transparency and bin width
+  geom_text(aes(y = lab_ypos, label = counts, group =Foods),
+            color = "white", fontface = "bold", size = 4) +
+  # scale_fill_brewer(palette = "Dark2") +
+  scale_fill_manual(values = c( "#3D5A80", "#9B1D20")) +
+  labs(y = "", x = "") +
+  coord_flip() +
+  theme_light() +
+  # Reverse the order of a discrete-valued axis
+  scale_x_discrete(limits=rev(levels(as.factor(fish_fct$source_fct)))) +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    plot.margin = margin(15, 10, 10, 15),
+    axis.text.y = element_text(face = "bold"),
+   panel.grid = element_blank()
+)
+
+## Suppl.Figure 3 (old version) ----
+
+# Checking fish included vs total (other food/fish) in FCTS
+
+stand_fct %>% distinct(source_fct, fdc_id) %>%            # removing duplicated items (fish)
+  group_by(source_fct) %>% count() %>% rename(Nfish = "n") %>%  # count of included foods (fish) by FCT & renaming variable
+  left_join(., fct_cover %>% group_by(source_fct) %>% count()) %>%  #adding total food items in each FCT
+  rename(Total = "n") %>%             #renaming variable
+  mutate(Nothers = Total-Nfish) %>%   # calculating other foods (excluded items)
+  pivot_longer(cols = c(Nfish, Nothers),  # combining counts variables (two variables into one (columns to rows))
+               names_to = "Foods", 
+               values_to = "counts") %>% 
+  mutate(perc = (counts/Total*100)) %>%  # calculating perc. 
+  select(!Total) %>%                    # excluding unnecessary variable
+  arrange(source_fct, desc(Foods)) %>%  
+  mutate(lab_ypos = cumsum(perc) - 0.5 * perc) %>% # generating the position of the labels
+  ggplot(aes(x = source_fct, y = perc)) +            # visualisation of variables
+  geom_col(aes(fill = Foods), alpha =.7, width = 0.8) + # Changing colour fill, transparency and bin width
+  geom_text(aes(y = lab_ypos, label = counts, group =Foods),
+            color = "black", size = 4) +
+  coord_flip() +
+  theme_light()
+
+# NCT compilation ----
 
 #If data is not loaded 
 source("variable_re-calculation.R")
@@ -9,18 +89,7 @@ library(gt)
 #library(gtExtras)
 colnames(fao_fish_fct)
 
-#1) Check that we have all FCTs merged ----
-
-fao_fish_fct %>% count(source_fct)
-
-
-#Total count of the no. of food entries (not only fish)
-#Harmonised per FCT
-
-fct_cover %>% ggplot(aes(source_fct)) + 
-  geom_bar() + 
-  theme_light() +
-  coord_flip() 
+fao_fish_fct %>% distinct(fdc_id, source_fct) %>% count()
 
 # Basic piechart
 fao_fish_fct %>% count(source_fct) %>% 
@@ -28,27 +97,36 @@ fao_fish_fct %>% count(source_fct) %>%
   geom_bar(stat="identity", width=1) +
   coord_polar("y", start=0)
 
-#├ Plot (lollipop-flip) ----  
+#├ Figure 3: Plot (lollipop-flip) ----  
 #Percentage of the fish items from each FCT
 
 fao_fish_fct %>% count(source_fct) %>% 
   mutate(perc = n/sum(n)*100,
          fct_label = paste0(source_fct, " (",
                             n, ")")) %>% 
-  arrange(desc(perc)) %>% 
+  arrange(perc) %>%  # First sort by val. This sort the dataframe but NOT the factor levels
+  mutate(fct_label=factor(fct_label, levels=fct_label)) %>%   # This trick update the factor levels
 ggplot( aes(x=fct_label, y=perc)) +
-  geom_segment( aes(x=fct_label, xend=fct_label, 
-                  y=0, yend=perc), 
-                color="skyblue") +
-  geom_point( color="blue", size=4, alpha=0.6) +
+  geom_segment( aes(xend=fct_label, yend=0), 
+                #color="skyblue"
+                ) +
+  geom_point(aes(color=fct_label), size=4, # alpha=0.6
+    ) +
+  scale_colour_manual(values = c( rep("#9B1D20",2), rep("#3D5A80",7), rep("#009292", 3) )) +
+# scale_color_brewer(palette = "Dark2") +
   theme_light() +
   coord_flip() +
   theme(
+    legend.position = "none",
     panel.grid.major.y = element_blank(),
     panel.border = element_blank(),
-    axis.ticks.y = element_blank()) +
+    axis.ticks.y = element_blank(),
+ #   panel.grid = element_blank(),
+    axis.text.y = element_text(face = "bold", size =12),
+    axis.text.x = element_text(size =12),
+    plot.margin = margin(15, 10, 10, 15)) +
   xlab("") +
-  ylab("%")
+  ylab("%") 
 
 #├ List of components that we are interested in: ----
  
@@ -112,13 +190,16 @@ fao_fish_fct %>% select(components) %>% vis_miss(sort_miss = T)
 
 #├ Plot (heat map): % of missing values per FCT ----
 
-fao_fish_fct %>% select(components, source_fct) %>% 
+#fao_fish_fct 
+fct_cover %>% #select(components, source_fct) %>% 
+# select(aa, source_fct) %>% 
+    select(x[120:130], source_fct) %>% 
 #  rename_all(., ~components_longname) %>%  
   naniar::gg_miss_fct(., fct = source_fct) +
  # geom_rect(aes(xmin = 0.5, ymin = -Inf, xmax = 1.5, ymax =Inf), #AU19
   #          linetype = "dotted",alpha = 0, colour = "red", size = 2.5) +
-  geom_rect(aes(xmin = 0.5, ymin = 3.5, xmax = Inf, ymax =5.5), #DHA & EPA
-            linetype = "dotted",alpha = 0, colour = "red", size = 2.5) +
+  # geom_rect(aes(xmin = 0.5, ymin = 3.5, xmax = Inf, ymax =5.5), #DHA & EPA
+    #        linetype = "dotted",alpha = 0, colour = "red", size = 2.5) +
     labs( x= "", y= "",
         title = "Data Gaps: Percentage (%) of missing values of selected components in each FCT")
 

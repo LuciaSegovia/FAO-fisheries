@@ -192,7 +192,7 @@ recalculated_results_table %>%
   # mutate_if(is.numeric, round, digits = 2) %>%
   write.csv(.,
             file = here::here(
-              "Output",
+              "output",
               paste0("Fisheries-Global-NCT_", Sys.Date(), ".csv")
             ),
             row.names = FALSE

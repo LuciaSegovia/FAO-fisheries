@@ -4,14 +4,50 @@
 library(tidyverse)
 
 # Restore the NO21 fish object
-NO_FCT_Data <- readRDS(file = "NO21/fish_NO21.rds")
+#data.df <- readRDS(file = "NO21/fish_NO21.rds")
 
-names(NO_FCT_Data)
+# Loading the data
+
+data.df <- read.csv(here::here("output", "NO21_FCT_FAO_Tags.csv"))
+
+names(data.df)
+str(data.df)
+
+# Checking food component variables
+
+names(data.df)[4:60]
+n1 <- 4
+n2 <- 60
+
+# Converting as numeric
+data.df[, c(n1:n2)] <- apply(data.df[, c(n1:n2)], 2, as.numeric)
+
+# Checking food groups
+
+unique(data.df$foodgroup)
+
+#  
+## Checking proximate values by foodgroup ----
+## Change the name of the food component to check
+
+nv <- "WATERg"
+
+
+ggplot(data.df, aes(x = !!sym(nv), fill = foodgroup)) +
+  geom_density() +
+  facet_wrap(~foodgroup)
+
 
 #04.208, 04.313
 
-subset(NO_FCT_Data, fdc_id == "04.313", 
+subset(data.df, fdc_id == "04.313", 
        select=c(food_desc, WATERg, CHOAVLg))
+
+
+data.df$product_desc <- recode(data.df$product_type, "1" = "raw", 
+                               "2" = "frozen whole", "3" = "fresh fillet", 
+                               "4" = "frozen fillet", 
+       "5" = "cured", "6" = "canned", "7" = "preparations")
 
 # Sum of Proximate (SOP)----
 
@@ -76,6 +112,43 @@ subset(NO_FCT_Data, !is.na(ics_faostat_sua_english_description) &
     # mean_ASHg = mean(as.numeric(ASHg), na.rm = T),
     mean_CHOAVLDFg =mean(as.numeric(CHOAVLg), na.rm =T))
 
+
+
+ggplot(data.df, aes(x = CHOAVLg, y = product_type)) +
+  geom_boxplot() 
+
+## Absence of components: in Fish ----
+## Fibre, Carbohydrates (in non-processed)
+
+compo <- "CHOAVLg"
+
+ggplot(data.df, aes(x = !!sym(compo), fill = product_desc)) +
+  geom_density() +
+  facet_wrap(~product_desc)
+
+data.df$food_desc[data.df$product_type == "1"  & as.numeric(data.df$CHOAVLg)>0]
+
+
+## Group specific sensible ranges: Fish ----
+## Protein ~ 30 g/100 g EP 
+
+ggplot(data.df, aes(x = PROCNTg, fill = product_desc)) +
+  geom_density() +
+  geom_vline(aes(xintercept=30), # Max for fish (INFOODS Guidelines)
+             color="blue", linetype="dashed", size=1) +
+  facet_wrap(~product_desc)
+
+
+data.df$food_desc[as.numeric(data.df$FIBTGg)>0 ]
+data.df$product_type[as.numeric(data.df$FIBTGg)>0 ]
+
+
+NO_FCT_Data$food_desc[NO_FCT_Data$product_type == 1 & NO_FCT_Data$CHOAVLg>1]
+NO_FCT_Data$scientific_name[NO_FCT_Data$product_type == 1 & NO_FCT_Data$CHOAVLg>1]
+
+NO_FCT_Data$food_desc[NO_FCT_Data$product_type == 3]
+
+
 #Checking those with higher CHOAVLg
 #Pelagic fish, cured
 #Cephalopods, preparations nei
@@ -87,7 +160,7 @@ subset(NO_FCT_Data, as.numeric(CHOAVLg) > 10 &
        select = c(fdc_id, food_desc,CHOAVLg ))
 
 #visuaL
-hist(as.numeric(NO_FCT_Data$CHOAVLg[NO_FCT_Data$ics_faostat_sua_english_description == "Demersal fish, preparations nei"]),
+hist(data.df$CHOAVLg[data.df$ics_faostat_sua_english_description == "Demersal fish, preparations nei"],
      main = "Fish with high CHOAVLg",
      xlab = "Carbohydrates (g/100g)")
 

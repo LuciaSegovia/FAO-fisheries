@@ -121,7 +121,7 @@ AU19_FCT_FAO_Tags %>% select(-c(20,30, 35:45, 48:61, 63:65, 67, 70, 73:75, #Visu
 
 glimpse(Output_table) #checking variables before saving
 
-write.csv(Output_table, file = here::here("Output", "AU19_FCT_FAO_Tags.csv"), #Saves the table as a csv called "AU19_FCT_FAO_Tags"
+write.csv(Output_table, file = here::here("output", "AU19_FCT_FAO_Tags.csv"), #Saves the table as a csv called "AU19_FCT_FAO_Tags"
           row.names = FALSE)
 
 rm(list = ls())

@@ -1,0 +1,611 @@
+---
+title: "Untitled"
+author: "Segovia de la Revilla, Lucia"
+date: "2023-09-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+#0) Loading the data ----
+#NOTE: For the images to be saved create a folder called "images"
+
+# Loading libraries
+library(gt)
+library(dplyr)
+library(tidyr)
+library(gtExtras)
+library(ggplot2)
+library(ggridges)
+library(cowplot)
+library(ggpubr)
+library(patchwork)
+
+# Loading data
+stand_fct <- readRDS(here::here("data", "FAO-fish-standardised-updated_v1.1.0.RDS"))
+
+harmo_fct <- readRDS(here::here("data", "FAO-fish-harmonised_v1.1.0.RDS"))
+
+```
+
+
+Values used in the paper: For total items in the library: load `merging_all.R` and `nrow(fct_cover)`. 
+
+Others:
+
+```{r}
+
+# Count of unique food entries in the fish and other aquatic products NCTs
+stand_fct %>% distinct(fdc_id, source_fct) %>% count()
+# Number of food entries per cat. and range (w/duplicates)
+table(stand_fct$ics_faostat_sua_english_description)
+mean(table(stand_fct$ics_faostat_sua_english_description))
+min(table(stand_fct$ics_faostat_sua_english_description))
+max(table(stand_fct$ics_faostat_sua_english_description))
+
+# Number of food entries per FCT & percentage (w/duplicates)
+stand_fct %>% count(source_fct) %>% 
+  mutate(perc = round(n/sum(n)*100)) %>% 
+  arrange(desc(n))
+
+```
+
+```{r}
+
+#├ Figure 3: Plot (lollipop-flip) ----  
+#Percentage of the fish items from each FCT
+
+stand_fct %>% count(source_fct) %>% 
+  mutate(perc = n/sum(n)*100,
+         fct_label = paste0(source_fct, " (",
+                            n, ")")) %>% 
+  arrange(perc) %>%  # First sort by val. This sort the dataframe but NOT the factor levels
+  mutate(fct_label=factor(fct_label, levels=fct_label)) %>%   # This trick update the factor levels
+ggplot( aes(x=fct_label, y=perc, label = paste0(round(perc,1), "%"))) +
+  # Bars length
+  geom_segment( aes(xend=fct_label, yend=0)) +
+  # Colour specific points
+  geom_point(aes(color=fct_label), size=4, # alpha=0.6
+    ) +
+  scale_colour_manual(values = c( rep("#9B1D20",2), rep("#3D5A80",7), rep("#009292", 3) )) +
+  geom_text(nudge_y = 1.2) +
+# scale_color_brewer(palette = "Dark2") +
+  theme_light() +
+  coord_flip() +
+  theme(
+    legend.position = "none",
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+ #   panel.grid = element_blank(),
+    axis.text.y = element_text(face = "bold", size =12),
+    axis.text.x = element_text(size =12),
+    plot.margin = margin(15, 10, 10, 15)) +
+  xlab("") +
+  ylab("%") 
+
+
+```
+
+
+# Missing values
+
+Checking those that were combined with the nutri_combiner().
+
+```{r}
+
+# VITB6
+compo <- "VITB6_mg_standardised equals to VITB6_mg"
+compo <- "VITB6_mg_standardised equals to VITB6Cmg"
+compo <- "VITB6_mg_standardised equals to VITB6Amg"
+# THIA
+compo <- "THIAmg_standardised equals to THIAmg"
+compo <- "THIAmg_standardised equals to THIAHCLmg"
+# FAT
+compo <- "FAT_g_standardised equals to FATg"
+compo <- "FAT_g_standardised equals to FAT_g"
+compo <- "FAT_g_standardised equals to FATCEg"
+# CARTBEQ
+compo <-  "CARTBEQmcg_std imputed with CARTBEQmcg"
+#CHOAVLDF
+compo <-  "CHOAVLDFg_standardised assumed zero"
+
+
+# Checking components
+#unique(grep(compo, harmo_fct$comments, value = TRUE))
+length(grep(compo, harmo_fct$comments, value = TRUE))/nrow(harmo_fct)*100
+length(grep(compo, harmo_fct$comments, value = TRUE))
+
+length(harmo_fct$fdc_id[(grep("Impausible value of CARTBEQmcg_std", harmo_fct$comments))])/nrow(harmo_fct)*100
+length(harmo_fct$fdc_id[(grep("CARTBEQmcg_std calculated", harmo_fct$comments))])
+#unique(grep("CARTBEQmcg_std imputed", harmo_fct$comments, value = TRUE))
+length(grep("CARTBEQmcg_std imputed with CARTBEQmcg", harmo_fct$comments, value = TRUE))
+
+#FIBRE
+sum(!is.na(harmo_fct$FIBTGg))
+#ALC
+sum(is.na(harmo_fct$ALCg))
+
+
+```
+
+
+
+
+```{r missing-values, echo=FALSE, width = 12, height = 7}
+
+#├ Plot (heat map):  % of missing values  per FCT ----
+
+# Proximate
+proxi <- c( "WATERg", "PROCNTg", "FATg", "CHOAVLDFg", "FIBTGg", "ALCg", "ASHg")
+
+
+vit <- c("VITB6Amg", "NIAmg",  "VITB12mcg",   "VITA_RAEmcg",  "CARTBmcg",
+         "CARTBEQmcg", "RETOLmcg")
+
+mine <- c( "FEmg", "CAmg", "MGmg", "ZNmg", "Pmg", "Kmg", "CUmg","SEmcg","IDmcg")
+
+components <- list(proxi, vit, mine)
+
+fig3 <- list()
+
+for(i in 1:length(components)){
+  
+fig3[[i]] <- stand_fct %>% 
+  select(components[[i]], source_fct) %>% 
+  naniar::gg_miss_fct(., fct = source_fct) +
+    labs( x= "", y= "") +
+  theme(
+    #text = element_text(size = 18),
+   legend.position = "none",
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+ #   panel.grid = element_blank(),
+    axis.text.y = element_text(face = "italic", size =11.5),
+    axis.text.x = element_text(size =14),
+    plot.margin = margin(15, 10, 10, 15)) 
+
+if(i<3){
+  
+  fig3[[i]] <- fig3[[i]] +
+    theme(axis.text.x = element_blank())
+  
+} else {
+  
+  fig3[[i]] <- fig3[[i]]
+  
+}
+
+#Perfect for ppt (width = 12, height = 7)
+# ggsave(here::here("images", 
+#            paste0("missing-values-standardised-fct_", i,"_", Sys.Date(), ".png")), 
+#        width = 12, height = 7)
+#
+}
+
+fig4A <- fig3
+
+#(fig3[[1]] / fig3[[2]] / fig3[[3]]) / plot_layout(axes = "collect_y")
+
+#(fig4a[[1]] / fig4a[[2]] / fig4a[[3]]) + theme(plot.margin = unit(c(0,0,0,0), "pt"))
+
+#(fig4a[[1]] + theme(plot.margin = unit(c(0,0,0,0), "pt"))) / (fig4a[[2]]  + theme(plot.margin = unit(c(0,0,0,0), "pt"))) / (fig4a[[3]] #+ theme(plot.margin = unit(c(0,0,0,0), "pt"))) 
+
+
+#G1 + plot_spacer() + G2 + plot_layout(widths = c(4, -1.1 ,4.5),guides = "collect") & theme(legend.position = "top")
+
+#(fig4a[[1]] + fig4a[[2]] + fig4a[[3]]) + plot_layout(heights = c(4, 4, 4 ))
+
+
+fig4a <- fig3[[1]] / plot_spacer() / fig3[[2]]/ plot_spacer() / fig3[[3]] + plot_layout(heights = c(4,-2, 4, -2, 4 ))
+
+print(fig4a)
+
+# Extract the legend. Returns a gtable
+leg <- get_legend(stand_fct %>% 
+  select(components[[i]], source_fct) %>% 
+  naniar::gg_miss_fct(., fct = source_fct) +
+    labs( x= "", y= "") +
+  theme(
+    #text = element_text(size = 18),
+   legend.position = "top",
+   legend.title=element_blank(),
+   legend.spacing.x  = unit(0, "pt"),
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+ #   panel.grid = element_blank(),
+    axis.text.y = element_text(face = "italic", size =12),
+    axis.text.x = element_text(size =16),
+    legend.margin = margin(1, 1, 1, 1),
+    legend.box.margin = margin(1, 1, 1, 1)))
+
+# Convert to a ggplot and print
+leg <- as_ggplot(leg)
+
+print(leg)
+
+# Saving the multi-plot
+# ggsave(here::here("images", paste0("missing-values-standardised-fct-all_", Sys.Date(), ".png")), 
+#                          width = 12, height = 7)
+
+```
+
+
+A) column is for standardised (non-harmonisation)
+
+
+
+```{r}
+
+
+#plot_grid(fig3[[1]], fig3[[2]], fig3[[3]], nrow = 3)
+#
+#ggarrange(fig3[[1]], fig3[[2]], fig3[[3]], common.legend = TRUE, nrow = 1)
+
+
+#((fig4a[[1]] + theme(plot.margin = unit(c(0,0,0,0), "pt"))) / (fig4a[[2]]  + theme(plot.margin #= unit(c(0,0,0,0), "pt"))) / (fig3[[3]] + theme(plot.margin = unit(c(0,0,0,0), "pt")))) # + #plot_annotation(tag_levels = 'a')
+
+#fig4a[[1]] / plot_spacer() / fig4a[[2]]/ plot_spacer() / fig3[[3]] + plot_layout(heights = #c(4,-1.5, 4, -1.5, 4 )) + 
+#  plot_annotation(title = "a",
+#                  theme = theme(plot.title = element_text(size = 23)))
+
+
+```
+
+
+
+```{r missing-values, echo=FALSE, width = 12, height = 7}
+
+#├ Plot (heat map):  % of missing values  per FCT ----
+
+# Proximate
+proxi <- c("WATERg", "PROCNTg", "FAT_g_standardised", "CHOAVLDFg_standardised", 
+           "FIBTGg_std", "ALCg", "ASHg")
+
+vit <- c("VITB6_mg_standardised", "NIAmg_std",  "VITB12mcg",   "VITA_RAEmcg_std",  "CARTBmcg",
+         "CARTBEQmcg_std", "RETOLmcg")
+
+mine <- c( "FEmg", "CAmg", "MGmg", "ZNmg", "Pmg", "Kmg", "CUmg","SEmcg","IDmcg")
+
+components <- list(proxi, vit, mine)
+
+#leg <- c("none", "bottom", "none")
+#leg <- c("top", "none", "none")
+
+fig3 <- list()
+
+for(i in 1:length(components)){
+  
+  fig3[[i]] <- harmo_fct %>% 
+  select(components[[i]], source_fct) %>% 
+  naniar::gg_miss_fct(., fct = source_fct) +
+    labs( x= "", y= "") +
+     scale_y_discrete(position = "right") +
+  theme(
+    legend.position = "none",
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+ #   panel.grid = element_blank(),
+    axis.text.y = element_text(face = "italic", size =11.5),
+    axis.text.x = element_text(size =14),
+    plot.margin = margin(15, 10, 10, 15)) 
+
+  if(i<3){
+    
+      fig3[[i]] <- fig3[[i]] +
+    theme(axis.text.x = element_blank())
+  
+  } else{
+  
+       fig3[[i]] <- fig3[[i]]
+   
+}
+
+#Perfect for ppt (width = 12, height = 7)
+# ggsave(here::here("images", 
+#            paste0("missing-values-harmonised-fct_", i,"_", Sys.Date(), ".png")), 
+#        width = 12, height = 7)
+
+}
+
+fig4B <- fig3
+
+#fig4a[[1]] / plot_spacer() / fig4a[[2]]/ plot_spacer() / fig3[[3]] + plot_layout(heights = c(4,-1.5, 4, -1.5, 4 )) + 
+#  plot_annotation(title = "a",
+#                  theme = theme(plot.title = element_text(size = 23)))
+#
+# plot_layout(guides = 'collect')
+# 
+# 
+
+fig4b <- fig3[[1]] / plot_spacer() / fig3[[2]]/ plot_spacer() / fig3[[3]] + plot_layout(heights = c(4,-2, 4, -2, 4 )) 
+
+print(fig4b)
+
+# fig4b + plot_layout(guides = 'collect')
+
+
+# fig3[[1]] / plot_spacer() / fig3[[2]]/ plot_spacer() / fig3[[3]] + plot_layout(heights = c(4,-1.5, 4, # -1.5, 4 )) 
+
+# Saving the multi-plot
+# ggsave(here::here("images", paste0("missing-values-harmonised-fct-all_", Sys.Date(), ".png")), 
+#                          width = 12, height = 7)
+
+```
+
+
+
+```{r}
+
+#
+# (fig4A[[1]] / plot_spacer() / fig4A[[2]]/ plot_spacer() / fig4A[[3]] + plot_layout(heights = c(4,-1.5, # 4, -1.5, 4 )) + plot_layout(guides = 'collect') &
+#  theme(legend.position='top')) + (fig4B[[1]] / plot_spacer() / fig4B[[2]]/ plot_spacer() / fig4B[[3]] # + plot_layout(heights = c(4,-1.5, 4, -1.5, 4 )) + plot_layout(guides = 'collect') &
+#  theme(legend.position='top')) + plot_layout(guides = 'collect', ncol = 2)  &
+#  theme(legend.position='top')
+#
+#
+# fig4A[[1]] / plot_spacer()  +  fig4B[[1]] / plot_spacer()  +
+# 
+# fig4A[[2]] / plot_spacer() + fig4B[[2]]/ plot_spacer()  + 
+#  
+# fig4A[[3]] + fig4B[[3]] +  
+#    plot_layout(heights = c(4,4,-1.5,-1.5,4,4,-1.5,-1.5,4,4)) +
+#   plot_layout(guides = 'collect', ncol = 2) & theme(legend.position='top') 
+#  
+# ((fig4A[[1]] | fig4B[[1]])/ plot_spacer() + plot_layout(heights =c(2,2, -1.5), guides = 'collect')& # # theme(legend.position='top') )/
+#  
+# ((fig4A[[2]] |  fig4B[[2]]) / plot_spacer() + plot_layout(heights =c(2,2,-1.5), guides = 'collect') & # theme(legend.position='none') ) /
+#   
+# (fig4A[[3]] | fig4B[[3]] +  plot_layout(guides = 'collect') & theme(legend.position='none'))
+#  
+# 
+# 
+# ((fig4A[[1]] | fig4B[[1]]) + plot_layout(guides = 'collect')& theme(legend.position='top'))/
+#  
+# ((fig4A[[2]] |  fig4B[[2]])  + plot_layout(guides = 'collect') & theme(legend.position='none') ) /
+#   
+# ((fig4A[[3]] | fig4B[[3]]) +  plot_layout(guides = 'collect') & theme(legend.position='none'))
+# 
+# 
+#  (fig4a-fig4b) +  plot_layout(guides = 'collect') & theme(legend.position='top')
+#  
+#  wrap_plots(leg / (fig4a | fig4b))
+#  
+#  patchwork::free(leg) / (fig4a | fig4b)
+ 
+ 
+leg/(fig4a-fig4b) + plot_layout(heights = c(1,2)) + 
+  plot_annotation(tag_levels = list(c("", "a",rep("", 2), "b", rep("", 2)))) & 
+    theme(plot.tag.position = c(0, 1),
+        plot.tag = element_text(size = 18, hjust = 0, vjust = -2))
+
+
+```
+
+
+
+```{r}
+
+#TO-DO:
+#1) Change the names of the "standardised variables by adding a * to note that those were 
+# recalculated/standardised. So name are similar in length.
+#2) Find a way to add the legend maybe as an image to the mix or something along those lines. 
+#3) Try smaller font for food comoponents 
+
+
+fig3[[i]] <- harmo_fct %>% 
+  select(components[[i]], source_fct) %>% 
+#  rename_all(., ~components_longname) %>%  
+  naniar::gg_miss_fct(., fct = source_fct) +
+ # geom_rect(aes(xmin = 0.5, ymin = -Inf, xmax = 1.5, ymax =Inf), #AU19
+  #          linetype = "dotted",alpha = 0, colour = "red", size = 2.5) +
+    labs( x= "", y= ""
+        #title = "Data Gaps: Percentage (%) of missing values of food components per FCT"
+        ) +
+  
+#  scale_fill_continuous(name = "Missing values (%)") +
+  scale_y_discrete(position = "right") +
+#  guides(fill=guide_legend(title="Missing values (%)")) +
+  theme(text = element_text(size = 23),
+      #  legend.position=leg[i],
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+ #   panel.grid = element_blank(),
+    axis.text.y = element_text(face = "italic"),
+    axis.text.x=element_blank(),
+  #  axis.text.x = element_text(size =12),
+    plot.margin = margin(15, 10, 10, 15)) 
+
+ fig3[[i]] <- data.df %>% 
+  select(components[[i]], source_fct) %>% 
+#  rename_all(., ~components_longname) %>%  
+  naniar::gg_miss_fct(., fct = source_fct) +
+ # geom_rect(aes(xmin = 0.5, ymin = -Inf, xmax = 1.5, ymax =Inf), #AU19
+  #          linetype = "dotted",alpha = 0, colour = "red", size = 2.5) +
+    labs( x= "", y= ""
+        #title = "Data Gaps: Percentage (%) of missing values of food components per FCT"
+        ) +
+#  scale_fill_continuous(name = "Missing values (%)") +
+      scale_y_discrete(position = "right") +
+    guides(fill=guide_legend(title="Missing values (%)")) +
+      theme(text = element_text(size = 23),
+        legend.position=leg[i],
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank(),
+ #   panel.grid = element_blank(),
+    axis.text.y = element_text(face = "italic"),
+  #  axis.text.x=element_blank(),
+  #  axis.text.x = element_text(size =12),
+    plot.margin = margin(15, 10, 10, 15)) 
+
+
+
+```
+
+```{r}
+
+# Checking the categories for the sOP
+
+harmo_fct %>% 
+  mutate(SOP_cat =  ifelse(SOPg_standardised < 103, "prefered" , 
+                       ifelse(SOPg_standardised >=105, "outside", "aceptable" ))) %>% 
+  group_by(SOP_cat) %>% summarise(mean_SOP = mean(SOPg_standardised, na.rm = TRUE))
+
+
+
+```
+
+
+
+```{r}
+
+
+my_color <- c("preferred" = "grey","aceptable" = "lightgoldenrod2", "outside" = "red4")
+
+
+plota <- harmo_fct %>% 
+  mutate(SOP_cat =  ifelse(SOPg_standardised < 103, "preferred" , 
+                       ifelse(SOPg_standardised >=105, "outside", "aceptable" ))) %>% 
+  ggplot(aes(SOPg_standardised, fill = SOP_cat)) + 
+  # geom_histogram(bins = 50) +
+  geom_bar() +
+  scale_x_binned() +
+   scale_fill_manual("SOP range", breaks=c("preferred", "aceptable", "outside"), 
+                     values=my_color ) +
+  labs(x="Sum of proximate \n (g/100g EP)", y = "")  +
+ theme_minimal() +
+  theme(legend.position = c(0.65,0.85),
+        legend.box.background = element_rect(fill="white"),
+#    panel.grid.major.y = element_blank(),
+  #  panel.border = element_blank(),
+   # axis.ticks.y = element_blank(),
+  #  panel.grid = element_blank(),
+ #   axis.text.y = element_text(face = "italic", size =12),
+   # axis.text.x = element_text(size =12),
+    plot.margin = margin(15, 10, 10, 15)) 
+ 
+print(plota)
+#Perfect for ppt (width = 12, height = 7)
+# ggsave(here::here("images", 
+#            paste0("hist-SOPb", "_", Sys.Date(), ".png")), 
+#        width = 12, height = 7)
+
+```
+
+
+
+
+
+```{r}
+
+
+my_color <- c("#DC8665", "#138086", "#534666", "#CD7672", "#EEB462")
+
+
+plot2b <- harmo_fct %>% filter(grepl("fresh|frozen|raw", fish_prep)) %>% 
+  filter(grepl("fish", ics_faostat_sua_english_description)) %>% 
+  mutate(fish_prep = ifelse(fish_prep == "frozen, fillets", "frozen fillets", fish_prep), 
+         fish_prep = stringr::str_to_title(fish_prep)) %>% 
+  ggplot(aes(PROCNTg, after_stat(count), fill = fish_prep)) + 
+  geom_density(alpha = 0.9) +
+  scale_fill_manual(values = my_color) +
+  facet_wrap(~fish_prep, ncol = 1) +
+ # labs(x="g of protein per 100g of fresh fish (EP)", y = "")  +
+  labs(x="Protein in fresh fish \n (g/100g EP)", y = "")  +
+ theme_minimal() +
+  theme(legend.position = "none") 
+ 
+plot1b <- harmo_fct %>% filter(grepl("fresh|frozen|raw", fish_prep)) %>% 
+  filter(grepl("fish", ics_faostat_sua_english_description)) %>% 
+  ggplot(aes(PROCNTg, fish_prep, fill = fish_prep)) + 
+  geom_density_ridges(alpha = 0.8) +
+  scale_fill_manual(values = my_color) +
+  theme_ridges() + 
+  labs(x="", y = "")  +
+  theme(legend.position = "none")
+
+print(plot2b)
+
+#Perfect for ppt (width = 12, height = 7)
+# ggsave(here::here("images", 
+#            paste0("hist-SOPb", "_", Sys.Date(), ".png")), 
+#        width = 12, height = 7)
+
+```
+
+
+
+```{r}
+
+(plota-plot2b)  + 
+  plot_annotation(tag_levels = "a")
+
+#Perfect for ppt (width = 12, height = 7)
+ ggsave(here::here("images", 
+            paste0("Figure5.png")), 
+        width = 12, height = 7)
+
+
+```
+
+
+
+```{r}
+
+library(tidyverse)
+library(ggridges)
+library(patchwork)
+#library(camcorder)
+
+spam_long <- spam %>% 
+  select(-crl.tot) %>% 
+  pivot_longer(1:make) %>% 
+  mutate(
+    value_log = log10(value),
+    yesno = if_else(yesno == "y", "Spam", "Not\nSpam")
+    ) %>% 
+  filter(value_log > -Inf)
+  
+f1 <- "DIN Condensed"
+f2 <- "Outfit"
+
+pal <- RColorBrewer::brewer.pal(3, "Pastel2") %>% 
+  colorspace::darken(., 0.5)
+
+ggplot(fct_cover) +
+  geom_density_ridges(aes(ASHg, y = food_group, fill = food_group, color = after_scale(colorspace::darken(fill, 0.5))), quantile_lines = TRUE, quantiles = 2, jittered_points = TRUE, scale = 1, rel_min_height = .01, point_shape = "|", point_size = 3, size = 0.25, position = position_points_jitter(height = 0, yoffset = -0.2)) +
+  scale_fill_brewer(palette = "Pastel2") +
+  coord_cartesian(clip = "off") +
+  facet_wrap(vars(food_group), ncol = 1, scales = "free_x") +
+  labs(
+    title = "Spam E-mail",
+    subtitle = "Occurrences of '!', '$', 'make', 'money', and '000' as a percent of total number of words\nin 4601 emails, of which 1813 were identified as spam",
+    caption = "Source: UCI Repository Of Machine Learning Databases · Graphic: Georgios Karamanis"
+  ) +
+  theme_minimal(base_family = f1) +
+  theme(
+    legend.position = "none",
+    plot.background = element_rect(fill = "grey99", color = NA),
+    axis.title = element_blank(),
+    axis.text = element_text(size = 12),
+    axis.text.y = element_text(color = pal),
+    axis.text.x = element_text(color = "grey50"),
+    panel.grid.major.y = element_blank(),
+    strip.text = element_text(size = 12, family = f2, face = "bold"),
+    plot.margin = margin(10, 30, 10, 30),
+    plot.title = element_text(family = f2, face = "bold", size = 16),
+    plot.title.position = "plot",
+    plot.subtitle = element_text(family = f2, margin = margin(0, 0, 20, 0)),
+    plot.caption = element_text(family = f2, margin = margin(20, 0, 0, 0))
+  )
+
+
+
+```
+

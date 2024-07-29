@@ -1,6 +1,32 @@
-library(tidyverse)
-source("functions.R")
 
+################################################################################
+#                                                                              #
+#                                                                              #
+#                        McCance Widdowsons                                    #
+#      Composition of Foods Integrated Dataset (CoFID, 2021 )                  #
+#                                                                              #
+#                                                                              #
+#                                                                              #
+################################################################################
+
+##Run this to clean the environment
+rm(list = ls())
+
+# Library loading 
+
+library(dplyr)
+library(stringr)
+source(here::here("functions.R")) # Loading nutrition functions (change to package when ready)
+
+# 0) Accessing the data (for source of the data see README) - Uncomment!
+# Only need to do it the first time to obtain the raw files!
+# 
+#f <- "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/971018/McCance_Widdowsons_Composition_of_Foods_Integrated_Dataset_2021..xlsx"
+# 
+# download.file(f, 
+#             destfile = here::here( 'WA19', "WAFCT_2019.xlsx"),
+#             method="wininet", #use "curl" for OS X / Linux, "wininet" for Windows
+#             mode="wb")
 
 # Data Import ----
 
@@ -80,7 +106,7 @@ uk21_colnames <- c("fdc_id", #Creates a list of column names following thew FAO 
                    "NTg", 
                    "PROCNTg",
                    "FAT_g",
-                   "CHOAVLg",
+                   "CHOAVLMg",
                    "ENERCkcal", 
                    "ENERCkJ", 
                    "STARCHMg", 
@@ -220,7 +246,7 @@ Output_table <- Output_table %>%
 
 # Saving the output
 
-write.csv(Output_table, file = here::here("Output", "UK21_FCT_FAO_Tags.csv"),
+write.csv(Output_table, file = here::here("output", "UK21_FCT_FAO_Tags.csv"),
           row.names = FALSE) #Saves the newly-created data table to the Output folder
 
 #Run this to clean the environment
