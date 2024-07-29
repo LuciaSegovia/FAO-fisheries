@@ -49,9 +49,11 @@ data/*
 *.accdb
 US19/SR-LEG_DB/
 *.xlsx
+LS06/
 
 #Outputs (e.g., documents, images, plots, etc.)
 *.docx
 *.pdf
 images/
 *.csv
+output/*.zip
