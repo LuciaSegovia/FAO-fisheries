@@ -41,6 +41,17 @@ In summary, the framework consists in six steps (Figure 1).
 Note: Those FCTs that are publicly available and accessible will be automatically standardised and merged, for the others, the user would need to get raw data into the folder. See the table below for more information on data provenance. 
 
 
+**Supporting data**
+
+Some data sets are needed to replicate the fish and other aquatic products subset of the [Global NCT for FAO Supply and Utilization Accounts (SUAs)](https://www.fao.org/faostat/en/#data/SUA). Some of which provide formatting structure and other data provided by expert inputs and consultation.
+
+|File name | Description | Reference |
+|---|---|---|
+|List_SUA_ICS_fish.xlsx| This file provides information about the SUA codes, and their corresponding ISSCAAP codes. | REF|
+|FISHERIES-GlobalNCT_ForSharing_Feb2022.csv| This file provides the information for the food matching of all FCTs to their correspondict SUA with the exception of the NO21| REF|
+
+ 
+
 This repository has a data dependencies which are not available here. 
 
 

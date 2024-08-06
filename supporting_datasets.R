@@ -15,7 +15,7 @@ library(dplyr) # For data cleaning (wrangling)
 library(stringr) # For string manipulation (data cleaning)
 
 ## Food matching: Fish and Fisheries ----
-# Preparing data frame that was prepared for the Global FCT (only fish)
+# Preparing data frame for replicating the Global FCT (only fish)
 # contains information for each fish on ISSCAAP code, ICS FAOSTAT fish codes, and
 # alpha-three code, when available. 
 
@@ -91,9 +91,9 @@ ics_code_file %>% filter(str_detect(fdc_id, "^0"))
 
 ics_code_file <- ics_code_file %>% 
   mutate(fdc_id = ifelse(source_fct == "KE18",
-                         str_replace(fdc_id, "^0", ""), fdc_id))  %>%  #removing the 0 of the fdc_id
-  mutate(fdc_id = ifelse(source_fct == "US19",
-                         NDB_number , fdc_id)) #using NDB_number as the fdc_id
+                         str_replace(fdc_id, "^0", ""), fdc_id))  # %>%  #removing the 0 of the fdc_id
+ # mutate(fdc_id = ifelse(source_fct == "US19",
+  #                       NDB_number , fdc_id)) #using NDB_number as the fdc_id
 
 #checking the US19 data from the FAO Global Fisheries data
 ics_code_file %>% filter(source_fct == "US19")
@@ -153,6 +153,8 @@ ics_code_file <- subset(ics_code_file, !(ICS.FAOSTAT.SUA.Current.Code %in% c("15
 saveRDS(ics_code_file, file = here::here("data", "ics-code_fish-code.RDS"))
 
 
+## Edible portion: Fish and Fisheries ----
+
 # Loading the data
 
 #Original 122 columns
@@ -172,7 +174,7 @@ which(fao_fish[1, c(1:122)] == "")
 
 fao_fish[1, c(1:30)]
 
-#Renaming variables
+# Renaming variables
 
 n <- which(fao_fish[1, c(1:122)] == "")
 
@@ -201,7 +203,8 @@ edible_ics <- unique(fao_fish[n, c(1,27)])
 
 edible_ics[,1] <- paste("SUMMARY ROW -", edible_ics[,1])
 
-# Save Edible coefficient to be used" to a R file - for formatting.
+#├ Save data set ----
+# "Edible coefficient to be used" to a R file - for formatting.
 saveRDS(edible_ics[c(2:96),], 
         file = "data/edible_coefficient.rds")
 
@@ -232,7 +235,6 @@ fao_fish[,5][fao_fish[,1] == "1557"] <- 15570
 unique(fao_fish[!is.na(fao_fish$`Food description`),c(1:6)])
 n <- nrow(unique(fao_fish[!is.na(fao_fish$`Food description`),c(1:6)]))
 unique(fao_fish[!is.na(fao_fish$`Food description`),c(1:6)])[c(3:n),]
-
 
 # Save ICS info  to a R file - for formatting.
 saveRDS(unique(fao_fish[!is.na(fao_fish$`Food description`),c(1:6)])[c(3:n),], 

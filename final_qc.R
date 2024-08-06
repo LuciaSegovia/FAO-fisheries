@@ -1,5 +1,8 @@
 ## Checking the results
 
+# Loading packages
+library(dplyr)
+
 ## Loading data
 
 stand_fct <- readRDS(here::here("data", "FAO-fish-standardised_v1.0.0.RDS"))
@@ -59,6 +62,11 @@ names(fao_fish)[1:6] <- fao_fish[2, c(1:6)]
 names(fao_fish)[(7:122)[!c(7:122) %in% n]] <- fao_fish[1, c(7:122)[!c(7:122) %in% n]]
 names(fao_fish)
 
+fao_fish <- fao_fish %>% select(1, Source, fcd_id_old,  fdc_id, `Food description`, `Scientific name`,
+                    36, `3-alpha code`) %>%
+  filter(fdc_id != "") 
+
+names(fao_fish) <- gsub(" ", ".", fao_fish[2,])
 
 # Checking duplicates - in original file 
 
@@ -70,7 +78,7 @@ fao_fish[3:nrow(fao_fish), c(1, 33)] %>%
   arrange(desc(n))
 
 
-# fao_fish <- readxl::read_excel(here::here("data", "FAO_fish.xlsx"))
+fao_fish <- readxl::read_excel(here::here("data", "FAO_fish.xlsx"))
 
 
 

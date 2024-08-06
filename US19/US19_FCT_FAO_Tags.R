@@ -4,6 +4,8 @@ source(here::here("functions.R"))
 
 
 # Data Import ----
+# Food ids (Get form https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip)
+US19_Food_Convert <- read.csv(here::here("US19", "sr_legacy_food.csv"))
 
 #legacy_database <- odbcConnectAccess2007("../../FAO/UoN-FAO/US19/SR-Leg_DB/SR_Legacy.accdb") #provides a link to the access database. Due to the database being too big to store on git, different locations have been used depending on who is running the code
 legacy_database <- odbcConnectAccess2007(here::here("US19", "SR-LEG_DB", "SR_Legacy.accdb")) #alternate database location
@@ -122,7 +124,6 @@ names(Composite_Table)[n1:n2]
 Output_table <- Composite_Table %>%
   select(-c("Com_Name", "ManufacName", "Ref_Desc")) %>% #These three columns are removed
   rename( #Some columns are renamed - e.g. NDB_No is renamed to fdc_id
-    fdc_id = "NDB_No",
     food_desc = "Long_Desc",
     food_group = "foodgroup",
     scientific_name = "Sci_Name",
@@ -177,7 +178,6 @@ Output_table <- Composite_Table %>%
     THIAmg = "Thiamin (mg)",
     RIBFmg = "Riboflavin (mg)", 
     NIAmg = "Niacin (mg)", 
-   # TRPg = "Tryptophan (g)", 
     VITB6Amg = "Vitamin B-6 (mg)",
     #phyticacid_in_mg = "PHYTCPPD"), - not present
     FOLmcg = "Folate, total (µg)", 
@@ -188,36 +188,19 @@ Output_table <- Composite_Table %>%
     SUGARg = "Sugars, total (g)",
     F22D6N3g = "22:6 n-3 (DHA) (g)", 
     F20D5N3g = "20:5 n-3 (EPA) (g)") %>%
-  mutate( #TRPmg =  TRPg*1000, #convert TRP from g to mg
+  mutate( 
           comment = NA) %>%   
-  #CARTBEQmcg_std_creator() %>%
-  #  rename(CARTBEQmcg = "CARTBEQmcg_std") %>%   #Changing name of re-calculated variable for making VITA f(x) to work)
-  # VITAmcg_std_creator() %>%   #Re-calcuating VITAmcg
-  relocate(food_group, .after = food_desc) %>% #Some columns are relocated for easier reading
+  relocate(food_group, .after = food_desc) %>% # Some columns are relocated for easier reading
   relocate(source_fct, .after = food_group) %>%
   relocate(nutrient_data_source, .after = source_fct) %>%
   relocate(WATERg, .after = CHO_Factor) %>%
   relocate(ENERCkcal, .after = WATERg) %>%
   relocate(ENERCkJ, .after = ENERCkcal) %>%
-  relocate(Edible_factor_in_FCT, .after = Refuse)
+  relocate(Edible_factor_in_FCT, .after = Refuse)  %>% 
+  # Adding the "id" for using in the Global NCT
+  left_join(., US19_Food_Convert, by =c( "NDB_No" = "NDB_number")) %>% 
+  relocate(fdc_id , .before = NDB_No)
 
-#Re-calcuating VITAmcg from Vit.A (IU)
-#Checking if RETOLmcg or CARTBmcg are available
-#which(is.na(Output_table$VITAmcg_std) & !is.na(Output_table$VITAmcg_std))
-#which(is.na(Output_table$VITAmcg_std))
-
-#Checking where VITAmcg could be re-caluclated form VIT A (IU)
-#n <- which(is.na(Output_table$VITAmcg_std) & !is.na(Output_table$`Vitamin A, IU (IU)`))
-
-#Recalculating - FAO/ INFOODS Guidelines for Converting Units, Denominators and Expressions Version 1.0
-#suggested converting when no other info is available and "assuming" all VITA is retinol.
-#Creating VITAmcg so VITAmcg_std is not over-written by the use of VITAmcg_std_creator() in compilation
-# Output_table$VITAmcg <-  NA
-# Output_table[n, "VITAmcg"] <- Output_table[n, "Vitamin A, IU (IU)"]*0.3
-# 
-# #Adding info into comment variable
-# Output_table$comment <-  NA
-# Output_table[n, "comment"] <- "VITAmcg was recalculated from Vitamin A, IU (IU)*03. See documentation for more information"
 
 #Optional - check data before saving
 glimpse(Output_table)
@@ -225,4 +208,4 @@ glimpse(Output_table)
 # Data Output ----
 
 write.csv(Output_table, file = here::here("output", "US19_FCT_FAO_Tags.csv"), row.names = FALSE)  #Saves the newly-created data table to the Output folder 
-rm(list = ls())  #Removes all the environment variables - tidies up RStudio 
+rm(list = ls())  # Removes all the environment variables - tidies up RStudio 

@@ -4,7 +4,7 @@
 # library(tidyverse)
 
 # Only running if first time running the scripts.
-# source(here::here("supporting-datasets.R")) 
+# source(here::here("supporting_datasets.R")) 
 
 source(here::here("QC.R"))
 source(here::here("functions.R"))
@@ -12,9 +12,9 @@ source(here::here("functions.R"))
 # source(here::here("summary_table_functions.R")) # TODO I have created a separate file with my functions for testing. Once all other functions are tested then we can merge.
 # source(here::here("Summarised_Row_Recalculator.R"))
 
-# Reading formatting R file
+# Reading formatting R file (from "supporting_datasets.R”)
 ics <- readRDS(file = "data/fao-ics-desc.rds")
-edible_ics <- readRDS(file = "data/edible_coefficient.rds")
+edible_ics <- readRDS(file = "data/edible_coefficient.rds") # edible portion (lines 156-204)
 fisheries <- read.csv(here::here("data", "FISHERIES-GlobalNCT_ForSharing_Feb2022.csv"), encoding = "UTF-8")
 
 dim(fao_fish_fct)
