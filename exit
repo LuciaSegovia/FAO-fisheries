@@ -1,0 +1,428 @@
+[33mcommit 82d4ab956c09f7f687cc797707162972f2b5290d[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m)[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Fri Aug 23 09:47:29 2024 +0100
+
+    updating functions
+
+[33mcommit e7975cb18a8787b427547f5b47491e5d30734926[m[33m ([m[1;31morigin/main[m[33m)[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Tue Aug 6 17:15:01 2024 +0100
+
+    updating fdc.id in US19 and cleaning scripts
+
+[33mcommit fd3bb3aa4ae2d701b2b77e0e8d314cb2c3cd5776[m
+Merge: 18beee7 d9e6f47
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Mon Jul 29 15:30:06 2024 +0100
+
+    updating main
+
+[33mcommit 18beee737b6fc7640c340ea301050f92367db04b[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Mon Jul 29 15:28:31 2024 +0100
+
+    updating ignore
+
+[33mcommit d9e6f472b11f2ef3f37a257857ea3a570d466c5e[m[33m ([m[1;31morigin/paper[m[33m, [m[1;32mpaper[m[33m)[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Fri Jul 26 17:19:58 2024 +0100
+
+    added data provenance
+
+[33mcommit 6e87c436d9398d1eb6075cbc4f52268c71240dd8[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Fri Jul 26 16:21:54 2024 +0100
+
+    stop tracking files and added to ignore
+
+[33mcommit 5902c75fc6403a3f0bfd5b910e14faa0b42b395b[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Fri Jul 26 16:11:27 2024 +0100
+
+    trying removing items
+
+[33mcommit a4738075638ef4ec30709dacd336beeab7f2adc0[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Fri Jul 26 16:06:40 2024 +0100
+
+    updated the README
+
+[33mcommit cda0a41746d367fad7910175b493e3dfa2640c81[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Fri Jul 26 14:50:55 2024 +0100
+
+    amended README
+
+[33mcommit d47c6fdfe0b02766d09b4822336215b13323944f[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Wed Apr 24 18:03:30 2024 +0100
+
+    finalised v6.0.0 of manuscript visuals
+
+[33mcommit 23a676339fb81f98ef13a4a9c48cd56a79adf537[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Fri Apr 19 17:41:51 2024 +0100
+
+    caroten function not working, playing with visuals
+
+[33mcommit 0bf2ab5047c4b1251d00178332fd535e96635867[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Tue Feb 27 15:06:07 2024 +0000
+
+    improved standard for aa
+
+[33mcommit d666e5030a0b8deb3f186223e1b14267dc586f8b[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Mon Jan 15 17:06:49 2024 +0000
+
+    finalised NO21 harmonisation and combined with merging_all script
+
+[33mcommit 529ef32b536ee48fe43a18d6cc8c65c32dcf9269[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Wed Dec 20 19:54:54 2023 +0000
+
+    updated fig3 and fig4
+
+[33mcommit 8a560d23909c8dfd403922ab4ec899c8f03d38c1[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Tue Dec 19 10:49:16 2023 +0000
+
+    UPDATED:modified tracetozero and update WA19
+
+[33mcommit b91e2616fe0a08b5df4b52b8846480efe503f0a6[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Tue Dec 5 18:15:03 2023 +0000
+
+    added nutri_combiner function
+
+[33mcommit ec3d4ee91496195d7edaeebe6d442b3840d82c7a[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Fri Nov 17 17:43:18 2023 +0000
+
+    fix-typo vege food group
+
+[33mcommit f1673d4ff5f210e1832f8e2eebee86cd2daf1f25[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Fri Oct 13 18:41:44 2023 +0100
+
+    added corrected food groups in no21 and added qc visualisation
+
+[33mcommit c1157fc7af620061d3a02aa23f63ccc15b17c30b[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Tue Oct 10 18:22:12 2023 +0100
+
+    generalising ISSCAAP allocation for scientific names
+
+[33mcommit b347a1f48652c4c503131a177fad2b17783d12ce[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Wed Oct 4 18:48:28 2023 +0100
+
+    loading-script
+
+[33mcommit d034302e2d6e5de42c333f460d058a710b9c3ba3[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Fri Sep 29 17:36:47 2023 +0100
+
+    arranging QC & viz scripts
+
+[33mcommit 3c4e543508e31dbcb20076333a24eefbb5e88ff2[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Mon Sep 18 18:20:07 2023 +0100
+
+    NO21 harmonising script and visuals for presenation
+
+[33mcommit 36b27edc6d9cb006b9b0177730754069a0dba695[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Fri Sep 15 17:33:54 2023 +0100
+
+    added NO21 documentation and final steps
+
+[33mcommit 6c35c5ce5e7146e5049804bcadd1d6c456b23bfd[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Thu Sep 14 17:01:26 2023 +0100
+
+    getting graphs
+
+[33mcommit 292c257b32942ac51cec1607df2dc5bc00fcd7c7[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Thu Sep 14 15:16:58 2023 +0100
+
+    testing project
+
+[33mcommit 2f961a0ca94dd3b9701127b1cd47683b47609fe2[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Tue Sep 12 18:09:30 2023 +0100
+
+    getting the merged file updated
+
+[33mcommit ba627277eba9fe0b6ca77273e8ff3d9c6a0f704d[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Mon Sep 11 18:25:20 2023 +0100
+
+    standardising NO21 for paper
+
+[33mcommit 4ee8c57ceaa759469ba531e7d76171a2beb37f4e[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Fri Aug 11 18:29:33 2023 +0100
+
+    modifing NO21 script for paper example1
+
+[33mcommit 70e52aca01b5bdc82e6f1e5af90d7c47358ffc4c[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Fri Aug 11 14:09:32 2023 +0100
+
+    merged with briefing
+
+[33mcommit 30a97b2e0070e92483d9932d7a6c602c53b6af4e[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Wed Aug 2 09:50:19 2023 +0100
+
+    saving results before branching
+
+[33mcommit 32777d3ef2efb945c48e5f707631500eb194be8f[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Tue Jul 25 18:14:32 2023 +0100
+
+    standardised fat improved loop
+
+[33mcommit 035f8b8855c75fc204547093c562f830b2cf0001[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Tue Jul 25 17:08:34 2023 +0100
+
+    recovered the recalculation update
+
+[33mcommit e765956da03a682c3f31cd92d7f3f52780378456[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Tue Jul 25 17:06:26 2023 +0100
+
+    recovered template
+
+[33mcommit cd87ae3b007c1031b0f380b449ff5389ef96572b[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Tue Jul 25 13:55:44 2023 +0100
+
+    changed variable comment for comments
+
+[33mcommit a533cfc6722d88d876c86fefe980d02c4bb799d5[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Tue Jul 25 13:39:50 2023 +0100
+
+    updated renv
+
+[33mcommit 312212e0df5b2c4b8ee76666549a6f92227a37b9[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Tue Jul 25 13:36:55 2023 +0100
+
+    improved in17 script for repro and almost finished template and docu
+
+[33mcommit 0ab1c4bfd48b65b2a00f133a45d2a400a7fb144e[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Tue Jul 25 11:35:45 2023 +0100
+
+    updated script according to uon_fao repo
+
+[33mcommit ade0b1edb0e24acdbc6f566ad4f685cffe0bcfd1[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Mon Jul 24 18:06:31 2023 +0100
+
+    added template for paper
+
+[33mcommit 463dc828a57af5e6e6883360d0b6055e98b51ef3[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Wed Jul 12 09:21:46 2023 +0100
+
+    updating renv lock
+
+[33mcommit 60013d370b5a82137a5e7c92b033331c27818018[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Wed Apr 26 16:19:11 2023 +0100
+
+    checking dependencies
+
+[33mcommit bc565f5f9bbf547f1de958de34f80b31b22a72a5[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Tue Feb 21 12:22:16 2023 +0000
+
+    trying to reduce data dependencies
+
+[33mcommit 6c07b159ea1a3431d1fcfa5ff954d422f7cc8a02[m
+Author: Lucia Segovia De La Revilla <lshls9@lshtm.ac.uk>
+Date:   Tue Feb 21 11:45:46 2023 +0000
+
+    cleaning scripts for table generation
+
+[33mcommit a74450d850526bb71be32573faa44892ce7b29cc[m
+Author: LuciaSegovia <lsegoviarevilla@gmail.com>
+Date:   Tue Nov 29 11:34:50 2022 +0000
+
+    first draft of documentation
+
+[33mcommit 56347e7a3f40cd84c09b7191c96be65746199d95[m
+Author: LuciaSegovia <lsegoviarevilla@gmail.com>
+Date:   Tue Nov 15 18:41:38 2022 +0000
+
+    added new visuals for the report
+
+[33mcommit 406e9692bd87133185812e1dfe1c99aeac2d31c3[m
+Author: LuciaSegovia <lsegoviarevilla@gmail.com>
+Date:   Fri Nov 11 18:11:47 2022 +0000
+
+    added new visualisation
+
+[33mcommit fee1880737cb59322272efeb0c93fadbcba2e624[m
+Author: LuciaSegovia <lsegoviarevilla@gmail.com>
+Date:   Wed Nov 9 19:16:04 2022 +0000
+
+    adding more sides to the presentation
+
+[33mcommit d7fad49cb872363734e86a3a6aec41bf0f891919[m
+Author: LuciaSegovia <lsegoviarevilla@gmail.com>
+Date:   Tue Nov 8 18:56:04 2022 +0000
+
+    reviewing documentation
+
+[33mcommit 9f669fe5be2f2d200ff77aabfcef5360e712756e[m
+Author: LuciaSegovia <lsegoviarevilla@gmail.com>
+Date:   Fri Nov 4 14:18:32 2022 +0000
+
+    installed all packages needed and fixed some Rmd document dependicies
+
+[33mcommit 193176c4b415ee7f628b559155b091b42f1e6979[m
+Merge: a382e05 d1b88aa
+Author: LuciaSegovia <lsegoviarevilla@gmail.com>
+Date:   Tue Nov 1 18:30:20 2022 +0000
+
+    Merge branch 'main' of https://github.com/LuciaSegovia/FAO-fisheries into main
+
+[33mcommit a382e0554d6471cfcdd1ac8a9096a01b6302bdaa[m
+Author: LuciaSegovia <lsegoviarevilla@gmail.com>
+Date:   Tue Nov 1 18:30:11 2022 +0000
+
+    fixed bug in  with JA15 and generate a table to subtitute gt()
+
+[33mcommit d1b88aaa6e8a2cf58de06d3c0ecb8f9e723b1520[m
+Merge: bdd5a93 968316c
+Author: Liberty Mlambo <certifieddzvoti@gmail.com>
+Date:   Mon Oct 31 14:57:26 2022 +0000
+
+    Merge pull request #6 from LuciaSegovia/4-reviewing-functions
+    
+    4 reviewing functions and adding documentation see #5
+
+[33mcommit 968316c66560777b6778b1b5377650637d950c31[m
+Author: Liberty Mlambo <certifieddzvoti@gmail.com>
+Date:   Mon Oct 31 14:54:00 2022 +0000
+
+    Added documentation to `CARTBEQmcg_std_to_zero`
+
+[33mcommit b8ef18e5f71df668b6011e6a27c410624842f6cb[m
+Author: Liberty Mlambo <certifieddzvoti@gmail.com>
+Date:   Mon Oct 31 14:50:50 2022 +0000
+
+    Added documentation to `CARTBEQmcg_std_imputer_with_CARTBEQmcg`
+
+[33mcommit ac5d94275045ec49ae461c4f06c80ccdae4927aa[m
+Author: Liberty Mlambo <certifieddzvoti@gmail.com>
+Date:   Mon Oct 31 14:46:42 2022 +0000
+
+    Deleted CARTBEQmcg_std_back_calculator_VITAmcg which is deprecated
+
+[33mcommit b9fe67e2e4b3ce6cede8ab603015a6e92fb143c5[m
+Author: Liberty Mlambo <certifieddzvoti@gmail.com>
+Date:   Mon Oct 31 14:45:33 2022 +0000
+
+    Added documentation to CARTBEQmcg_std_back_calculator_VITA_RAEmcg
+
+[33mcommit 8f753c0f0a4cfcdf40d5ba7b11491a714f010fcd[m
+Author: Liberty Mlambo <certifieddzvoti@gmail.com>
+Date:   Mon Oct 31 14:36:22 2022 +0000
+
+    Updated documentation of `RETOLmcg_Recalculator`
+
+[33mcommit 6a5d1993827f56e23e876068ae49c9a018fee76f[m
+Author: Liberty Mlambo <certifieddzvoti@gmail.com>
+Date:   Mon Oct 31 14:31:14 2022 +0000
+
+    Added documentation to `RETOLmcg_Recalculator `
+
+[33mcommit f1534cd7d7d1c964ccda311cc96e33c057ad1fda[m
+Author: Liberty Mlambo <certifieddzvoti@gmail.com>
+Date:   Mon Oct 31 14:19:37 2022 +0000
+
+    Added documentation to `nia_conversion_creator`
+
+[33mcommit 7e8f05063b1bad89135e75e405b107123994ed6d[m
+Author: Liberty Mlambo <certifieddzvoti@gmail.com>
+Date:   Mon Oct 31 13:59:18 2022 +0000
+
+    Added documentation to `CHOAVLDFg_std_creator`
+
+[33mcommit a1bea069e54cbbb9a4db2dbd524d50479a076e01[m
+Author: Liberty Mlambo <certifieddzvoti@gmail.com>
+Date:   Mon Oct 31 13:48:50 2022 +0000
+
+    Added documentation to THIAmg_std_creator
+
+[33mcommit b9c256e660c053e872734ea9a26348ab32860570[m
+Author: Liberty Mlambo <certifieddzvoti@gmail.com>
+Date:   Mon Oct 31 13:35:35 2022 +0000
+
+    Added documentation to `VITAmcg_std_creator` function
+
+[33mcommit 1a0a895dd99313fea224276042ef0ec11ace556f[m
+Author: Liberty Mlambo <certifieddzvoti@gmail.com>
+Date:   Mon Oct 31 13:19:58 2022 +0000
+
+    Added documentation to VITA_RAEmcg_std_creator
+
+[33mcommit aad99a8823fe12c9d4b72b67df0fa352ae96d03a[m
+Author: Liberty Mlambo <certifieddzvoti@gmail.com>
+Date:   Mon Oct 31 13:08:46 2022 +0000
+
+    Added documentation to `CARTBEQmcg_std_creator `
+
+[33mcommit f84a6ce32013cc4b245f740de57e449b734b4c95[m
+Author: Liberty Mlambo <certifieddzvoti@gmail.com>
+Date:   Mon Oct 31 12:46:54 2022 +0000
+
+    Added documentation to the `SOP_std_creator` i.e. Sum of Proximates
+
+[33mcommit 0066007370538ceb405822eb13286ac543679927[m
+Author: Liberty Mlambo <certifieddzvoti@gmail.com>
+Date:   Mon Oct 31 11:41:38 2022 +0000
+
+    Removed competed TODO tag in check_column function
+
+[33mcommit 8d025a98f4bb734da8e1f85d64ebca002efb11aa[m
+Author: Liberty Mlambo <certifieddzvoti@gmail.com>
+Date:   Mon Oct 31 11:35:15 2022 +0000
+
+    Refactored all function to implement the 'check column' method
+
+[33mcommit 9b025bb42ed6e99367f88cc26e49331d07b3a71b[m
+Author: Liberty Mlambo <certifieddzvoti@gmail.com>
+Date:   Mon Oct 31 11:32:52 2022 +0000
+
+    Added documentation to 'check_columns` function
+
+[33mcommit b4ef36ce04aff71a6fac2706797d64d090fe1aa7[m
+Author: Liberty Mlambo <certifieddzvoti@gmail.com>
+Date:   Mon Oct 31 11:08:40 2022 +0000
+
+    Updates `.gitignore` to add data folder
+
+[33mcommit 771f53966d50c416bd68f4e0321e08fd2fa319b2[m
+Author: Liberty Mlambo <certifieddzvoti@gmail.com>
+Date:   Mon Oct 31 11:04:07 2022 +0000
+
+    renv initialisation
+    
+    renv handles dependencies by introducing a `renv.lock` file freezing all package dependencies and versions.
+
+[33mcommit 96113a652d75bd94ebc9ab283df6e59d24ccd955[m
+Author: Liberty Mlambo <certifieddzvoti@gmail.com>
+Date:   Mon Oct 31 10:49:15 2022 +0000
+
+    Update .gitignore
+    
+    To include exception for empty data folder.
