@@ -9,7 +9,7 @@
 
 
 ##Run this to clean the environment
-rm(list = ls())
+#rm(list = ls())
 
 
 # Loading libraries
@@ -26,13 +26,13 @@ source(here::here("functions.R")) # Loading nutrition functions (change to packa
 # f <- "https://www.matportalen.no/verktoy/the_norwegian_food_composition_table/article43472.ece/BINARY/The%20Norwegian%20Food%20Composition%20Table%202022%20(xlsx)"
 # 
 # download.file(f,  # the location where is downloaded from
-#              destfile = here::here('NO21', 
+#              destfile = here::here('NO21',
 #                                    "NorwegianFCT.xlsx"), # the location where is stored in your terminal
 #             method="wininet", # use "curl" for OS X / Linux, "wininet" for Windows
 #             mode="wb")
-# 
-## cleaning scientific names
-# source(here::here("NO21", "NO21_scientific-names.R"))
+
+# cleaning scientific names
+#source(here::here("NO21", "NO21_scientific-names.R"))
 
 # 1. Data Import ----
 
@@ -317,5 +317,5 @@ data.df %>%
   write.csv(., file = here::here("output", "NO21_FCT_FAO_Tags.csv"),
             row.names = FALSE)
 
-# Removing object// Cleaning environment
-rm(list = ls())
+# Removing object// Cleaning environment - do so if running the script on its own
+#rm(list = ls())

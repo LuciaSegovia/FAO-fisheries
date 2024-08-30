@@ -1,13 +1,35 @@
 
+#Required packages - please ensure they're installed before running. Installation can be done by uncommenting the relevant line below and running that line.
+
+#install.packages("here")
+#install.packages("gt")
+#install.packages("stringr")
+#install.packages("purrr")
+#install.packages("readr")
+#install.packages("measurements")
+#install.packages("visdat")
+#install.packages("readxl")
+#install.packages("janitor")
+
+
 # tictoc::tic("total")
 
 # library(tidyverse)
 
-# Only running if first time running the scripts.
-# source(here::here("supporting_datasets.R")) 
+#This should allow the file save location to be changed should the user wish to, as long as the file format remains the same.
+supporting_datasets_savefilename <- readLines("supporting_datasets.R") #Reads in file
+supporting_datasets_savefilename <- supporting_datasets_savefilename[! supporting_datasets_savefilename %in% ""] #Removes blanks
+supporting_datasets_savefilename <- supporting_datasets_savefilename[length(supporting_datasets_savefilename)] #Finds last non-blank row
+supporting_datasets_savefilename <- strsplit(supporting_datasets_savefilename, "\"", fixed = T)[[1]][2] #Extracts the correct portion of it
+
+if(!file.exists(supporting_datasets_savefilename)){ #Checks if the final file of this script is present - if it isn't, runs it. 
+  source(here::here("supporting_datasets.R"))
+}
 
 source(here::here("QC.R"))
 source(here::here("functions.R"))
+
+print("here 1")
 
 # source(here::here("summary_table_functions.R")) # TODO I have created a separate file with my functions for testing. Once all other functions are tested then we can merge.
 # source(here::here("Summarised_Row_Recalculator.R"))
@@ -110,6 +132,9 @@ results_table <- Group_Summariser(df1, "ICS.FAOSTAT.SUA.Current.Code", sep_row =
 
 # Checking nrow() - Should be true - only adding 1 row or 2 row if: sep_row = T
 nrow(df1) == (nrow(results_table) - (2 * 95))
+
+print("here 2")
+
 
 dim(results_table)
 names(results_table)

@@ -2,9 +2,11 @@
 
 #QC 
 library(gt)
+library(tidyr)
+library(ggplot2)
 #If data is not loaded 
 source("merging_all.R") #original fct
-#source("missing.R") #added missing
+source("missing.R") #added missing
 
 ## Checking Ash by difference  ----
 
@@ -15,7 +17,7 @@ proxi <- c( "WATERg", "PROCNTg",  "FATg",  "CHOAVLg", "FIBTGg", "ALCg", "ASHg" )
 # Converting them into numeric
 fct_cover[, proxi] <- apply(fct_cover[, proxi], 2, as.numeric)
 
-# Creating a dataset for comparisson (only when Ash & CHO were analysed)
+# Creating a dataset for comparison (only when Ash & CHO were analysed)
 ## Realised that there were some cases that proximate (realised some analysed values were 
 # not accurated) 
 # Removed those with SOP below acceptable range.
@@ -51,12 +53,28 @@ plot(datadf$CHOAVLg, datadf$CHOAVLDFg)
 qqplot(datadf$CHOAVLg, datadf$CHOAVLDFg)
 cor(datadf$CHOAVLg, datadf$CHOAVLDFg)
 
-subset(datadf, ASHDFg>40 & ASHg<40) %>%  View()
-subset(datadf, SOP<95 |SOP>105) %>%  View()
+subset(datadf, ASHDFg>40 & ASHg<40)# %>%  View()
+subset(datadf, SOP<95 |SOP>105)# %>%  View()
 
 
 
 #1) Checking the fisheries dataset
+
+fao_fish_fct <- readRDS(here::here("data", "FAO-fish-harmonised_nomissing_v1.1.0.RDS"))
+
+#adding in quality values, by finding the last created/edited file (file has consecuttive date-based naming)
+
+fish_quality_files <- list.files("data/", pattern = "fish-NO21_*", recursive=TRUE, full.names=TRUE)
+fish_quality_folders <- dirname(fish_quality_files)
+lastfile <- tapply(fish_quality_files, fish_quality_folders, function(v) v[which.max(file.mtime(v))])
+
+fish_NO21_quality <- readRDS(lastfile) %>% select("ics_faostat_sua_english_description", "fdc_id", "ICS.FAOSTAT.SUA.Current.Code", "quality")
+
+fao_fish_fct <- left_join(fao_fish_fct, fish_NO21_quality,
+                          by = c("fdc_id" , 
+                                 "ICS.FAOSTAT.SUA.Current.Code", "ics_faostat_sua_english_description"))
+
+#This is done because the qc step requires the 'quality' column to be present as a backup value.
 
 dim(fao_fish_fct)
 names(fao_fish_fct)
@@ -66,7 +84,7 @@ fao_fish_fct %>%
 
 # Checking n of fish per category
 
-fao_fish_fct %>% count(fao_fish_fct) %>% 
+fao_fish_fct %>% count(fish_type) %>% 
   arrange(desc(n))
 
 # Checking n of fish per category
@@ -126,28 +144,28 @@ fao_fish_fct %>% filter(is.na(NIAmg)) %>% count(source_fct)
 fao_fish_fct %>% filter(is.na(TRPmg)) %>% count(source_fct)
 fao_fish_fct %>% filter(is.na(NIAEQmg)) %>% count(source_fct)
 
-fao_fish_fct %>% filter(is.na(NIAmg_std)) %>% count(source_fct)
+fao_fish_fct %>% filter(is.na(NIAmg_combined)) %>% count(source_fct)
 
 #Checking variability in the values
 
 #Overall
-hist(as.numeric(fao_fish_fct$NIAmg_std))
-quantile(as.numeric(fao_fish_fct$NIAmg_std), na.rm = T)
+hist(as.numeric(fao_fish_fct$NIAmg_combined))
+quantile(as.numeric(fao_fish_fct$NIAmg_combined), na.rm = T)
 
 #By FCTs
-fao_fish_fct %>% ggplot(aes(as.numeric(NIAmg_std), source_fct)) +
+fao_fish_fct %>% ggplot(aes(as.numeric(NIAmg_combined), source_fct)) +
   geom_boxplot()
 
 #Checking high end values
-fao_fish_fct %>% filter(as.numeric(NIAmg_std) >40) %>% 
-  select(source_fct, fdc_id, food_desc, WATERg, NIAmg_std)
+fao_fish_fct %>% filter(as.numeric(NIAmg_combined) >40) %>% 
+  select(source_fct, fdc_id, food_desc, WATERg, NIAmg_combined)
 
 #By fish type
-fao_fish_fct %>% ggplot(aes(as.numeric(NIAmg_std), fish_type)) +
+fao_fish_fct %>% ggplot(aes(as.numeric(NIAmg_combined), fish_type)) +
   geom_boxplot()
 
 #By fish preparation
-fao_fish_fct %>% ggplot(aes(as.numeric(NIAmg_std), fish_prep)) +
+fao_fish_fct %>% ggplot(aes(as.numeric(NIAmg_combined), fish_prep)) +
   geom_boxplot()
 
 #├├ Extreme values ----
@@ -157,23 +175,23 @@ fao_fish_fct %>% ggplot(aes(as.numeric(NIAmg_std), fish_prep)) +
 x1 <- fao_fish_fct %>% 
   group_by(ics_faostat_sua_english_description) %>% 
   summarise(mean_water = mean(as.numeric(WATERg), na.rm = T),
-            mean_nia = mean(as.numeric(NIAmg_std), na.rm = T),
-            sd_nia = sd(as.numeric(NIAmg_std), na.rm = T)) %>% 
+            mean_nia = mean(as.numeric(NIAmg_combined), na.rm = T),
+            sd_nia = sd(as.numeric(NIAmg_combined), na.rm = T)) %>% 
   arrange(desc(mean_nia))
 
 #Checking values with the highest mean  
 fao_fish_fct %>% 
   filter(ics_faostat_sua_english_description == "Other pelagic fish, cured") %>% 
-  select(source_fct, fdc_id, food_desc, WATERg, NIAmg_std)
+  select(source_fct, fdc_id, food_desc, WATERg, NIAmg_combined)
 
 #Checking skipjack values for different preparations
 fao_fish_fct %>% 
   filter(str_detect(food_desc, "skipjack ")) %>% 
-  select(source_fct, fdc_id, food_desc, WATERg, NIAmg_std)
+  select(source_fct, fdc_id, food_desc, WATERg, NIAmg_combined)
 
 
 #Checking high end values
-fao_fish_fct %>% filter(as.numeric(NIAmg_std) >20) %>% 
+fao_fish_fct %>% filter(as.numeric(NIAmg_combined) >20) %>% 
   select(source_fct, fdc_id, food_desc, WATERg, NIAmg)
 
 #Calculating mean concentration by ics w/o "extreme values"
@@ -181,8 +199,8 @@ x2 <- fao_fish_fct %>%
   filter(as.numeric(NIAmg) < 40) %>% 
   group_by(ics_faostat_sua_english_description) %>% 
   summarise(mean_water = mean(as.numeric(WATERg), na.rm = T),
-            mean_nia = mean(as.numeric(NIAmg_std), na.rm = T),
-            sd_nia = sd(as.numeric(NIAmg_std), na.rm = T)) %>% 
+            mean_nia = mean(as.numeric(NIAmg_combined), na.rm = T),
+            sd_nia = sd(as.numeric(NIAmg_combined), na.rm = T)) %>% 
   arrange(desc(mean_nia))
 
 #Checking data w/ and w/o outliers
@@ -294,28 +312,28 @@ which(!is.na(fao_fish_fct$VITB6_mg))
 which(is.na(fao_fish_fct$VITB6Amg) & is.na(fao_fish_fct$VITB6Cmg))
 
 
-fao_fish_fct %>% filter(!is.na(VITB6_mg_standardised)) %>% 
+fao_fish_fct %>% filter(!is.na(VITB6_mg_combined)) %>% 
   count(source_fct)
 
-#[VITB6_mg_standardised] bc is calculated we do not need
+#[VITB6_mg_combined] bc is calculated we do not need
 #to check for bracket/trace as it was done before converting
 
 #Checking variability in the values (total)
 
-hist(as.numeric(fao_fish_fct$VITB6_mg_standardised))
+hist(as.numeric(fao_fish_fct$VITB6_mg_combined))
 
-median(as.numeric(fao_fish_fct$VITB6_mg_standardised), na.rm = T)
-quantile(as.numeric(fao_fish_fct$VITB6_mg_standardised), na.rm = T)
+median(as.numeric(fao_fish_fct$VITB6_mg_combined), na.rm = T)
+quantile(as.numeric(fao_fish_fct$VITB6_mg_combined), na.rm = T)
 
 
 #Checking variability in the values
-fao_fish_fct %>% ggplot(aes(as.numeric(VITB6_mg_standardised), source_fct)) +
+fao_fish_fct %>% ggplot(aes(as.numeric(VITB6_mg_combined), source_fct)) +
   geom_boxplot()
 
-fao_fish_fct %>% ggplot(aes(as.numeric(VITB6_mg_standardised), fish_type)) +
+fao_fish_fct %>% ggplot(aes(as.numeric(VITB6_mg_combined), fish_type)) +
   geom_boxplot()
 
-fao_fish_fct %>% ggplot(aes(as.numeric(VITB6_mg_standardised), fish_prep)) +
+fao_fish_fct %>% ggplot(aes(as.numeric(VITB6_mg_combined), fish_prep)) +
   geom_boxplot()
 
 #├├ Extreme values ----
@@ -325,8 +343,8 @@ fao_fish_fct %>% ggplot(aes(as.numeric(VITB6_mg_standardised), fish_prep)) +
 x1 <- fao_fish_fct %>% 
   group_by(ics_faostat_sua_english_description) %>% 
   summarise(mean_water = mean(as.numeric(WATERg), na.rm = T),
-            mean = mean(as.numeric(VITB6_mg_standardised), na.rm = T),
-            sd = sd(as.numeric(VITB6_mg_standardised), na.rm = T)) %>% 
+            mean = mean(as.numeric(VITB6_mg_combined), na.rm = T),
+            sd = sd(as.numeric(VITB6_mg_combined), na.rm = T)) %>% 
   arrange(desc(mean))
 
 #Checking values with the highest mean 
@@ -334,25 +352,25 @@ x1 <- fao_fish_fct %>%
 
 fao_fish_fct %>% 
   filter(ics_faostat_sua_english_description == "Other pelagic fish, canned") %>% 
-  select(source_fct, fdc_id, food_desc, WATERg, VITB6_mg_standardised)
+  select(source_fct, fdc_id, food_desc, WATERg, VITB6_mg_combined)
 
 
 #Checking high end values
 
 outlier_value <- 0.75
 
-fao_fish_fct %>% filter(as.numeric(VITB6_mg_standardised)> outlier_value) %>% 
-  select(source_fct, fdc_id, food_desc, WATERg, VITB6_mg_standardised ) %>% 
-  arrange(desc(as.numeric(VITB6_mg_standardised)))
+fao_fish_fct %>% filter(as.numeric(VITB6_mg_combined)> outlier_value) %>% 
+  select(source_fct, fdc_id, food_desc, WATERg, VITB6_mg_combined ) %>% 
+  arrange(desc(as.numeric(VITB6_mg_combined)))
 
 
 #Calculating mean concentration by ics w/o "extreme values"
 x2 <- fao_fish_fct %>% 
-  filter(as.numeric(VITB6_mg_standardised)< outlier_value) %>% 
+  filter(as.numeric(VITB6_mg_combined)< outlier_value) %>% 
   group_by(ics_faostat_sua_english_description) %>% 
   summarise(mean_water = mean(as.numeric(WATERg), na.rm = T),
-            mean = mean(as.numeric(VITB6_mg_standardised), na.rm = T),
-            sd = sd(as.numeric(VITB6_mg_standardised), na.rm = T)) %>% 
+            mean = mean(as.numeric(VITB6_mg_combined), na.rm = T),
+            sd = sd(as.numeric(VITB6_mg_combined), na.rm = T)) %>% 
   arrange(desc(mean))
 
 
@@ -467,7 +485,7 @@ quantile(as.numeric(fao_fish_fct$F22D6N3g), na.rm = T)
 #Checking values higher than Q4
 fao_fish_fct %>% filter(as.numeric(F22D6N3g)>0.695, 
                         as.numeric(F22D6N3g)<4) %>% 
-  select(source_fct, fdc_id, food_desc, WATERg, FAT_g_standardised,
+  select(source_fct, fdc_id, food_desc, WATERg, FAT_g_combined,
          F22D6N3g) %>% 
   arrange(as.numeric(F22D6N3g))
 
@@ -497,7 +515,7 @@ fao_fish_fct %>% filter(as.numeric(F22D6N3g)>5) %>%
 x1 <- fao_fish_fct %>% 
   group_by(ics_faostat_sua_english_description) %>% 
   summarise(mean_water = mean(as.numeric(WATERg), na.rm = T),
-            mean_fat = mean(as.numeric(FAT_g_standardised), na.rm = T),
+            mean_fat = mean(as.numeric(FAT_g_combined), na.rm = T),
             mean = mean(as.numeric(F22D6N3g), na.rm = T),
             sd = sd(as.numeric(F22D6N3g), na.rm = T)) %>% 
   arrange(desc(ics_faostat_sua_english_description))
@@ -507,7 +525,7 @@ x1 <- fao_fish_fct %>%
 
 fao_fish_fct %>% filter(!is.na(F22D6N3g)) %>% 
   select(source_fct, fdc_id, food_desc, WATERg, 
-         FAT_g_standardised, F22D6N3g , 
+         FAT_g_combined, F22D6N3g , 
          ics_faostat_sua_english_description) %>% 
   arrange(desc(as.numeric(F22D6N3g)))
 
@@ -518,18 +536,24 @@ x2 <- fao_fish_fct %>%
   filter(!is.na(F22D6N3g)) %>%
   group_by(ics_faostat_sua_english_description)  %>% 
   summarise(mean_water = mean(as.numeric(WATERg), na.rm = T),
-            mean_fat = mean(as.numeric(FAT_g_standardised), na.rm = T),
+            mean_fat = mean(as.numeric(FAT_g_combined), na.rm = T),
             mean = mean(as.numeric(F22D6N3g), na.rm = T),
             sd = sd(as.numeric(F22D6N3g), na.rm = T)) %>% 
   arrange(desc(ics_faostat_sua_english_description))
 
 
-#Checking data w/ and w/o outliers
-diff <- as.data.frame(all.equal(x1, x2))
-
 #Generating a table with difference between 
 #fat in the fct (x1) and
 #fat only for items with DHA values (x2)
+
+# Because in partial dataset coverage x1 doesn't match x2 in length, the comparison can't be done for some fish.
+# trimming the dataset down to only the fish categories present in both.
+x1 <- x1[x1$ics_faostat_sua_english_description %in% x2$ics_faostat_sua_english_description, ]
+
+
+#Checking data w/ and w/o outliers
+diff <- as.data.frame(all.equal(x1, x2))
+
 
 fat_check <- x1 
 fat_check$fat_diff <- (x1$mean_fat-x2$mean_fat)/x1$mean_fat*100
@@ -548,17 +572,22 @@ subset(fat_check, fat_diff>10 | fat_diff< -10,
 
 test <- "Aquatic mammals, meat"
 
-fao_fish_fct %>% 
-  filter(ics_faostat_sua_english_description %in% test) %>% 
-  select(source_fct, fdc_id, food_desc,
-         WATERg, FAT_g_standardised, F22D6N3g) %>% 
-  arrange(desc(as.numeric(F22D6N3g)))
+if(nrow(fao_fish_fct %>% #Only carries out the analysis if the test condition has results - may not be the case with partial datasets
+        filter(ics_faostat_sua_english_description %in% test))>0){
+  fao_fish_fct %>% 
+    filter(ics_faostat_sua_english_description %in% test) %>% 
+    select(source_fct, fdc_id, food_desc,
+           WATERg, FAT_g_combined, F22D6N3g) %>% 
+    arrange(desc(as.numeric(F22D6N3g)))
+  
+  hist(as.numeric(fao_fish_fct$F22D6N3g[fao_fish_fct$ics_faostat_sua_english_description %in% test]))
+  hist(as.numeric(fao_fish_fct$FAT_g_combined[fao_fish_fct$ics_faostat_sua_english_description %in% test]))
+  
+  fao_fish_fct %>% filter(ics_faostat_sua_english_description %in% test) %>% 
+    ggplot(aes(FAT_g_combined)) + geom_dotplot() + theme_classic()
+}
 
-hist(as.numeric(fao_fish_fct$F22D6N3g[fao_fish_fct$ics_faostat_sua_english_description %in% test]))
-hist(as.numeric(fao_fish_fct$FAT_g_standardised[fao_fish_fct$ics_faostat_sua_english_description %in% test]))
 
-fao_fish_fct %>% filter(ics_faostat_sua_english_description %in% test) %>% 
-  ggplot(aes(FAT_g_standardised)) + geom_dotplot() + theme_classic()
 
 #6) EPA (20:5 n-3) ----
 
@@ -580,7 +609,7 @@ quantile(as.numeric(fao_fish_fct$F20D5N3g), na.rm = T)
 
 #Checking values higher than Q4
 fao_fish_fct %>% filter(as.numeric(F22D6N3g)>0.363) %>% 
-  select(source_fct, fdc_id, food_desc, WATERg, FAT_g_standardised,
+  select(source_fct, fdc_id, food_desc, WATERg, FAT_g_combined,
          F20D5N3g) %>% 
   arrange(desc(as.numeric(F20D5N3g)))
 
@@ -609,7 +638,7 @@ fao_fish_fct %>% filter(as.numeric(F20D5N3g)>2.0, fish_prep == "fresh") %>%
 x1 <- fao_fish_fct %>% 
   group_by(ics_faostat_sua_english_description) %>% 
   summarise(mean_water = mean(as.numeric(WATERg), na.rm = T),
-            mean_fat = mean(as.numeric(FAT_g_standardised), na.rm = T),
+            mean_fat = mean(as.numeric(FAT_g_combined), na.rm = T),
             mean = mean(as.numeric(F20D5N3g), na.rm = T),
             sd = sd(as.numeric(F20D5N3g), na.rm = T)) %>% 
   arrange(desc(ics_faostat_sua_english_description))
@@ -618,7 +647,7 @@ x1 <- fao_fish_fct %>%
 #Checking values with no NA
 fao_fish_fct %>% filter(!is.na(F20D5N3g)) %>% 
   select(source_fct, fdc_id, food_desc, WATERg, 
-         FAT_g_standardised, F20D5N3g , 
+         FAT_g_combined, F20D5N3g , 
          ics_faostat_sua_english_description) %>% 
   arrange(desc(as.numeric(F20D5N3g)))
 
@@ -629,10 +658,15 @@ x2 <- fao_fish_fct %>%
   filter(!is.na(F20D5N3g)) %>%
   group_by(ics_faostat_sua_english_description)  %>% 
   summarise(mean_water = mean(as.numeric(WATERg), na.rm = T),
-            mean_fat = mean(as.numeric(FAT_g_standardised), na.rm = T),
+            mean_fat = mean(as.numeric(FAT_g_combined), na.rm = T),
             mean = mean(as.numeric(F20D5N3g), na.rm = T),
             sd = sd(as.numeric(F20D5N3g), na.rm = T)) %>% 
   arrange(desc(ics_faostat_sua_english_description))
+
+
+# Because in partial dataset coverage x1 doesn't match x2 in length, the comparison can't be done for some fish.
+# trimming the dataset down to only the fish categories present in both.
+x1 <- x1[x1$ics_faostat_sua_english_description %in% x2$ics_faostat_sua_english_description, ]
 
 
 #Checking data w/ and w/o outliers
@@ -737,6 +771,11 @@ x2 <- fao_fish_fct %>%
   arrange(desc(mean))
 
 
+# Because in partial dataset coverage x1 doesn't match x2 in length, the comparison can't be done for some fish.
+# trimming the dataset down to only the fish categories present in both.
+x1 <- x1[x1$ics_faostat_sua_english_description %in% x2$ics_faostat_sua_english_description, ]
+
+
 #Checking data w/ and w/o outliers
 diff <- as.data.frame(all.equal(x1, x2))
 
@@ -751,7 +790,7 @@ anti_join(x1, x2, by = "ics_faostat_sua_english_description")
 
 fao_fish_fct %>% 
   filter(ICS.FAOSTAT.SUA.Current.Code == "1520",
-         FAT_g_standardised > 30) 
+         FAT_g_combined > 30) 
 
 
 low_q <- c("35013", "35055", "35079", "15142", #US19
@@ -824,21 +863,21 @@ fao_fish_fct %>% filter(is.na(CHOAVLDFg), !is.na(CHOAVLMg)) %>% count(source_fct
 # Checking values that the CHOAVLDFg calculated was assumed zero, but fractions
 #of were higher than zero. 
 
-subset(fao_fish_fct, #str_detect(comment, "CHOAVLDFg_std assumed zero") &
-       CHOAVLDFg_std == 0 &  
+subset(fao_fish_fct, #str_detect(comment, "CHOAVLDFg_calculated assumed zero") &
+       CHOAVLDFg_calculated == 0 &  
        (CHOCDFg > 0 & FIBTGg == 0| CHOAVLg >0), 
-       select = c(fdc_id, source_fct, CHOAVLDFg_std,
-                  CHOAVLDFg, CHOCDFg, FIBTGg, CHOAVLg, CHOAVLMg)) %>% distinct() %>% View()
+       select = c(fdc_id, source_fct, CHOAVLDFg_calculated,
+                  CHOAVLDFg, CHOCDFg, FIBTGg, CHOAVLg, CHOAVLMg)) %>% distinct()# %>% View()
 
-id_to_check <- subset(fao_fish_fct, str_detect(comment, "CHOAVLDFg_std assumed zero") &
+id_to_check <- subset(fao_fish_fct, str_detect(comment, "CHOAVLDFg_calculated assumed zero") &
          (CHOCDFg > 0  | CHOAVLg >0), 
-       select = c(fdc_id, source_fct, CHOAVLDFg_std,
+       select = c(fdc_id, source_fct, CHOAVLDFg_calculated,
                   CHOAVLDFg, CHOCDFg, CHOAVLg, CHOAVLMg)) %>% distinct() %>% 
   pull(fdc_id)
 
 
 subset(fao_fish_fct, fdc_id %in% id_to_check, 
-       select = c(WATERg, PROCNTg, FAT_g_standardised, FIBTGg, ALCg, ASHg, CHOCDFg))
+       select = c(WATERg, PROCNTg, FAT_g_combined, FIBTGg, ALCg, ASHg, CHOCDFg))
 
 
 #├ 2) Proteins ----
@@ -852,7 +891,7 @@ fao_fish_fct %>% filter(is.na(PROCNTg)) %>% count(source_fct)
 fao_fish_fct %>% filter(is.na(FATg)) %>% count(source_fct)
 fao_fish_fct %>% filter(is.na(FATg), !is.na(FAT_g)) %>% count(source_fct)
 fao_fish_fct %>% filter(is.na(FATg), !is.na(FATCEg)) %>% count(source_fct)
-fao_fish_fct %>% filter(is.na(FAT_g_standardised)) %>% count(source_fct)
+fao_fish_fct %>% filter(is.na(FAT_g_combined)) %>% count(source_fct)
 #JA15 lipid fixed
 #fao_fish_fct %>% filter(fdc_id == "10130") %>% select(Lipid_g)
 
@@ -867,7 +906,12 @@ fao_fish_fct %>% filter(is.na(FIBTGg)) %>% count(source_fct)
 #Checking values of other fractions when dietary fibre was missing
 fao_fish_fct %>% filter(is.na(FIBTGg), !is.na(FIBCg)) %>% count(source_fct)
 #Checking values for Crude fibre when dietary fibre was missing
-fao_fish_fct %>% filter(is.na(FIBTGg), !is.na(NSPg)) %>% count(source_fct)
+
+if("NSPg" %in% colnames(fao_fish_fct)){
+  fao_fish_fct %>% filter(is.na(FIBTGg), !is.na(NSPg)) %>% count(source_fct)
+} else {
+  message("NSPg not found in dataframe - analysis skipped. Please include FCT's that contain this variable if you wish to do this analysis.")
+}
 
 #├ 5) Alcohol ------
 #Assumed zero
@@ -882,8 +926,8 @@ fao_fish_fct %>% filter(is.na(ASHg)) %>% count(source_fct)
 
 ## Checking Sum of Proximate  ----
 
-n <- length(fao_fish_fct$food_desc[fao_fish_fct$SOP_std <95|fao_fish_fct$SOP_std >105])
-hist(fao_fish_fct$SOP_std, main = "Sum of Proximate",
+n <- length(fao_fish_fct$food_desc[fao_fish_fct$SOPg_calculated <95|fao_fish_fct$SOPg_calculated >105])
+hist(fao_fish_fct$SOPg_calculated, main = "Sum of Proximate",
      xlab = paste0("There are ", n, " fish items outside range (95-105g)"))
 abline(v = 95, col = 2, lwd=3, lty =2)
 abline(v = 105, col = 2, lwd=3, lty =2)
@@ -949,7 +993,7 @@ sd(as.numeric(fao_fish_fct$RETOLmcg), na.rm = T)
 subset(fao_fish_fct, !grepl("CARTBEQmcg_std calculated from", comment) &
                 !grepl("CARTBEQmcg_std back", comment) &
          grepl("CARTBEQmcg_std", comment),
-       select = comment)
+       select = "comments")
 
 # Checking:
 # CARTBEQmcg_std imputed with CARTBEQmcg
@@ -958,10 +1002,9 @@ subset(fao_fish_fct, !grepl("CARTBEQmcg_std calculated from", comment) &
 
 subset(fao_fish_fct, 
          grepl("CARTBEQmcg_std calculated from CARTBmcg, CARTAmcg and CRYPXBmcg but only CARTB was used", comment),
-       select = comment)
+       select = "comments")
 
 
 subset(fao_fish_fct, 
        grepl("RETOLmcg value re-calulated from VITA_RAEmcg and VITAmcg", comment),
-       select = comment)
-
+       select = "comments")
