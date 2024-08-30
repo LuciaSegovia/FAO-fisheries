@@ -65,51 +65,58 @@ df1$VITEmg_std <- NA
 n <- ncol(df1) + 1
 
 df1 <- left_join(df1, ics,
-                 by = c("ICS.FAOSTAT.SUA.Current.Code" = "ICS FAOSTAT SUA Current Code")
-) %>%
+                 by = c("ICS.FAOSTAT.SUA.Current.Code" = "ICS FAOSTAT SUA Current Code"))
+
+ideal_relocate_column_list <- c(
+  "quality_rating_for_food_match", "source_fct", "NDB_number",
+  "fdc_id", "food_desc", "scientific_name", "ISSCAAP.Group",
+  "X3.alpha.code", "Edible_factor_in_FCT", "Edible_factor_desc",
+  "SOPg_calculated",
+  "ENERCkJ_std", "ENERCkcal_std", "ENERCkJ", "ENERCkcal", "WATERg",
+  "PROCNTg", "XN", "FAT_g_standardised", "FATg", "FATCEg", "FAT_g",
+  "CHOAVLDFg_std", "CHOCDFg", "CHOAVLDFg", "CHOAVLg", "CHOAVLMg",
+  "FIBTGg_std", "FIBTGg", "NSPg", "FIBCg", "ALCg", "ASHg",
+  "CAmg", "FEmg", "MGmg", "Pmg", "Kmg", "NAmg", "ZNmg", "CUmg",
+  "MNmg", "SEmcg", "VITA_RAEmcg_std", "VITAmcg_std", "VITA_RAEmcg",
+  "VITAmcg", "RETOLmcg", "CARTBEQmcg_std", "CARTBEQmcg", "CARTAmcg",
+  "CARTBmcg", "CRYPXBmcg",
+  "VITEmg_std", # VITEmg --> future TBC
+  "VITEmg", "TOCPHAmg", "TOCPHBmg", "TOCPHGmg", "TOCPHDmg",
+  "TOCTRAmg", "TOCTRBmg", "TOCTRGmg", "THIAmg_std", "THIAmg",
+  "THIAHCLmg",
+  "RIBFmg", "VITB6_mg_standardised", "VITB6Cmg", "VITB6Amg",
+  "VITB6_mg", "FOLDFEmcg_std", # FOLDFEmcg --> standardise calculated #future
+  "FOLDFEmcg", "FOLmcg", "FOLACmcg", "FOLFDmcg",
+  "FOLSUMmcg", "FOL_mcg", "NIAEQmg_std", # NIAEQmg --> standardise calculated #future
+  "NIAEQmg", "NIAmg", "NIATRIPmg_std", # NIATRIPmg --> standardise calculated #future
+  "NIATRPmg", "TRPmg", "VITB12mcg", "VITCmg", "ASCLmg", "FASATg",
+  "FAMSg", "FAPUg", "FATRNg", "CHOLEmg", "CHOL_mg", "SUGARg",
+  "F22D6N3g", "F20D5N3g", "NIAmg_std", "IDmcg", "ASHg_std",
+  "ASHg_bydiff",
+  "comments"
+)
+
+current_relocate_list <- ideal_relocate_column_list[ideal_relocate_column_list %in% colnames(df1)]
+
+ideal_remove_list <- c("ics_faostat_sua_english_description",
+  "Food.description", "Scientific.name", "ICS_FAOSTAT", "quality",
+  "fish_type", "fish_prep", "food_group", #CHOg, 
+  "ALCg_100mL")
+
+current_remove_list <- ideal_remove_list[ideal_remove_list %in% colnames(df1)]
+
+ df1 <- df1 %>%
   relocate(ICS.FAOSTAT.SUA.Current.Code,
            .before = "ics_faostat_sua_english_description"
   ) %>%
   relocate(c(n:(n + 4)), .after = "ics_faostat_sua_english_description") %>%
-  relocate(c(
-    "quality_rating_for_food_match", "source_fct", "NDB_number",
-    "fdc_id", "food_desc", "scientific_name", "ISSCAAP.Group",
-    "X3.alpha.code", "Edible_factor_in_FCT", "Edible_factor_desc",
-    "SOP_std",
-    "ENERCkJ_std", "ENERCkcal_std", "ENERCkJ", "ENERCkcal", "WATERg",
-    "PROCNTg", "XN", "FAT_g_standardised", "FATg", "FATCEg", "FAT_g",
-    "CHOAVLDFg_std", "CHOCDFg", "CHOAVLDFg", "CHOAVLg", "CHOAVLMg",
-    "FIBTGg_std", "FIBTGg", "NSPg", "FIBCg", "ALCg", "ASHg",
-    "CAmg", "FEmg", "MGmg", "Pmg", "Kmg", "NAmg", "ZNmg", "CUmg",
-    "MNmg", "SEmcg", "VITA_RAEmcg_std", "VITAmcg_std", "VITA_RAEmcg",
-    "VITAmcg", "RETOLmcg", "CARTBEQmcg_std", "CARTBEQmcg", "CARTAmcg",
-    "CARTBmcg", "CRYPXBmcg",
-    "VITEmg_std", # VITEmg --> future TBC
-    "VITEmg", "TOCPHAmg", "TOCPHBmg", "TOCPHGmg", "TOCPHDmg",
-    "TOCTRAmg", "TOCTRBmg", "TOCTRGmg", "THIAmg_std", "THIAmg",
-    "THIAHCLmg",
-    "RIBFmg", "VITB6_mg_standardised", "VITB6Cmg", "VITB6Amg",
-    "VITB6_mg", "FOLDFEmcg_std", # FOLDFEmcg --> standardise calculated #future
-    "FOLDFEmcg", "FOLmcg", "FOLACmcg", "FOLFDmcg",
-    "FOLSUMmcg", "FOL_mcg", "NIAEQmg_std", # NIAEQmg --> standardise calculated #future
-    "NIAEQmg", "NIAmg", "NIATRIPmg_std", # NIATRIPmg --> standardise calculated #future
-    "NIATRPmg", "TRPmg", "VITB12mcg", "VITCmg", "ASCLmg", "FASATg",
-    "FAMSg", "FAPUg", "FATRNg", "CHOLEmg", "CHOL_mg", "SUGARg",
-    "F22D6N3g", "F20D5N3g", "NIAmg_std", "IDmcg", "ASHg_std",
-    "ASHg_bydiff",
-    "comment"
-  ), .after = "ISSCAAP Group") %>%
-  select(-c(
-    ics_faostat_sua_english_description,
-    Food.description, Scientific.name, ICS_FAOSTAT, quality,
-    fish_type, fish_prep, food_group, #CHOg, 
-    ALCg_100mL
-  ))
+  relocate(current_relocate_list, .after = "ISSCAAP Group") %>%
+  select(-current_remove_list)
 
 
 # Selecting variables that should be numeric
-n1 <- match("SOP_std", names(df1))
-n2 <- match("comment", names(df1)) - 1
+n1 <- match("SOPg_calculated", names(df1))
+n2 <- match("comments", names(df1)) - 1
 
 # names(df1[, c(n:ncol(df1))])
 # checking variables
@@ -141,6 +148,8 @@ names(results_table)
 
 head(results_table)
 # Re - calculating variables (#43)
+
+source("functions/Summarised_Row_Recalculator.R")
 
 recalculated_results_table <- Grp_Smrsr_row_update(results_table, 1)
 
@@ -185,7 +194,7 @@ recalculated_results_table <- recalculated_results_table %>%
 
 
 #n1 <- match("X.36", names(recalculated_results_table))
-#n2 <- match("comment", names(recalculated_results_table))-1
+#n2 <- match("comments", names(recalculated_results_table))-1
 #
 #recalculated_results_table <-  recalculated_results_table %>% mutate_at(n1:n2, as.numeric)
 #  
@@ -196,8 +205,8 @@ class(recalculated_results_table$FOLFDmcg)
 
 n1 <- which(recalculated_results_table$CHOAVLDFg_std< 0)
 
-recalculated_results_table$comment[n1] <- ifelse(is.na(recalculated_results_table$comment[n1]),
-                                                 "CHOAVLDFg_std assumed zero", paste(recalculated_results_table$comment, "| CHOAVLDFg_std assumed zero") )
+recalculated_results_table$comments[n1] <- ifelse(is.na(recalculated_results_table$comments[n1]),
+                                                 "CHOAVLDFg_std assumed zero", paste(recalculated_results_table$comments, "| CHOAVLDFg_std assumed zero") )
 recalculated_results_table$CHOAVLDFg_std[recalculated_results_table$CHOAVLDFg_std< 0] <- 0
 
 recalculated_results_table$CHOAVLDFg_std

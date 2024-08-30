@@ -18,16 +18,16 @@ library(tidyverse)
 Grp_Smrsr_row_update <- function(df1, group_ID_col, 
                                  
                                  ENERCKcal_std = "ENERCkcal_std", ENERCKj_std = "ENERCkj_std",
-                                 SOP_std = "SOP_std", 
-                                 CHOAVLDFg_std = "CHOAVLDFg_std", WATERg = "WATERg", 
-                                 PROCNTg = "PROCNTg", FAT_g_standardised = "FAT_g_standardised", 
+                                 SOP_std = "SOPg_calculated", 
+                                 CHOAVLDFg_std = "CHOAVLDFg_calculated", WATERg = "WATERg", 
+                                 PROCNTg = "PROCNTg", FAT_g_standardised = "FAT_g_combined", 
                                  CHOAVLg = "CHOAVLg", FIBTGg_std = "FIBTGg_std", ALCg = "ALCg", 
-                                 ASHg_std = "ASHg_std", CARTBEQmcg_std = "CARTBEQmcg_std",
+                                 ASHg_std = "ASHg", CARTBEQmcg_std = "CARTBEQmcg_std",
                                  CARTBmcg = "CARTBmcg", CARTAmcg = "CARTAmcg", CRYPXBmcg = "CRYPXBmcg", 
                                  VITA_RAEmcg_std = "VITA_RAEmcg_std", VITAmcg_std = "VITAmcg_std", 
                                  RETOLmcg = "RETOLmcg", CARTBEQmcg = "CARTBEQmcg", THIAmg_std = "THIAmg_std", 
                                  THIAmg = "THIAmg", THIAHCLmg = "THIAHCLmg", NIAEQmg = "NIAEQmg", TRPmg = "TRPmg",
-                                 NIAmg = "NIAmg", comment = "comment"){
+                                 NIAmg = "NIAmg", comment = "comments"){
   
   summary_row_table <- subset(df1, grepl("SUMMARY ROW - ", df1[, group_ID_col]))
   old_summary_row_table <- summary_row_table
