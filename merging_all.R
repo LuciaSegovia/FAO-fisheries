@@ -214,7 +214,7 @@ col_names <- c("fdc_id",
 
 present_col_names <- colnames(fct_cover) #Finds all the column names in the actual meta-FCT
 
-col_names <- col_names[col_names %in% present_col_names] #strips down the list above to the ones present (some FCT's are the sole source of some variables; if they aren't present, they can't be included. This removes them)
+col_names <- present_col_names[present_col_names %in% col_names] #strips down the list above to the ones present (some FCT's are the sole source of some variables; if they aren't present, they can't be included. This removes them)
 
 # AAs
 aa <- c("ILEmg", 	"LEUmg",	"LYSmg", 	"METmg", "CYSmg", "PHEmg",	"TYRmg", 
@@ -232,8 +232,8 @@ fct_cover %>% dplyr::select(col_names) %>%
 
 #Filtering out components that are not used and removing "_FCT" from the FCTs/FCDB name
 #added quality for NO21
-#fct_cover <- fct_cover %>% select(col_names, quality) %>% 
-#  mutate_at("source_fct", ~str_replace(., "_FCT", "")) 
+fct_cover <- fct_cover %>% select(col_names) %>% 
+  mutate_at("source_fct", ~str_replace(., "_FCT", "")) 
 
 #Checking that we have all the variables of interest
 fct_cover %>% str()
@@ -393,6 +393,4 @@ subset(fao_fish_fct, !is.na(scientific_name)) %>%
 table(!is.na(fao_fish_fct$scientific_name), fao_fish_fct$source_fct)
 
 
-if(!file.exists(here::here("data", "FAO-fish-standardised-updated_v1.1.0.RDS"))){ #Checks if the final file of this script already exists - if it isn't, creates it.
-  saveRDS(fao_fish_fct, here::here("data", "FAO-fish-standardised-updated_v1.1.0.RDS"))
-}
+saveRDS(fao_fish_fct, here::here("data", "FAO-fish-standardised-updated_v1.1.0.RDS"))

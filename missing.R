@@ -266,6 +266,4 @@ fao_fish_fct <- readRDS(here::here("data", "FAO-fish-harmonised_v1.1.0.RDS")) #O
   
   
   
-  if(!file.exists(here::here("data", "FAO-fish-harmonised_nomissing_v1.1.0.RDS"))){ #Checks if the final file of this script already exists - if it isn't, creates it.
-    saveRDS(fao_fish_fct, here::here("data", "FAO-fish-harmonised_nomissing_v1.1.0.RDS"))
-  }
+saveRDS(fao_fish_fct, here::here("data", "FAO-fish-harmonised_nomissing_v1.1.0.RDS"))

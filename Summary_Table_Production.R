@@ -11,7 +11,6 @@
 #install.packages("readxl")
 #install.packages("janitor")
 
-
 # tictoc::tic("total")
 
 # library(tidyverse)
@@ -155,20 +154,64 @@ recalculated_results_table <- Grp_Smrsr_row_update(results_table, 1)
 
 # Copying FISHERIES-GlobalNCT_ForSharing_Feb2022 (excel) - format (#43)
 
-# Adding extra columns to keep the structure as FAO spreadsheet
-recalculated_results_table[, c(ncol(recalculated_results_table):(ncol(recalculated_results_table) + 23))] <- NA
-names(recalculated_results_table[, c((ncol(recalculated_results_table) - 23):ncol(recalculated_results_table))])
-dim(recalculated_results_table)
+# Need to find the columns we need to add - and which ones are already present
 
 # Adding extra columns to FAO spreadsheet to account for new variables
 dim(fisheries)
 fisheries[, c(ncol(fisheries):(ncol(fisheries) + 12))] <- NA
 
-# Reorganising columns in our dataset
+new_col_names <- as.character(fisheries[2, 7:29])
 
-recalculated_results_table <- recalculated_results_table %>% relocate(c(V117:V139), .after = "ISSCAAP Group")
+# Adding extra columns to keep the structure as FAO spreadsheet
+recalculated_results_table[, c(ncol(recalculated_results_table):(ncol(recalculated_results_table) + 23))] <- NA
+names(recalculated_results_table[, c((ncol(recalculated_results_table) - 22):ncol(recalculated_results_table))])
+dim(recalculated_results_table)
+
+# Renaming and reorganising columns in our dataset
+
+first_NA_col <- which(colnames(recalculated_results_table) == colnames(recalculated_results_table %>% select(last_col(22))))
+last_NA_col <- which(colnames(recalculated_results_table) == colnames(recalculated_results_table %>% select(last_col())))
+
+new_col_names[1] <- "NA1" #Both were previously "NA"
+new_col_names[2] <- "NA2"
+
+new_col_names[6] <- "Seq1"
+new_col_names[18] <- "Seq2"
+
+new_col_names[9] <- "f=fortified with micronutrients1"
+new_col_names[20] <- "f=fortified with micronutrients2"
+
+
+new_col_names[10] <- "Edible coefficient to be used1"
+new_col_names[21] <- "Edible coefficient to be used2"
+
+new_col_names[11] <- "1 = as purchased i.e. edible factors of FCTs can be used after verification of definition of edible factors. 2 = as produced i.e. the default factors given here should be used unless country-specific factors are available1"
+new_col_names[22] <- "1 = as purchased i.e. edible factors of FCTs can be used after verification of definition of edible factors. 2 = as produced i.e. the default factors given here should be used unless country-specific factors are available2"
+
+new_col_names[12] <- "Source for edible coeff.and/or comments1"
+new_col_names[23] <- "Source for edible coeff.and/or comments2"
+
+
+new_col_names[17] <- " " #This was "", but that was blank and throwing errors when trying to run the rest of the code
+
+
+new_col_names %in% colnames(recalculated_results_table)
+
+
+
+colnames(recalculated_results_table)[first_NA_col:last_NA_col] <- new_col_names
+
+duplicate_colnames <- colnames(recalculated_results_table)[duplicated(colnames(recalculated_results_table))]
+
+duplicate_colnames %in% new_col_names #All duplicates are in the new column names
+
+first_NA_colname <- colnames(recalculated_results_table)[first_NA_col]
+last_NA_colname <- colnames(recalculated_results_table)[last_NA_col]
+
+recalculated_results_table <- recalculated_results_table %>% relocate(all_of(new_col_names), .after = "ISSCAAP Group")
 
 # Combining variable names
+
 #names(recalculated_results_table)[1:122] <- names(fisheries)[1:122]
 #names(fisheries)[123:139] <- names(recalculated_results_table)[123:139]
 
@@ -187,7 +230,7 @@ names(recalculated_results_table[n1])
 recalculated_results_table <- recalculated_results_table %>%
   select(-n1) %>%
   left_join(., edible_ics ) %>%
-  relocate("X.24", .after = "V136")
+  relocate("X.24", .after = new_col_names[20])
 
 #27
 (match("X.24", names(recalculated_results_table)))
@@ -203,13 +246,13 @@ recalculated_results_table <- recalculated_results_table %>%
 
 class(recalculated_results_table$FOLFDmcg)
 
-n1 <- which(recalculated_results_table$CHOAVLDFg_std< 0)
+n1 <- which(recalculated_results_table$CHOAVLDFg_calculated< 0)
 
 recalculated_results_table$comments[n1] <- ifelse(is.na(recalculated_results_table$comments[n1]),
-                                                 "CHOAVLDFg_std assumed zero", paste(recalculated_results_table$comments, "| CHOAVLDFg_std assumed zero") )
-recalculated_results_table$CHOAVLDFg_std[recalculated_results_table$CHOAVLDFg_std< 0] <- 0
+                                                 "CHOAVLDFg_calculated assumed zero", paste(recalculated_results_table$comments, "| CHOAVLDFg_calculated assumed zero") )
+recalculated_results_table$CHOAVLDFg_calculated[recalculated_results_table$CHOAVLDFg_calculated< 0] <- 0
 
-recalculated_results_table$CHOAVLDFg_std
+recalculated_results_table$CHOAVLDFg_calculated
 
 # tictoc::toc()
 

@@ -15,6 +15,37 @@ library(tidyverse)
 #"NIAEQmg", "TRPmg", "NIAmg"
 
 
+# Uncomment and run for debugging, if going block by block
+# df1 <- results_table
+# group_ID_col <- 1
+# ENERCKcal_std = "ENERCkcal_std"
+# ENERCKj_std = "ENERCkj_std"
+# SOP_std = "SOPg_calculated"
+# CHOAVLDFg_std = "CHOAVLDFg_calculated"
+# WATERg = "WATERg"
+# PROCNTg = "PROCNTg"
+# FAT_g_standardised = "FAT_g_combined"
+# CHOAVLg = "CHOAVLg"
+# FIBTGg_std = "FIBTGg_std"
+# ALCg = "ALCg"
+# ASHg_std = "ASHg"
+# CARTBEQmcg_std = "CARTBEQmcg_std"
+# CARTBmcg = "CARTBmcg"
+# CARTAmcg = "CARTAmcg"
+# CRYPXBmcg = "CRYPXBmcg"
+# VITA_RAEmcg_std = "VITA_RAEmcg_std"
+# VITAmcg_std = "VITAmcg_std"
+# RETOLmcg = "RETOLmcg"
+# CARTBEQmcg = "CARTBEQmcg"
+# THIAmg_std = "THIAmg_std"
+# THIAmg = "THIAmg"
+# THIAHCLmg = "THIAHCLmg"
+# NIAEQmg = "NIAEQmg"
+# TRPmg = "TRPmg"
+# NIAmg = "NIAmg"
+# comment = "comments"
+
+
 Grp_Smrsr_row_update <- function(df1, group_ID_col, 
                                  
                                  ENERCKcal_std = "ENERCkcal_std", ENERCKj_std = "ENERCkj_std",

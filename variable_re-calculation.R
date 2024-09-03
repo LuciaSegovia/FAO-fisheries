@@ -246,9 +246,7 @@ if("THIAHCLmg" %in% colnames(data.df)){ #Only allows this step if THIAHCL, which
 
 # Saving the results of the harmnonised dataset
 
-if(!file.exists(here::here("data", "FAO-fish-harmonised_v1.1.0.RDS"))){ #Checks if the final file of this script already exists - if it isn't, creates it.
-  saveRDS(data.df, here::here("data", "FAO-fish-harmonised_v1.1.0.RDS"))
-}
+saveRDS(data.df, here::here("data", "FAO-fish-harmonised_v1.1.0.RDS"))
 
 
 
