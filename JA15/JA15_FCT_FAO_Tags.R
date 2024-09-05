@@ -127,8 +127,8 @@ JA15_FCT_Fatty_Acids_int <- mutate_if(JA15_FCT_Fatty_Acids_int, is.numeric, ~ . 
 # Merging tables ----
 
 Output_table <- JA15_FCT_int #This batch of code sets the output to be a copy of the main FCT, then adds on the other FCT tables to them.
-Output_table <- left_join(Output_table, JA15_FCT_Amino_Acids_int, by.all = "Item Number")
-Output_table <- left_join(Output_table, JA15_FCT_CPOA_int, by.all = "Item Number")
+Output_table <- left_join(Output_table, JA15_FCT_Amino_Acids_int, by = "Item Number")
+Output_table <- left_join(Output_table, JA15_FCT_CPOA_int, by = "Item Number")
 Output_table <- left_join(Output_table, JA15_FCT_Fatty_Acids_int, by = "Item Number")
 
 
@@ -138,7 +138,8 @@ Output_table <- left_join(Output_table, JA15_FCT_Fatty_Acids_int, by = "Item Num
 Output_table[Output_table == "-"] <- NA #Sets all missing entries to NA.
 #Output_table[Output_table == "Tr"] <- "0" #Sets all "Tr" entries to 0
 
-Output_table[,c(5:156)] <- apply(Output_table[,c(5:156)], 2, TraceToZero)
+Output_table <- TraceToZero(Output_table, c(5:156))
+
 
 Output_table[] <- lapply(Output_table, function(x) gsub("\\*|\\(|\\)", "", x)) # removes special characters from the table contents
 

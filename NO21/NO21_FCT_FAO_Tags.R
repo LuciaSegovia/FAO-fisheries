@@ -32,7 +32,11 @@ source(here::here("functions.R")) # Loading nutrition functions (change to packa
 #             mode="wb")
 
 # cleaning scientific names
-#source(here::here("NO21", "NO21_scientific-names.R"))
+
+if(!file.exists(here::here("NO21", 
+                           "scientific-name_NO21.RDS"))){ #Checks if the final file of this script is present - if it isn't, runs it. 
+  source(here::here("NO21", "NO21_scientific-names.R"))
+}
 
 # 1. Data Import ----
 

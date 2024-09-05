@@ -1,3 +1,6 @@
+
+message("Starting variable_re-calculation.R")
+
 #
 # This script combines food components in standardised FCTs
 # 
@@ -140,7 +143,7 @@ dim(data.df) # same rows, one more column
 ##├ )  Niacin - standardised  ----
 
 data.df <- data.df %>% 
-  NIAmg_calc_combiner()
+  NutritionTools::NIAmg_calc_combiner()
 
 
 # Re-calculating variables ----
@@ -215,24 +218,44 @@ data.df  <- data.df %>% SOPg_calculator(FIBTGg_combined_column = "FIBTGg_std")
 
 # Back-calculating ----
 #├ ) Retinol - recalculated ---- 
-
-data.df <- RETOLmcg_calculator(data.df)
+# data.df_test <- data.df %>% RETOLmcg_calculator()
+# 
+# data.df$comments == data.df_test$comments
+# 
+# data.df2 <- RETOLmcg_calculator(data.df)
 
 #├ ) Beta - Carotene eq. - standardised ---- 
+# 
+# data.df_test <- NutritionTools::CARTBEQ_calc_combiner(data.df)
+# 
+# data.df_test <- data.df_test %>%
+#   CARTBEQmcg_std_creator() %>% # Calculate CARTBEQmcg & store it in CARTBEQmcg_std
+#   CARTBEQmcg_std_imputer_with_CARTBEQmcg() %>% # New imputer of CARTBEQmcg into CARTBEQmcg_std when they are NAs.
+#   CARTBEQmcg_backcalculator() %>% # This requires values created in RETOLmcg_Recalculator
+#   CARTBEQmcg_std_to_zero()   # changing negative values to zero # This handles better and adds comments
+# 
+# data.df_test[is.na(data.df_test$CARTBEQmcg_combined), "CARTBEQmcg_combined"] <- 99999
+# data.df_test[is.na(data.df_test$CARTBEQmcg_std), "CARTBEQmcg_std"] <- 99999
+# 
+# 
+# data.df_test$CARTBEQ_difference <- data.df_test$CARTBEQmcg_combined - data.df_test$CARTBEQmcg_std
+# There are 9 rows changed by the shift to this method. 
 
-data.df <- data.df %>% 
-  CARTBEQmcg_std_creator() %>% # Calculate CARTBEQmcg & store it in CARTBEQmcg_std
-  CARTBEQmcg_std_imputer_with_CARTBEQmcg() %>% # New imputer of CARTBEQmcg into CARTBEQmcg_std when they are NAs.
-  CARTBEQmcg_backcalculator() %>% # This requires values created in RETOLmcg_Recalculator
-  CARTBEQmcg_std_to_zero()   # changing negative values to zero # This handles better and adds comments
+data.df <- NutritionTools::CARTBEQ_calc_combiner(data.df)
 
+#OK - these results are not the same (thy are mostly, but not always). However, data.df2 has columns that are calculated from
+#CRYPXBmcg, even though its NA.
 
 #├ )  Vitamin A - standardised ----  
-
-data.df  <- data.df %>% 
-VITA_RAEmcg_std_creator() %>%  # This function recalculate VITA_RAEmcg_std (standardised)
-  VITAmcg_std_creator()   # This function recalculate VITAmcg_std (standardised)
+# 
+# data.df  <- data.df %>% 
+# VITA_RAEmcg_std_creator() %>%  # This function recalculate VITA_RAEmcg_std (standardised)
+#   VITAmcg_std_creator()   # This function recalculate VITAmcg_std (standardised)
   
+data.df <- NutritionTools::VITA_RAEmcg_calculator(data.df)
+
+
+data.df <- NutritionTools::VITAmcg_calculator(data.df)
 
 
 #├ ) Thiamine - standardised  ----

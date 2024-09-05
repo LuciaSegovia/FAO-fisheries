@@ -148,11 +148,11 @@ BA13_Sugar <- Annex_Sugar[!is.na(Annex_Sugar$`Food name in English`),] %>%
          `WATER` = NULL)
 
 Output_table <- BA13_Main_Table #This batch of code sets the output to be a copy of the main FCT, then adds on the other FCT tables to them.
-Output_table <- left_join(Output_table, BA13_Amino_acids, by.all = "Code")
-Output_table <- left_join(Output_table, BA13_Antinutrients, by.all = "Code")
-Output_table <- left_join(Output_table, BA13_Antioxidants, by.all = "Code")
-Output_table <- left_join(Output_table, BA13_Fatty_acids, by.all = "Code")
-Output_table <- left_join(Output_table, BA13_Sugar, by.all = "Code")
+Output_table <- left_join(Output_table, BA13_Amino_acids, by = "Code")
+Output_table <- left_join(Output_table, BA13_Antinutrients, by = "Code")
+Output_table <- left_join(Output_table, BA13_Antioxidants, by = "Code")
+Output_table <- left_join(Output_table, BA13_Fatty_acids, by = "Code")
+Output_table <- left_join(Output_table, BA13_Sugar, by = "Code")
 
 
 

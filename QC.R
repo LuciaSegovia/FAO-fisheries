@@ -5,6 +5,9 @@ library(gt)
 library(tidyr)
 library(ggplot2)
 #If data is not loaded 
+
+message("starting QC.R")
+
 source("merging_all.R") #original fct
 source("missing.R") #added missing
 
@@ -863,7 +866,7 @@ fao_fish_fct %>% filter(is.na(CHOAVLDFg), !is.na(CHOAVLMg)) %>% count(source_fct
 # Checking values that the CHOAVLDFg calculated was assumed zero, but fractions
 #of were higher than zero. 
 
-subset(fao_fish_fct, #str_detect(comment, "CHOAVLDFg_calculated assumed zero") &
+subset(fao_fish_fct, str_detect(comment, "CHOAVLDFg_calculated assumed zero") &
        CHOAVLDFg_calculated == 0 &  
        (CHOCDFg > 0 & FIBTGg == 0| CHOAVLg >0), 
        select = c(fdc_id, source_fct, CHOAVLDFg_calculated,

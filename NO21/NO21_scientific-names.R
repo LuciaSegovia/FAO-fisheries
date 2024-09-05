@@ -11,11 +11,11 @@ library(stringr) # For string manipulation (data cleaning)
 #├  Norwegian FCDB data - Scientific names ----
 
 #reading excel
-readxl::excel_sheets(here::here("NO21",
+readxl::excel_sheets(here::here("data",
                                 "Scientific-name_Norwegian-FCDB.xlsx"))
 
 #loading the data
-sci_no21 <- readxl::read_excel(here::here("NO21",
+sci_no21 <- readxl::read_excel(here::here("data",
                                           "Scientific-name_Norwegian-FCDB.xlsx"),
                                sheet = 1) %>% 
   janitor::clean_names() 

@@ -1,4 +1,6 @@
 
+message("starting merging_all.R")
+
 ##Run this to clean the environment
 rm(list = ls())
 #

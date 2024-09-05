@@ -150,7 +150,7 @@ head(results_table)
 
 source("functions/Summarised_Row_Recalculator.R")
 
-recalculated_results_table <- Grp_Smrsr_row_update(results_table, 1)
+recalculated_results_table <- Grp_Smrsr_row_update(results_table, 1, CARTBEQmcg_std = "CARTBEQmcg_combined")
 
 # Copying FISHERIES-GlobalNCT_ForSharing_Feb2022 (excel) - format (#43)
 
@@ -271,6 +271,16 @@ recalculated_results_table %>%
             file = here::here(
               "output",
               paste0("Fisheries-Global-NCT_", Sys.Date(), ".csv")
+            ),
+            row.names = FALSE
+  )
+
+recalculated_results_table %>% select("comments") %>%
+  # mutate_if(is.numeric, round, digits = 2) %>%
+  write.csv(.,
+            file = here::here(
+              "output",
+              paste0("Fisheries-Global-NCT_comments_", Sys.Date(), ".csv")
             ),
             row.names = FALSE
   )

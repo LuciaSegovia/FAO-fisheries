@@ -10,7 +10,7 @@
 ################################################################################
 
 ##Run this to clean the environment
-rm(list = ls())
+#rm(list = ls())
 
 # Library loading 
 
@@ -216,8 +216,7 @@ Output_table <- Output_table %>%
 
 Output_table[Output_table == "N"] <- NA # Sets all N values, defined as "where a nutrient is present in significant quantities, but there is no reliable information on the amount", to NA
 
-Output_table[,c(9:288)] <- apply(Output_table[,c(9:288)], 2, TraceToZero)
-
+Output_table <- TraceToZero(Output_table, c(9:288))
 
 # Conversion: Measurement units -----
 
