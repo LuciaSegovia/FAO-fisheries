@@ -26,7 +26,7 @@ library(stringr) # For string manipulation (data cleaning)
 library(measurements) # For unit conversion
 library(gt) # For generating tables
 library(NutritionTools) # Nutrition functions
-source(here::here("functions.R")) # Loading nutrition functions (change to package when ready)
+# source(here::here("functions.R")) # Loading nutrition functions (change to package when ready)
 
 
 # Loading the data
