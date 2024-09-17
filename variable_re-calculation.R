@@ -20,7 +20,7 @@ library(stringr) # For string manipulation (data cleaning)
 library(measurements) # For unit conversion
 library(gt) # For generating tables
 library(NutritionTools) # Nutrition functions
-source(here::here("functions.R")) # Loading nutrition functions (change to package when ready)
+# source(here::here("functions.R")) # Loading nutrition functions (change to package when ready)
 
 
 # Loading the data
@@ -28,9 +28,16 @@ source(here::here("functions.R")) # Loading nutrition functions (change to packa
 #Uncommenting and running the following
 #source(here::here("merging_all.R"))
 
-data.df <- readRDS(here::here("data", "FAO-fish-standardised-updated_v1.1.0.RDS"))
-#data.df <- read.csv(here::here("output", "template-name_FCT_FAO_Tags.csv"))
-  
+# Identifying if we have the food composition library (standardised) file
+file <- list.files(here::here("data"), "FAO-fish-standardised-updated_")
+
+# Generating the food composition library (standardised), if unavailable
+if(sum(file) == 0) {
+  source(here::here("merging_all.R"))}
+
+# Getting the most recent food composition library 
+data.df <- readRDS(here::here("data", sort(file, decreasing = TRUE)[1]))
+
 # 0) Check that we have all FCTs merged ----
 data.df %>% 
   group_by(source_fct) %>% count()
