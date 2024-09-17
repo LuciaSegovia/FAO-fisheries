@@ -1,10 +1,29 @@
 
+#Required packages - please ensure they're installed before running. Installation can be done by uncommenting the relevant line below and running that line.
+
+#install.packages("here")
+#install.packages("gt")
+#install.packages("stringr")
+#install.packages("purrr")
+#install.packages("readr")
+#install.packages("measurements")
+#install.packages("visdat")
+#install.packages("readxl")
+#install.packages("janitor")
+
 # tictoc::tic("total")
 
 # library(tidyverse)
 
-# Only running if first time running the scripts.
-# source(here::here("supporting_datasets.R")) 
+#This should allow the file save location to be changed should the user wish to, as long as the file format remains the same.
+supporting_datasets_savefilename <- readLines("supporting_datasets.R") #Reads in file
+supporting_datasets_savefilename <- supporting_datasets_savefilename[! supporting_datasets_savefilename %in% ""] #Removes blanks
+supporting_datasets_savefilename <- supporting_datasets_savefilename[length(supporting_datasets_savefilename)] #Finds last non-blank row
+supporting_datasets_savefilename <- strsplit(supporting_datasets_savefilename, "\"", fixed = T)[[1]][2] #Extracts the correct portion of it
+
+if(!file.exists(supporting_datasets_savefilename)){ #Checks if the final file of this script is present - if it isn't, runs it. 
+  source(here::here("supporting_datasets.R"))
+}
 
 source(here::here("QC.R"))
 source(here::here("functions.R"))
@@ -43,51 +62,58 @@ df1$VITEmg_std <- NA
 n <- ncol(df1) + 1
 
 df1 <- left_join(df1, ics,
-                 by = c("ICS.FAOSTAT.SUA.Current.Code" = "ICS FAOSTAT SUA Current Code")
-) %>%
+                 by = c("ICS.FAOSTAT.SUA.Current.Code" = "ICS FAOSTAT SUA Current Code"))
+
+ideal_relocate_column_list <- c(
+  "quality_rating_for_food_match", "source_fct", "NDB_number",
+  "fdc_id", "food_desc", "scientific_name", "ISSCAAP.Group",
+  "X3.alpha.code", "Edible_factor_in_FCT", "Edible_factor_desc",
+  "SOPg_calculated",
+  "ENERCkJ_std", "ENERCkcal_std", "ENERCkJ", "ENERCkcal", "WATERg",
+  "PROCNTg", "XN", "FAT_g_standardised", "FATg", "FATCEg", "FAT_g",
+  "CHOAVLDFg_std", "CHOCDFg", "CHOAVLDFg", "CHOAVLg", "CHOAVLMg",
+  "FIBTGg_std", "FIBTGg", "NSPg", "FIBCg", "ALCg", "ASHg",
+  "CAmg", "FEmg", "MGmg", "Pmg", "Kmg", "NAmg", "ZNmg", "CUmg",
+  "MNmg", "SEmcg", "VITA_RAEmcg_std", "VITAmcg_std", "VITA_RAEmcg",
+  "VITAmcg", "RETOLmcg", "CARTBEQmcg_std", "CARTBEQmcg", "CARTAmcg",
+  "CARTBmcg", "CRYPXBmcg",
+  "VITEmg_std", # VITEmg --> future TBC
+  "VITEmg", "TOCPHAmg", "TOCPHBmg", "TOCPHGmg", "TOCPHDmg",
+  "TOCTRAmg", "TOCTRBmg", "TOCTRGmg", "THIAmg_std", "THIAmg",
+  "THIAHCLmg",
+  "RIBFmg", "VITB6_mg_standardised", "VITB6Cmg", "VITB6Amg",
+  "VITB6_mg", "FOLDFEmcg_std", # FOLDFEmcg --> standardise calculated #future
+  "FOLDFEmcg", "FOLmcg", "FOLACmcg", "FOLFDmcg",
+  "FOLSUMmcg", "FOL_mcg", "NIAEQmg_std", # NIAEQmg --> standardise calculated #future
+  "NIAEQmg", "NIAmg", "NIATRIPmg_std", # NIATRIPmg --> standardise calculated #future
+  "NIATRPmg", "TRPmg", "VITB12mcg", "VITCmg", "ASCLmg", "FASATg",
+  "FAMSg", "FAPUg", "FATRNg", "CHOLEmg", "CHOL_mg", "SUGARg",
+  "F22D6N3g", "F20D5N3g", "NIAmg_std", "IDmcg", "ASHg_std",
+  "ASHg_bydiff",
+  "comments"
+)
+
+current_relocate_list <- ideal_relocate_column_list[ideal_relocate_column_list %in% colnames(df1)]
+
+ideal_remove_list <- c("ics_faostat_sua_english_description",
+  "Food.description", "Scientific.name", "ICS_FAOSTAT", "quality",
+  "fish_type", "fish_prep", "food_group", #CHOg, 
+  "ALCg_100mL")
+
+current_remove_list <- ideal_remove_list[ideal_remove_list %in% colnames(df1)]
+
+ df1 <- df1 %>%
   relocate(ICS.FAOSTAT.SUA.Current.Code,
            .before = "ics_faostat_sua_english_description"
   ) %>%
   relocate(c(n:(n + 4)), .after = "ics_faostat_sua_english_description") %>%
-  relocate(c(
-    "quality_rating_for_food_match", "source_fct", "NDB_number",
-    "fdc_id", "food_desc", "scientific_name", "ISSCAAP.Group",
-    "X3.alpha.code", "Edible_factor_in_FCT", "Edible_factor_desc",
-    "SOP_std",
-    "ENERCkJ_std", "ENERCkcal_std", "ENERCkJ", "ENERCkcal", "WATERg",
-    "PROCNTg", "XN", "FAT_g_standardised", "FATg", "FATCEg", "FAT_g",
-    "CHOAVLDFg_std", "CHOCDFg", "CHOAVLDFg", "CHOAVLg", "CHOAVLMg",
-    "FIBTGg_std", "FIBTGg", "NSPg", "FIBCg", "ALCg", "ASHg",
-    "CAmg", "FEmg", "MGmg", "Pmg", "Kmg", "NAmg", "ZNmg", "CUmg",
-    "MNmg", "SEmcg", "VITA_RAEmcg_std", "VITAmcg_std", "VITA_RAEmcg",
-    "VITAmcg", "RETOLmcg", "CARTBEQmcg_std", "CARTBEQmcg", "CARTAmcg",
-    "CARTBmcg", "CRYPXBmcg",
-    "VITEmg_std", # VITEmg --> future TBC
-    "VITEmg", "TOCPHAmg", "TOCPHBmg", "TOCPHGmg", "TOCPHDmg",
-    "TOCTRAmg", "TOCTRBmg", "TOCTRGmg", "THIAmg_std", "THIAmg",
-    "THIAHCLmg",
-    "RIBFmg", "VITB6_mg_standardised", "VITB6Cmg", "VITB6Amg",
-    "VITB6_mg", "FOLDFEmcg_std", # FOLDFEmcg --> standardise calculated #future
-    "FOLDFEmcg", "FOLmcg", "FOLACmcg", "FOLFDmcg",
-    "FOLSUMmcg", "FOL_mcg", "NIAEQmg_std", # NIAEQmg --> standardise calculated #future
-    "NIAEQmg", "NIAmg", "NIATRIPmg_std", # NIATRIPmg --> standardise calculated #future
-    "NIATRPmg", "TRPmg", "VITB12mcg", "VITCmg", "ASCLmg", "FASATg",
-    "FAMSg", "FAPUg", "FATRNg", "CHOLEmg", "CHOL_mg", "SUGARg",
-    "F22D6N3g", "F20D5N3g", "NIAmg_std", "IDmcg", "ASHg_std",
-    "ASHg_bydiff",
-    "comment"
-  ), .after = "ISSCAAP Group") %>%
-  select(-c(
-    ics_faostat_sua_english_description,
-    Food.description, Scientific.name, ICS_FAOSTAT, quality,
-    fish_type, fish_prep, food_group, #CHOg, 
-    ALCg_100mL
-  ))
+  relocate(current_relocate_list, .after = "ISSCAAP Group") %>%
+  select(-current_remove_list)
 
 
 # Selecting variables that should be numeric
-n1 <- match("SOP_std", names(df1))
-n2 <- match("comment", names(df1)) - 1
+n1 <- match("SOPg_calculated", names(df1))
+n2 <- match("comments", names(df1)) - 1
 
 # names(df1[, c(n:ncol(df1))])
 # checking variables
@@ -111,41 +137,77 @@ results_table <- Group_Summariser(df1, "ICS.FAOSTAT.SUA.Current.Code", sep_row =
 # Checking nrow() - Should be true - only adding 1 row or 2 row if: sep_row = T
 nrow(df1) == (nrow(results_table) - (2 * 95))
 
+
 dim(results_table)
 names(results_table)
 
 head(results_table)
 # Re - calculating variables (#43)
 
-recalculated_results_table <- Grp_Smrsr_row_update(results_table, 1)
+source("functions/Summarised_Row_Recalculator.R")
+
+recalculated_results_table <- Grp_Smrsr_row_update(results_table, 1, CARTBEQmcg_std = "CARTBEQmcg_combined")
 
 # Copying FISHERIES-GlobalNCT_ForSharing_Feb2022 (excel) - format (#43)
 
-# Adding extra columns to keep the structure as FAO spreadsheet
-recalculated_results_table[, c(ncol(recalculated_results_table):(ncol(recalculated_results_table) + 23))] <- NA
-names(recalculated_results_table[, c((ncol(recalculated_results_table) - 23):ncol(recalculated_results_table))])
-dim(recalculated_results_table)
+# Need to find the columns we need to add - and which ones are already present
 
 # Adding extra columns to FAO spreadsheet to account for new variables
 dim(fisheries)
 fisheries[, c(ncol(fisheries):(ncol(fisheries) + 12))] <- NA
 
-# Reorganising columns in our dataset
+new_col_names <- as.character(fisheries[2, 7:29])
 
-recalculated_results_table <- recalculated_results_table %>% relocate(c(V117:V139), .after = "ISSCAAP Group")
+# Adding extra columns to keep the structure as FAO spreadsheet
+recalculated_results_table[, c(ncol(recalculated_results_table):(ncol(recalculated_results_table) + 23))] <- NA
+names(recalculated_results_table[, c((ncol(recalculated_results_table) - 22):ncol(recalculated_results_table))])
+dim(recalculated_results_table)
+
+# Renaming and reorganising columns in our dataset
+
+first_NA_col <- which(colnames(recalculated_results_table) == colnames(recalculated_results_table %>% select(last_col(22))))
+last_NA_col <- which(colnames(recalculated_results_table) == colnames(recalculated_results_table %>% select(last_col())))
+
+new_col_names[1] <- "NA1" #Both were previously "NA"
+new_col_names[2] <- "NA2"
+
+new_col_names[6] <- "Seq1"
+new_col_names[18] <- "Seq2"
+
+new_col_names[9] <- "f=fortified with micronutrients1"
+new_col_names[20] <- "f=fortified with micronutrients2"
+
+
+new_col_names[10] <- "Edible coefficient to be used1"
+new_col_names[21] <- "Edible coefficient to be used2"
+
+new_col_names[11] <- "1 = as purchased i.e. edible factors of FCTs can be used after verification of definition of edible factors. 2 = as produced i.e. the default factors given here should be used unless country-specific factors are available1"
+new_col_names[22] <- "1 = as purchased i.e. edible factors of FCTs can be used after verification of definition of edible factors. 2 = as produced i.e. the default factors given here should be used unless country-specific factors are available2"
+
+new_col_names[12] <- "Source for edible coeff.and/or comments1"
+new_col_names[23] <- "Source for edible coeff.and/or comments2"
+
+
+new_col_names[17] <- " " #This was "", but that was blank and throwing errors when trying to run the rest of the code
+
+
+new_col_names %in% colnames(recalculated_results_table)
+
 
 # Combining variable names
-#names(recalculated_results_table)[1:122] <- names(fisheries)[1:122]
-#names(fisheries)[123:139] <- names(recalculated_results_table)[123:139]
 
-# Merging variable names
-#recalculated_results_table <- rbind(
-# fisheries[c(1:2), ],
-#  recalculated_results_table
-#)
 
-# Add Edible portion from "Edible coefficient to be used"
-# TO-DO: Check if could be calculated
+colnames(recalculated_results_table)[first_NA_col:last_NA_col] <- new_col_names
+
+duplicate_colnames <- colnames(recalculated_results_table)[duplicated(colnames(recalculated_results_table))]
+
+duplicate_colnames %in% new_col_names #All duplicates are in the new column names
+
+first_NA_colname <- colnames(recalculated_results_table)[first_NA_col]
+last_NA_colname <- colnames(recalculated_results_table)[last_NA_col]
+
+recalculated_results_table <- recalculated_results_table %>% relocate(all_of(new_col_names), .after = "ISSCAAP Group")
+
 
 n1 <- match("quality_rating_for_food_match", names(recalculated_results_table)) -3
 names(recalculated_results_table[n1])
@@ -153,14 +215,14 @@ names(recalculated_results_table[n1])
 recalculated_results_table <- recalculated_results_table %>%
   select(-n1) %>%
   left_join(., edible_ics ) %>%
-  relocate("X.24", .after = "V136")
+  relocate("X.24", .after = new_col_names[20])
 
 #27
 (match("X.24", names(recalculated_results_table)))
 
 
 #n1 <- match("X.36", names(recalculated_results_table))
-#n2 <- match("comment", names(recalculated_results_table))-1
+#n2 <- match("comments", names(recalculated_results_table))-1
 #
 #recalculated_results_table <-  recalculated_results_table %>% mutate_at(n1:n2, as.numeric)
 #  
@@ -169,13 +231,13 @@ recalculated_results_table <- recalculated_results_table %>%
 
 class(recalculated_results_table$FOLFDmcg)
 
-n1 <- which(recalculated_results_table$CHOAVLDFg_std< 0)
+n1 <- which(recalculated_results_table$CHOAVLDFg_calculated< 0)
 
-recalculated_results_table$comment[n1] <- ifelse(is.na(recalculated_results_table$comment[n1]),
-                                                 "CHOAVLDFg_std assumed zero", paste(recalculated_results_table$comment, "| CHOAVLDFg_std assumed zero") )
-recalculated_results_table$CHOAVLDFg_std[recalculated_results_table$CHOAVLDFg_std< 0] <- 0
+recalculated_results_table$comments[n1] <- ifelse(is.na(recalculated_results_table$comments[n1]),
+                                                 "CHOAVLDFg_calculated assumed zero", paste(recalculated_results_table$comments, "| CHOAVLDFg_calculated assumed zero") )
+recalculated_results_table$CHOAVLDFg_calculated[recalculated_results_table$CHOAVLDFg_calculated< 0] <- 0
 
-recalculated_results_table$CHOAVLDFg_std
+recalculated_results_table$CHOAVLDFg_calculated
 
 # tictoc::toc()
 
@@ -194,6 +256,16 @@ recalculated_results_table %>%
             file = here::here(
               "output",
               paste0("Fisheries-Global-NCT_", Sys.Date(), ".csv")
+            ),
+            row.names = FALSE
+  )
+
+recalculated_results_table %>% select("comments") %>%
+  # mutate_if(is.numeric, round, digits = 2) %>%
+  write.csv(.,
+            file = here::here(
+              "output",
+              paste0("Fisheries-Global-NCT_comments_", Sys.Date(), ".csv")
             ),
             row.names = FALSE
   )

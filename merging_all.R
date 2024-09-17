@@ -1,4 +1,6 @@
 
+message("starting merging_all.R")
+
 ##Run this to clean the environment
 rm(list = ls())
 #
@@ -26,20 +28,50 @@ library(visdat) # Data visualisation
 
 ##Checking and loading updates
 
-#source_fct_name <- c("DK19" ,
-#                     "IN17" ,
-#                     "KE18" ,   
-#                     "NZ18" ,
-#                     "UK21" ,
-#                     "BA13" ,  
-#                     "UF16" ,
-#                     "WA19" ,
-#                     "NO21")
-#
-#
-#for(i in source_fct_name){
-#  source(paste0(i, "/", i, "_FCT_FAO_Tags.R"))
-#}
+source_fct_name <- c("DK19" ,
+                     "IN17" ,
+                     "KE18" ,   
+                     "NZ18" ,
+                     "UK21" ,
+                     "BA13" ,  
+                     "UF16" ,
+                     "WA19" ,
+                     "NO21" ,
+                     "AU19" ,
+                     "JA15" ,
+                     "US19" ,
+                     "BR11" )
+present_fcts <- c()
+
+for(FCTNumber in 1:length(source_fct_name)){ #Loops through all the FCT's 
+  FCT_folder <- list.files(source_fct_name[FCTNumber], recursive = T) #For each FCT folder, extracts the details of all files present
+  input_files <- FCT_folder[grepl(".xlsx|.accdb", FCT_folder)] #Checks for the presence of input files (.xlsx or .accdb files)
+  
+  if(length(input_files)>0){ #Checks if input files are present
+    message(paste0("Input files detected for ", source_fct_name[FCTNumber])) #Tells user they are if they're present
+    
+    if(file.exists(paste0("Output/", source_fct_name[FCTNumber], "_FCT_FAO_Tags.csv"))){ #Checks if output files are present
+      message(paste0("Output table detected for ", source_fct_name[FCTNumber], ". Table generation skipped. If you would like to regenerate the table, please delete file ",  source_fct_name[FCTNumber], "_FCT_FAO_Tags.csv from the Outputs folder and rerun this script")) #Tells user if output files are detected
+    } else{ #If no output files are detected, generates these tables, telling the user that this is happening
+      message(paste0("No output table detected for ", source_fct_name[FCTNumber], ". Generating now"))
+      source(paste0(source_fct_name[FCTNumber], "/", source_fct_name[FCTNumber], "_FCT_FAO_Tags.R"))
+    }
+  }
+  if(file.exists(paste0("Output/", source_fct_name[FCTNumber], "_FCT_FAO_Tags.csv"))){ #Finally, checks if the output files are present, and adds to list of present files. This means that if the user gets an output file and directly places it in the Output folder without generating it themselves this process can be skipped and the input files are not requried. 
+    present_fcts <- c(present_fcts, source_fct_name[FCTNumber])
+  } else {
+    message(paste0("No Input or Output file detected for ", source_fct_name[FCTNumber], "; skipping"))
+  }
+  remove_list <- ls() #creates list of things to remove
+  remove_list <- remove_list[!remove_list %in% c("present_fcts", "source_fct_name", "FCTNumber")] #removes required files from the remove list
+  rm(list=remove_list) # removes all the extra files from generating the tables
+}
+
+
+
+
+
+
 
 
 # 1) Loading all FCDBs into one single database ----
@@ -57,11 +89,32 @@ fct_cover <- list.files("Output/", pattern = "*_FCT_FAO_Tags", recursive=FALSE, 
 fct_cover %>% distinct(source_fct) 
 colnames(fct_cover)
 
+
+
 # Importing the ICS Codes for all the fisheries
 ics_code_file <- readRDS(here::here("data", "ics-code_fish-code.RDS")) %>%  # FAO Fisheries
   rename(food_desc = "Food.description", scientific_name = "Scientific.name",
-          ISSCAAP = "ISSCAAP.Group") %>% 
-  bind_rows(., readRDS(here::here("data", "ics-code_NO21-code.RDS"))) # Plus NO21
+          ISSCAAP = "ISSCAAP.Group")
+
+
+# If NO21 is present, the next steps are required - wont work if its not present.
+
+if("NO21" %in% present_fcts){
+  #Checks to see the file name of the output, then generates it if not present.
+  NO21_fishcodes_savefilename <- readLines("NO21/NO21_harmonising.R") #Reads in file
+  NO21_fishcodes_savefilename <- NO21_fishcodes_savefilename[! NO21_fishcodes_savefilename %in% ""] #Removes blanks
+  NO21_fishcodes_savefilename <- NO21_fishcodes_savefilename[length(NO21_fishcodes_savefilename)] #Finds last non-blank row
+  NO21_fishcodes_savefilename <- strsplit(NO21_fishcodes_savefilename, "\"", fixed = T)[[1]][2] #Extracts the correct portion of it
+  
+  if(!file.exists(NO21_fishcodes_savefilename) | length(list.files("data/", pattern = "fish-NO21_*", recursive=FALSE, full.names=TRUE)) == 0){ #Checks if the final file of this script is present - if it isn't, runs it. 
+    source(here::here("NO21","NO21_harmonising.R"))
+  }
+  
+  ics_code_file <- ics_code_file %>% 
+    bind_rows(., readRDS(here::here("data", "ics-code_NO21-code.RDS"))) # Plus NO21
+  
+}
+
 
 # creating a vector with all the variables of interest
 # identification variables, components that were included in the Global FCT plus new components
@@ -160,6 +213,11 @@ col_names <- c("fdc_id",
                "SEmcg",
                "IDmcg")
 
+
+present_col_names <- colnames(fct_cover) #Finds all the column names in the actual meta-FCT
+
+col_names <- present_col_names[present_col_names %in% col_names] #strips down the list above to the ones present (some FCT's are the sole source of some variables; if they aren't present, they can't be included. This removes them)
+
 # AAs
 aa <- c("ILEmg", 	"LEUmg",	"LYSmg", 	"METmg", "CYSmg", "PHEmg",	"TYRmg", 
   "THRmg", "TRPmg", "VALmg", 	"ARGmg", 	"HISmg", 	"ALAmg", 	"ASPmg",
@@ -176,8 +234,8 @@ fct_cover %>% dplyr::select(col_names) %>%
 
 #Filtering out components that are not used and removing "_FCT" from the FCTs/FCDB name
 #added quality for NO21
-#fct_cover <- fct_cover %>% select(col_names, quality) %>% 
-#  mutate_at("source_fct", ~str_replace(., "_FCT", "")) 
+fct_cover <- fct_cover %>% select(col_names) %>% 
+  mutate_at("source_fct", ~str_replace(., "_FCT", "")) 
 
 #Checking that we have all the variables of interest
 fct_cover %>% str()
@@ -200,9 +258,17 @@ fct_cover %>%
 
 fish_fct <-  fct_cover %>% 
   left_join(., ics_code_file %>% select(-c(food_desc, ISSCAAP, scientific_name)), 
-            by = c("source_fct", "fdc_id")) %>% 
-  filter(!is.na(ICS.FAOSTAT.SUA.Current.Code) | !is.na(ICS_FAOSTAT_future)) 
-  
+            by = c("source_fct", "fdc_id"))
+
+
+#Filtering is dependent on information provided by NO21 potentially. ICS_FAOSTAT_future comes from NO21
+if("NO21" %in% present_fcts){
+  fish_fct <- fish_fct %>% filter(!is.na(ICS.FAOSTAT.SUA.Current.Code) | !is.na(ICS_FAOSTAT_future)) 
+} else {
+  fish_fct <- fish_fct %>% filter(!is.na(ICS.FAOSTAT.SUA.Current.Code)) 
+}
+
+
 
 length(unique(fish_fct$fdc_id))
 unique(fish_fct$source_fct)
@@ -328,5 +394,5 @@ subset(fao_fish_fct, !is.na(scientific_name)) %>%
 
 table(!is.na(fao_fish_fct$scientific_name), fao_fish_fct$source_fct)
 
-#saveRDS(fao_fish_fct, here::here("data", "FAO-fish-standardised-updated_v1.1.0.RDS"))
 
+saveRDS(fao_fish_fct, here::here("data", "FAO-fish-standardised-updated_v1.1.0.RDS"))

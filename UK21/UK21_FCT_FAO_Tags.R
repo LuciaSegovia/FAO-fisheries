@@ -10,7 +10,7 @@
 ################################################################################
 
 ##Run this to clean the environment
-rm(list = ls())
+#rm(list = ls())
 
 # Library loading 
 
@@ -21,9 +21,9 @@ source(here::here("functions.R")) # Loading nutrition functions (change to packa
 # 0) Accessing the data (for source of the data see README) - Uncomment!
 # Only need to do it the first time to obtain the raw files!
 # 
-#f <- "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/971018/McCance_Widdowsons_Composition_of_Foods_Integrated_Dataset_2021..xlsx"
+# f <- "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/971018/McCance_Widdowsons_Composition_of_Foods_Integrated_Dataset_2021..xlsx"
 # 
-# download.file(f, 
+# download.file(f,
 #             destfile = here::here( 'WA19', "WAFCT_2019.xlsx"),
 #             method="wininet", #use "curl" for OS X / Linux, "wininet" for Windows
 #             mode="wb")
@@ -212,11 +212,12 @@ Output_table <- Output_table %>%
   relocate(source_fct, .after = food_desc) #Moves the source_fct column to the start, with other metadata columns
 
 #Check "N" vs "Tr"
+
 # Sets all N values, defined as "where a nutrient is present in significant quantities, but there is no reliable information on the amount", to NA
 Output_table[Output_table == "N"] <- NA 
-# Changing "Tr" to zero
-Output_table <- TraceToZero(Output_table, names(Output_table[,c(9:288)]))
 
+#Changing "Tr" to zero
+Output_table <- TraceToZero(Output_table, c(9:288))
 
 # Conversion: Measurement units -----
 
@@ -248,5 +249,5 @@ Output_table <- Output_table %>%
 write.csv(Output_table, file = here::here("output", "UK21_FCT_FAO_Tags.csv"),
           row.names = FALSE) #Saves the newly-created data table to the Output folder
 
-#Run this to clean the environment
-rm(list = ls())
+#Run this to clean the environment - do so if running it on its own
+#rm(list = ls())

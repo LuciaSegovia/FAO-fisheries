@@ -155,7 +155,7 @@ write.csv(IN17_Renamed,
           file = here::here("output", 
                             "IN17_FCT_FAO_Tags.csv"), row.names = FALSE)
 
-#clean environment
-rm(list = ls())
+#clean environment - do so if running the script individually
+#rm(list = ls())
 
 

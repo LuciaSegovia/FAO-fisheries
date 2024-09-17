@@ -4,11 +4,11 @@ source(here::here("functions.R"))
 
 
 # Data Import ----
-# Food ids (Get form https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip)
+# Food ids (Get from https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip)
 US19_Food_Convert <- read.csv(here::here("US19", "sr_legacy_food.csv"))
 
 #legacy_database <- odbcConnectAccess2007("../../FAO/UoN-FAO/US19/SR-Leg_DB/SR_Legacy.accdb") #provides a link to the access database. Due to the database being too big to store on git, different locations have been used depending on who is running the code
-legacy_database <- odbcConnectAccess2007(here::here("US19", "SR-LEG_DB", "SR_Legacy.accdb")) #alternate database location
+legacy_database <- odbcConnectAccess2007(here::here("US19", "SR_Legacy.accdb")) #alternate database location
 
 
 legacy_database_tables <- sqlTables(legacy_database) #Creates a list of the tables in the database
@@ -208,4 +208,6 @@ glimpse(Output_table)
 # Data Output ----
 
 write.csv(Output_table, file = here::here("output", "US19_FCT_FAO_Tags.csv"), row.names = FALSE)  #Saves the newly-created data table to the Output folder 
-rm(list = ls())  # Removes all the environment variables - tidies up RStudio 
+
+# Removes all the environment variables - tidies up RStudio. Do so if running the script individually
+#rm(list = ls())  

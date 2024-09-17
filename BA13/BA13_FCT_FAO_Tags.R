@@ -213,5 +213,5 @@ glimpse(Output_table)
 write.csv(Output_table, file = here::here("output", "BA13_FCT_FAO_Tags.csv"),
           row.names = FALSE) #This writes the Output table to a csv in the projects "Output" subfolder
 
-#Run this to clean the environment
-rm(list = ls())
+#Run this to clean the environment - do so if running the script individually
+#rm(list = ls())

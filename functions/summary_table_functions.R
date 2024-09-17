@@ -200,7 +200,7 @@ CARTBEQmcg_std_creator <- function(dataset) {
         comments,
         paste0(
           comments,
-          " | CARTBEQmcg_std calculated from CARTBmcg, CARTAmcg and CRYPXBmcg"
+          "; CARTBEQmcg_std calculated from CARTBmcg, CARTAmcg and CRYPXBmcg"
         )
       )) %>%
       mutate(comments = ifelse(
@@ -440,7 +440,7 @@ RETOLmcg_calculator <- function(dataset) {
             rowwise() %>%
             mutate(comments = ifelse(is.na(comments), "", comments)) %>%
             # ! case 1 If all three variables are not NA them calculate and add comment
-            mutate(RETOLmcg = ifelse((is.na(RETOLmcg) &
+            mutate(RETOLmcg_calculated = ifelse((is.na(RETOLmcg) &
                 !is.na(CARTBEQmcg) &
                 !is.na(VITA_RAEmcg)),
             sum(VITA_RAEmcg, (-1 / 12 * CARTBEQmcg)),
@@ -451,12 +451,12 @@ RETOLmcg_calculator <- function(dataset) {
                 !is.na(VITA_RAEmcg)),
             paste0(
                 comments,
-                " | RETOLmcg value re-calulated from VITA_RAEmcg and CARTBEQmcg "
+                "; RETOLmcg_calculated value re-calulated from VITA_RAEmcg and CARTBEQmcg "
             ),
             comments
             )) %>%
             # ! Case 2: If RETOLmcg is not present and CARTBEQmcg also not present but both VITA_RAEmcg and VITAmcg are available then calculate with eq2 and add comments.
-            mutate(RETOLmcg = ifelse((
+            mutate(RETOLmcg_calculated = ifelse((
                 is.na(RETOLmcg) &
                     is.na(CARTBEQmcg) &
                     !is.na(VITA_RAEmcg) & !is.na(VITAmcg)
@@ -471,7 +471,7 @@ RETOLmcg_calculator <- function(dataset) {
             ),
             paste0(
                 comments,
-                " | RETOLmcg value re-calulated from VITA_RAEmcg and VITAmcg "
+                "; RETOLmcg_calculated value re-calulated from VITA_RAEmcg and VITAmcg "
             ),
             comments
             )) %>%
@@ -480,10 +480,11 @@ RETOLmcg_calculator <- function(dataset) {
             print(paste0(
                 "Error: ",
                 columns,
-                " columns missing in dataset, halting calculation"
+                "; columns missing in dataset, halting calculation"
             ))
         }
     )
+    return(dataset)
 }
 
 
@@ -514,7 +515,7 @@ CARTBEQmcg_backcalculator <- function(dataset) {
             ),
             paste0(
                 comments,
-                " | CARTBEQmcg_std back calculated from VITA_RAEmcg and VITAmcg"
+                "; CARTBEQmcg_std back calculated from VITA_RAEmcg and VITAmcg"
             ),
             comments
             )) %>%
@@ -559,7 +560,7 @@ CARTBEQmcg_std_imputer_with_CARTBEQmcg <-
                     !is.na(CARTBEQmcg)),
                 paste0(
                     comments,
-                    "| CARTBEQmcg_std imputed with CARTBEQmcg"
+                    "; CARTBEQmcg_std imputed with CARTBEQmcg"
                 ),
                 comments
                 )) %>%
@@ -573,7 +574,7 @@ CARTBEQmcg_std_imputer_with_CARTBEQmcg <-
                 print(paste0(
                     "Error: ",
                     columns,
-                    " columns missing in dataset, halting calculation"
+                    "; columns missing in dataset, halting calculation"
                 ))
             }
         )

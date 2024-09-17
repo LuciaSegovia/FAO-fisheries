@@ -8,7 +8,7 @@
 #                                                                              #
 ################################################################################
 ##Run this to clean the environment
-rm(list = ls())
+#rm(list = ls())
 
 # Library loading 
 
@@ -145,5 +145,5 @@ wafct <- wafct %>% mutate_at(vars(wa_nut), as.numeric) # Converts certain column
 write.csv(wafct, file = here::here("output", "WA19_FCT_FAO_Tags.csv"), 
           row.names = FALSE) #Saves the newly-created data table to the Output folder
 
-#Run this to clean the environment
-rm(list = ls())
+#Run this to clean the environment - do so if running the script on its own
+#rm(list = ls())
