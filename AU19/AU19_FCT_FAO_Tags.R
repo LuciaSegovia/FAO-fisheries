@@ -124,4 +124,5 @@ glimpse(Output_table) #checking variables before saving
 write.csv(Output_table, file = here::here("output", "AU19_FCT_FAO_Tags.csv"), #Saves the table as a csv called "AU19_FCT_FAO_Tags"
           row.names = FALSE)
 
-rm(list = ls())
+#Run this to clean the environment - do so if running the script on its own
+#rm(list = ls())

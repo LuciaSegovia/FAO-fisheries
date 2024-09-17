@@ -63,15 +63,15 @@ Speaker notes go here.
 3.  Increasing the standardisation of the FCTs would...
 
 ::: fragment
-\... Lower cost of updating & generating new NCTs
+... Lower cost of updating & generating new NCTs
 :::
 
 ::: fragment
-\... Increase reproducibility of NCTs and their survey outputs
+... Increase reproducibility of NCTs and their survey outputs
 :::
 
 ::: fragment
-\... Increase re-usability & dissemination of FCTs
+... Increase re-usability & dissemination of FCTs
 :::
 
 ## Overview of the NCT framework
@@ -334,7 +334,7 @@ Combining variables
 `THIAmg_std_creator()` - Thiamin and Thiamin hydrochloride
 
 ::: notes
-In our FCT data library the following variables were recombined: FAT_g\_standardised, FIBTGg_standardised\*, THIAmg_standardised and VITB6_mg_standardised
+In our FCT data library the following variables were recombined: FAT_g_standardised, FIBTGg_standardised\*, THIAmg_standardised and VITB6_mg_standardised
 :::
 :::
 
@@ -896,8 +896,10 @@ This is an stand-alone script that allows for: reproducibility, transparency and
 
 -   More food composition analysis are required, particularly for some fishery categories & nutrients.
 
-          -  "Aquatic Animals nei", and fish oils in general.
-          -  DHA, EPA, I & Se
+    ```         
+      -  "Aquatic Animals nei", and fish oils in general.
+      -  DHA, EPA, I & Se
+    ```
 
 -   For some fishery categories and food components, the number of data were far fewer than for other.
 

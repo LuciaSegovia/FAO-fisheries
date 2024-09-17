@@ -198,5 +198,5 @@ glimpse(Output_table)
 write.csv(Output_table, file = here::here("output", "NZ18_FCT_FAO_Tags.csv"),
           row.names = FALSE) #Saves the newly-created data table to the Output folder 
 
-#Run this to clean the environment
-rm(list = ls())
+#Run this to clean the environment - do so if running this script individually
+#rm(list = ls())

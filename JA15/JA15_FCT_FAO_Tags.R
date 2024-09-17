@@ -139,7 +139,7 @@ Output_table <- left_join(Output_table, JA15_FCT_Fatty_Acids_int, by = "Item Num
 Output_table[Output_table == "-"] <- NA 
 
 # Sets all "Tr" entries to 0
-Output_table <- TraceToZero(Output_table,names(Output_table[,c(5:156)])) 
+Output_table <- TraceToZero(Output_table, c(5:156))
 
 # removes special characters from the table contents
 Output_table[] <- lapply(Output_table, function(x) gsub("\\*|\\(|\\)", "", x)) 
@@ -175,5 +175,5 @@ glimpse(Output_table)
 
 write.csv(Output_table, file = here::here("output", "JA15_FCT_FAO_Tags.csv"), row.names = FALSE) #Saves the newly-cleaned table to the Output folder 
 
-#Run this to clean the environment
-rm(list = ls())
+#Run this to clean the environment - do so if running the script on its own
+#rm(list = ls())

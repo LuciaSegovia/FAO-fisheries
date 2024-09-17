@@ -1,4 +1,6 @@
 
+message("starting NO21_harmonising.R")
+
 # Loading libraries
 ## Note: if it is the first time: install.packages() first
 library(dplyr) # For data cleaning (wrangling)
@@ -579,7 +581,9 @@ no21_fish <- no21_fish %>%
 sum(is.na(no21_fish$ICS_FAOSTAT_future))
 
 # Save an NO21 to a R file - for QC.
-# saveRDS(no21_fish, file = paste0("NO21/fish-NO21_", Sys.Date(),  ".RDS"))
+
+
+saveRDS(no21_fish, file = paste0("data/fish-NO21_", Sys.Date(),  ".RDS"))
 
 #├ 3.6. Dealing with missing values ----
 
