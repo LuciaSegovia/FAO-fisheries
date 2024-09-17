@@ -135,17 +135,23 @@ Output_table <- left_join(Output_table, JA15_FCT_Fatty_Acids_int, by = "Item Num
 
 # Data tidying, column creation, moving and renaming ----
 
-Output_table[Output_table == "-"] <- NA #Sets all missing entries to NA.
-#Output_table[Output_table == "Tr"] <- "0" #Sets all "Tr" entries to 0
+# Sets all missing entries to NA
+Output_table[Output_table == "-"] <- NA 
 
+# Sets all "Tr" entries to 0
 Output_table <- TraceToZero(Output_table, c(5:156))
 
+# removes special characters from the table contents
+Output_table[] <- lapply(Output_table, function(x) gsub("\\*|\\(|\\)", "", x)) 
 
-Output_table[] <- lapply(Output_table, function(x) gsub("\\*|\\(|\\)", "", x)) # removes special characters from the table contents
+# creates and populates the "source_fct" column 
+Output_table$source_fct <- "JA15" 
 
-Output_table$source_fct <- "JA15" #creates and populates the "source_fct" column 
-Output_table$EDIBLEpc <- (100-as.integer(Output_table$REFUSEpc))/100 #calculates the Edible percentage column (EDIBLEpc)
-Output_table$nutrient_data_source <- "None listed" #creates and populates the data source column
+# calculates the Edible percentage column (EDIBLEpc)
+Output_table$EDIBLEpc <- (100-as.integer(Output_table$REFUSEpc))/100 
+
+#creates and populates the data source column
+Output_table$nutrient_data_source <- "None listed"
 
 Output_table <- Output_table %>%
   relocate(source_fct, .after = `Food Description`) %>% #moves columns to more relevant locations

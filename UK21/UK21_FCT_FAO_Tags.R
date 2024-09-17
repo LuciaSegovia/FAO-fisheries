@@ -212,10 +212,11 @@ Output_table <- Output_table %>%
   relocate(source_fct, .after = food_desc) #Moves the source_fct column to the start, with other metadata columns
 
 #Check "N" vs "Tr"
+
+# Sets all N values, defined as "where a nutrient is present in significant quantities, but there is no reliable information on the amount", to NA
+Output_table[Output_table == "N"] <- NA 
+
 #Changing "Tr" to zero
-
-Output_table[Output_table == "N"] <- NA # Sets all N values, defined as "where a nutrient is present in significant quantities, but there is no reliable information on the amount", to NA
-
 Output_table <- TraceToZero(Output_table, c(9:288))
 
 # Conversion: Measurement units -----
