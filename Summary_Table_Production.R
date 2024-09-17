@@ -1,19 +1,21 @@
 
 #Required packages - please ensure they're installed before running. Installation can be done by uncommenting the relevant line below and running that line.
 
-#install.packages("here")
-#install.packages("gt")
-#install.packages("stringr")
-#install.packages("purrr")
-#install.packages("readr")
-#install.packages("measurements")
-#install.packages("visdat")
-#install.packages("readxl")
-#install.packages("janitor")
-
-# tictoc::tic("total")
-
-# library(tidyverse)
+# install.packages("here")
+# install.packages("gt")
+# install.packages("stringr")
+# install.packages("purrr")
+# install.packages("readr")
+# install.packages("measurements")
+# install.packages("visdat")
+# install.packages("readxl")
+# install.packages("janitor")
+# install.packages("naniar")
+# 
+# if (!require("devtools")) {
+#   install.packages("devtools")
+# }
+# devtools::install_github("TomCodd/NutritionTools")
 
 #This should allow the file save location to be changed should the user wish to, as long as the file format remains the same.
 supporting_datasets_savefilename <- readLines("supporting_datasets.R") #Reads in file
@@ -131,7 +133,7 @@ df1[, data_columns] <- apply(
   function(x) as.numeric(as.character(x))
 )
 
-results_table <- Group_Summariser(df1, "ICS.FAOSTAT.SUA.Current.Code", sep_row = T) %>%
+results_table <- NutritionTools::Group_Summariser(df1, "ICS.FAOSTAT.SUA.Current.Code", sep_row = T) %>%
   mutate_at(data_columns, as.numeric)
 
 # Checking nrow() - Should be true - only adding 1 row or 2 row if: sep_row = T
