@@ -28,8 +28,6 @@ if(!file.exists(supporting_datasets_savefilename)){ #Checks if the final file of
 source(here::here("QC.R"))
 source(here::here("functions.R"))
 
-print("here 1")
-
 # source(here::here("summary_table_functions.R")) # TODO I have created a separate file with my functions for testing. Once all other functions are tested then we can merge.
 # source(here::here("Summarised_Row_Recalculator.R"))
 
@@ -139,8 +137,6 @@ results_table <- Group_Summariser(df1, "ICS.FAOSTAT.SUA.Current.Code", sep_row =
 # Checking nrow() - Should be true - only adding 1 row or 2 row if: sep_row = T
 nrow(df1) == (nrow(results_table) - (2 * 95))
 
-print("here 2")
-
 
 dim(results_table)
 names(results_table)
@@ -198,6 +194,8 @@ new_col_names[17] <- " " #This was "", but that was blank and throwing errors wh
 new_col_names %in% colnames(recalculated_results_table)
 
 
+# Combining variable names
+
 
 colnames(recalculated_results_table)[first_NA_col:last_NA_col] <- new_col_names
 
@@ -210,19 +208,6 @@ last_NA_colname <- colnames(recalculated_results_table)[last_NA_col]
 
 recalculated_results_table <- recalculated_results_table %>% relocate(all_of(new_col_names), .after = "ISSCAAP Group")
 
-# Combining variable names
-
-#names(recalculated_results_table)[1:122] <- names(fisheries)[1:122]
-#names(fisheries)[123:139] <- names(recalculated_results_table)[123:139]
-
-# Merging variable names
-#recalculated_results_table <- rbind(
-# fisheries[c(1:2), ],
-#  recalculated_results_table
-#)
-
-# Add Edible portion from "Edible coefficient to be used"
-# TO-DO: Check if could be calculated
 
 n1 <- match("quality_rating_for_food_match", names(recalculated_results_table)) -3
 names(recalculated_results_table[n1])

@@ -97,7 +97,7 @@ ics_code_file <- readRDS(here::here("data", "ics-code_fish-code.RDS")) %>%  # FA
           ISSCAAP = "ISSCAAP.Group")
 
 
-# If NO12 is present, the next steps are required - wont work if its not present.
+# If NO21 is present, the next steps are required - wont work if its not present.
 
 if("NO21" %in% present_fcts){
   #Checks to see the file name of the output, then generates it if not present.
