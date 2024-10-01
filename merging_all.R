@@ -111,7 +111,7 @@ if("NO21" %in% present_fcts){
   }
   
   ics_code_file <- ics_code_file %>% 
-    bind_rows(., readRDS(here::here("inter-output", "ics-code_NO21-code.RDS"))) # Plus NO21
+    bind_rows(., readRDS(here::here("NO21", "inter-output", "ics-code_NO21-code.RDS"))) # Plus NO21
   
 }
 

@@ -54,6 +54,12 @@ inter-output/*.csv
 inter-output/*.RDS
 LS06/
 
+# Intermediate Outputs
+
+inter-output/*.csv
+inter-output/*.RDS
+NO21/inter-output/*.RDS
+
 # Outputs (e.g., documents, images, plots, etc.)
 *.docx
 *.pdf

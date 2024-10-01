@@ -583,7 +583,7 @@ sum(is.na(no21_fish$ICS_FAOSTAT_future))
 # Save an NO21 to a R file - for QC.
 
 
-saveRDS(no21_fish, file = paste0("inter-output/fish-NO21_", Sys.Date(),  ".RDS"))
+saveRDS(no21_fish, file = paste0("NO21/inter-output/fish-NO21_", Sys.Date(),  ".RDS"))
 
 #├ 3.6. Dealing with missing values ----
 
@@ -629,5 +629,5 @@ no21_fish %>%
   select(ICS.FAOSTAT.SUA.Current.Code,  source_fct, fdc_id, food_desc,
          scientific_name, ISSCAAP,  X3.alpha.code, ICS_FAOSTAT_future) %>% 
   distinct() %>% mutate_at("ICS.FAOSTAT.SUA.Current.Code", as.integer) %>% 
-  saveRDS( file = "inter-output/ics-code_NO21-code.RDS")
+  saveRDS( file = "NO21/inter-output/ics-code_NO21-code.RDS")
 
