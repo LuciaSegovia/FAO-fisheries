@@ -61,7 +61,8 @@ subset(datadf, SOP<95 |SOP>105)# %>%  View()
 
 
 
-#1) Checking the fisheries dataset
+#1) Checking the fisheries dataset 
+#TO-DO: Change to read the most updated version of the file
 
 fao_fish_fct <- readRDS(here::here("data", "FAO-fish-harmonised_nomissing_v1.1.0.RDS"))
 
