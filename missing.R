@@ -3,7 +3,7 @@ message("starting missing.R")
 
 ##### Dealing with missing values ######
 
-if(!file.exists(here::here("data", "FAO-fish-harmonised_v1.1.0.RDS"))){ #Checks if the final file of variable_re-calculation already exists, if not, runs it.
+if(!file.exists(here::here("inter-output", "FAO-fish-harmonised_v1.1.0.RDS"))){ #Checks if the final file of variable_re-calculation already exists, if not, runs it.
   source("variable_re-calculation.R")
 }
 
