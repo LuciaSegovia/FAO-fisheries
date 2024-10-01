@@ -66,7 +66,7 @@ subset(datadf, SOP<95 |SOP>105)# %>%  View()
 
 fao_fish_fct <- readRDS(here::here("data", "FAO-fish-harmonised_nomissing_v1.1.0.RDS"))
 
-#adding in quality values, by finding the last created/edited file (file has consecuttive date-based naming)
+#adding in quality values, by finding the last created/edited file (file has consecutive date-based naming)
 
 fish_quality_files <- list.files("data/", pattern = "fish-NO21_*", recursive=TRUE, full.names=TRUE)
 fish_quality_folders <- dirname(fish_quality_files)
