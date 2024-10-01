@@ -8,10 +8,16 @@
 # If data is not loaded 
 #source("merging.R")
 source("merging_all.R")
-library(gt)
-library(gtExtras)
+# Loading libraries
+library(gt) # pretty tables
+library(gtExtras) # more pretty tables
+library(dplyr) # data wrangling
+library(tidyr) # data cleaning 
 library(ggplot2) # Visualisation
-library(tidyr) # Tidying
+library(ggridges) #ridges for ggplot
+library(cowplot) # combining plots
+library(ggpubr) 
+library(patchwork) # combining plots
 
 
 
@@ -704,6 +710,42 @@ missing <- c("Cephalopods, cured", "Aquatic animals nei, cured",
 subset(fao_fish_fct, grepl("Impausible value of CARTBEQmcg_std", comment)) %>% 
   count() /nrow(fao_fish_fct)*100
   
+# Quality checks ----
+
+harmo_fct <- readRDS(here::here("data", "FAO-fish-harmonised_v1.1.0.RDS"))
+
+harmo_fct$ics_faostat_sua_english_description[harmo_fct$fish_prep == "frozen, fillets"]
+harmo_fct$ics_faostat_sua_english_description[harmo_fct$fish_prep == "frozen fillets"]
+harmo_fct$fish_prep[harmo_fct$fish_prep == "frozen, fillets"] <- "frozen fillets"
+harmo_fct$fish_prep[harmo_fct$fish_prep == "frozen, whole"] <- "frozen whole"
+harmo_fct$fish_prep[harmo_fct$fish_prep == "frozen fillets"]
+
+
+## Proteins --------
+
+harmo_fct %>% 
+  #filter(grepl("fresh|frozen|raw", fish_prep)) %>% 
+  filter(grepl("fish", ics_faostat_sua_english_description)) %>% 
+  ggplot(aes(PROCNTg, fish_prep, fill = fish_prep)) + 
+  geom_density_ridges(alpha = 0.8) +
+ # scale_fill_manual(values = my_color) +
+  theme_ridges() + 
+  labs(x="", y = "")  +
+  theme(legend.position = "none")
+
+harmo_fct %>% 
+  filter(grepl("fish", ics_faostat_sua_english_description)) %>% 
+  mutate(fish_prep = factor(fish_prep,
+        levels =c("fresh", "fresh fillets", "frozen whole", 
+                  "frozen fillets","canned", "cured", "preparations nei", "body oils", "liver oils"))) %>% 
+ggplot(aes(PROCNTg, after_stat(count), fill = fish_prep)) + 
+  geom_density(alpha = 0.9) +
+  facet_wrap(~fish_prep) +
+  # labs(x="g of protein per 100g of fresh fish (EP)", y = "")  +
+  labs(x="Protein \n (g/100g EP)", y = "")  +
+  geom_vline(xintercept =  30, colour = "blue", linewidth = 1, linetype = "dashed") +
+  theme_minimal() +
+  theme(legend.position = "none") 
 
 # Supplementary figures -----------
 
