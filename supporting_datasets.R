@@ -14,6 +14,8 @@
 library(dplyr) # For data cleaning (wrangling)
 library(stringr) # For string manipulation (data cleaning)
 
+message("starting supporting_datasets.R")
+
 ## Food matching: Fish and Fisheries ----
 # Preparing data frame for replicating the Global FCT (only fish)
 # contains information for each fish on ISSCAAP code, ICS FAOSTAT fish codes, and
@@ -74,7 +76,7 @@ ics_code <- ics_code %>% mutate(
 
 #├ Saving ICS, ISSCAAP groups & product type info (fish matching) ----
 
-saveRDS(ics_code, file = here::here("data", "ics-code.RDS"))
+saveRDS(ics_code, file = here::here("inter-output", "ics-code.RDS"))
 
 
 #├ Loading the file ----
@@ -150,7 +152,7 @@ ics_code_file <- subset(ics_code_file, !(ICS.FAOSTAT.SUA.Current.Code %in% c("15
 
 #├ Saving ICS and food_id (fish matching) ----
 
-saveRDS(ics_code_file, file = here::here("data", "ics-code_fish-code.RDS"))
+saveRDS(ics_code_file, file = here::here("inter-output", "ics-code_fish-code.RDS"))
 
 
 ## Edible portion: Fish and Fisheries ----
@@ -206,7 +208,7 @@ edible_ics[,1] <- paste("SUMMARY ROW -", edible_ics[,1])
 #├ Save data set ----
 # "Edible coefficient to be used" to a R file - for formatting.
 saveRDS(edible_ics[c(2:96),], 
-        file = "data/edible_coefficient.rds")
+        file = "inter-output/edible_coefficient.RDS")
 
 
 # Getting the info for each ICS FAOSTAT category info (n=95)
@@ -238,7 +240,7 @@ unique(fao_fish[!is.na(fao_fish$`Food description`),c(1:6)])[c(3:n),]
 
 # Save ICS info  to a R file - for formatting.
 saveRDS(unique(fao_fish[!is.na(fao_fish$`Food description`),c(1:6)])[c(3:n),], 
-        file = "data/fao-ics-desc.rds")
+        file = "inter-output/fao-ics-desc.RDS")
 
 
 

@@ -55,4 +55,4 @@ names(sci_no21)
 
 # Saving clean Scientific names (fish) ----
 
-saveRDS(sci_no21, here::here("NO21", "scientific-name_NO21.RDS"))
+saveRDS(sci_no21, here::here("inter-output", "scientific-name_NO21.RDS"))
