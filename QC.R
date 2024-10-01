@@ -64,7 +64,7 @@ fao_fish_fct <- readRDS(here::here("inter-output", "FAO-fish-harmonised_nomissin
 
 #adding in quality values, by finding the last created/edited file (file has consecutive date-based naming)
 
-fish_quality_files <- list.files("inter-output/", pattern = "fish-NO21_*", recursive=TRUE, full.names=TRUE)
+fish_quality_files <- list.files("NO21/inter-output/", pattern = "fish-NO21_*", recursive=TRUE, full.names=TRUE)
 fish_quality_folders <- dirname(fish_quality_files)
 lastfile <- tapply(fish_quality_files, fish_quality_folders, function(v) v[which.max(file.mtime(v))])
 
