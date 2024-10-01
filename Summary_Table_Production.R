@@ -253,6 +253,16 @@ recalculated_results_table %>% group_by(ICS.FAOSTAT.SUA.Current.Code) %>%
   filter(n>1) %>% 
   arrange(desc(n))
 
+recalculated_results_table <- recalculated_results_table %>% 
+  relocate(comments, .after = X3.alpha.code) %>%
+  relocate(nutrient_data_source, .after = fdc_id) %>%
+  relocate(ISSCAAP, .after = scientific_name) %>%
+  relocate(alpha_code, .after = X3.alpha.code) %>%
+  relocate(ICS_FAOSTAT_future, .after = alpha_code)
+  
+
+recalculated_results_table <- recalculated_results_table[,colSums(is.na(recalculated_results_table))<nrow(recalculated_results_table)]
+
 
 # writing the output table
 recalculated_results_table %>%
