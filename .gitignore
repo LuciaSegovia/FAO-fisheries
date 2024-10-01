@@ -50,8 +50,15 @@ data/*
 US19/SR-LEG_DB/
 *.xlsx
 LS06/
-
+inter-output/*.csv
+inter-output/*.RDS
 LS06/
+
+# Intermediate Outputs
+
+inter-output/*.csv
+inter-output/*.RDS
+NO21/inter-output/*.RDS
 
 # Outputs (e.g., documents, images, plots, etc.)
 *.docx

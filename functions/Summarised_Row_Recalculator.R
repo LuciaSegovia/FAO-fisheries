@@ -101,14 +101,10 @@ Grp_Smrsr_row_update <- function(df1, group_ID_col,
     as.numeric(summary_row_table[, ALCg]) +
     as.numeric(summary_row_table[, ASHg_std])
   
-  print("got to here 1")
-  
  # summary_row_table[, nia_conversion_std] = case_when(
  #   !is.na(summary_row_table[, NIAmg]) ~ summary_row_table[, NIAmg],
  #   is.na(summary_row_table[, NIAmg]) ~ (as.numeric(summary_row_table[, NIAEQmg]) - (1 / 60 * as.numeric(summary_row_table[, TRPmg])))
  # )
-  
-  print("got to here 2")
   
   print(paste0("summary row table has nrow ", nrow(summary_row_table), " and ncol ", ncol(summary_row_table)))
   
@@ -116,7 +112,7 @@ Grp_Smrsr_row_update <- function(df1, group_ID_col,
   
   for (i in 1:nrow(summary_row_table)){
     
-    print(paste0("got to here 3.", i))
+    #print(paste0("got to here 3.", i))
     
     row_ID <- summary_row_table[i, group_ID_col]
     
