@@ -7,7 +7,7 @@ if(!file.exists(here::here("data", "FAO-fish-harmonised_v1.1.0.RDS"))){ #Checks 
   source("variable_re-calculation.R")
 }
 
-fao_fish_fct <- readRDS(here::here("data", "FAO-fish-harmonised_v1.1.0.RDS")) #Output from merging_all. First thing variable_re-calculation does is wipe the environment, so this brings it back.
+fao_fish_fct <- readRDS(here::here("inter-output", "FAO-fish-harmonised_v1.1.0.RDS")) #Output from merging_all. First thing variable_re-calculation does is wipe the environment, so this brings it back.
 
 # 7) SEmcg ---- 
 
@@ -265,4 +265,4 @@ fao_fish_fct <- readRDS(here::here("data", "FAO-fish-harmonised_v1.1.0.RDS")) #O
   
   
   
-saveRDS(fao_fish_fct, here::here("data", "FAO-fish-harmonised_nomissing_v1.1.0.RDS"))
+saveRDS(fao_fish_fct, here::here("inter-output", "FAO-fish-harmonised_nomissing_v1.1.0.RDS"))

@@ -34,11 +34,11 @@ library(NutritionTools) # Nutrition functions
 #Uncommenting and running the following
 #source(here::here("merging_all.R"))
 
-if(!file.exists("data/FAO-fish-standardised-updated_v1.1.0.RDS")){
+if(!file.exists("inter-output/FAO-fish-standardised-updated_v1.1.0.RDS")){
   stop("Dependency file missing. Please run merging_all.R, ensuring that the final line is not commented out.")
 }
 
-data.df <- readRDS(here::here("data", "FAO-fish-standardised-updated_v1.1.0.RDS"))
+data.df <- readRDS(here::here("inter-output", "FAO-fish-standardised-updated_v1.1.0.RDS"))
 #data.df <- read.csv(here::here("output", "template-name_FCT_FAO_Tags.csv"))
   
 # 0) Check that we have all FCTs merged ----
@@ -156,7 +156,7 @@ data.df <- data.df %>%
 
 data.df$WATERg <- as.numeric(data.df$WATERg)
 
-data.df <- data.df %>% CHOAVLDFg_calculator(., FIBTGg_combined_column = "FIBTGg_std")
+data.df <- data.df %>% NutritionTools::CHOAVLDFg_calculator(., FIBTGg_combined_column = "FIBTGg_std", comment = FALSE)
 
 ##├├ Plot: Missing values for carbohydrates by difference in each FCT ----
 data.df[,c("CHOAVLDFg_calculated",  "source_fct")] %>%  #selecting variables
@@ -214,7 +214,7 @@ data.df$ENERCkJ_std <-  ENERCKj_standardised(
 
 ##├ ) Sum of proximate  ----
 
-data.df  <- data.df %>% SOPg_calculator(FIBTGg_combined_column = "FIBTGg_std") 
+data.df  <- data.df %>% NutritionTools::SOPg_calculator(FIBTGg_combined_column = "FIBTGg_std", comment = FALSE) 
 
 # Back-calculating ----
 #├ ) Retinol - recalculated ---- 
@@ -269,7 +269,7 @@ if("THIAHCLmg" %in% colnames(data.df)){ #Only allows this step if THIAHCL, which
 
 # Saving the results of the harmnonised dataset
 
-saveRDS(data.df, here::here("data", "FAO-fish-harmonised_v1.1.0.RDS"))
+saveRDS(data.df, here::here("inter-output", "FAO-fish-harmonised_v1.1.0.RDS"))
 
 
 

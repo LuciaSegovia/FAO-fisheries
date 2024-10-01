@@ -1,0 +1,1 @@
+This is where intermediate outputs are saved. If changes have been made, it is recommended you delete all files in here to force them to be regenerated with the alterations you have implemented.

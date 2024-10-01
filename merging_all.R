@@ -92,7 +92,7 @@ colnames(fct_cover)
 
 
 # Importing the ICS Codes for all the fisheries
-ics_code_file <- readRDS(here::here("data", "ics-code_fish-code.RDS")) %>%  # FAO Fisheries
+ics_code_file <- readRDS(here::here("inter-output", "ics-code_fish-code.RDS")) %>%  # FAO Fisheries
   rename(food_desc = "Food.description", scientific_name = "Scientific.name",
           ISSCAAP = "ISSCAAP.Group")
 
@@ -111,7 +111,7 @@ if("NO21" %in% present_fcts){
   }
   
   ics_code_file <- ics_code_file %>% 
-    bind_rows(., readRDS(here::here("data", "ics-code_NO21-code.RDS"))) # Plus NO21
+    bind_rows(., readRDS(here::here("NO21", "inter-output", "ics-code_NO21-code.RDS"))) # Plus NO21
   
 }
 
@@ -396,4 +396,4 @@ table(!is.na(fao_fish_fct$scientific_name), fao_fish_fct$source_fct)
 
 
 # Saving the standarised data library
-saveRDS(fao_fish_fct, here::here("data", "FAO-fish-standardised-updated_v1.1.1.RDS"))
+saveRDS(fao_fish_fct, here::here("inter-output", "FAO-fish-standardised-updated_v1.1.0.RDS"))

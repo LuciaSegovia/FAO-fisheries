@@ -1,7 +1,6 @@
 library(tidyverse)
 
-# Link to download the data
-#f <- https://www.fao.org/fileadmin/templates/food_composition/documents/FCDB_7_4_14.xlsx
+
 
 # Data Import ----
 
@@ -107,6 +106,16 @@ for (i in 1:nrow(BA13_Main_Table)){ #Very similarly to the Fibre for loop, this 
 
 
 
+# CARTBEQ/CARTB Separation ----
+
+# Because theres already a CARTB column this is borrowing from, we can just remove the [CARTB]mcg Values
+
+BA13_Main_Table[grepl("[", BA13_Main_Table$`CARTBEQ or [CARTB] (mcg)`, fixed = TRUE), "CARTBEQ or [CARTB] (mcg)"] <- NA #replaces CARTB values with NA
+
+
+colnames(BA13_Main_Table)[colnames(BA13_Main_Table) == "CARTBEQ or [CARTB] (mcg)"] <- 'CARTBEQmcg' #Renames column
+
+
 
 
 # NIAEQ/NIA value seperation ----
@@ -210,8 +219,8 @@ Output_table[9:ncol(Output_table)] %>% str_extract_all(.,"tr|[tr]|Tr|\\[.*?\\]")
 
 glimpse(Output_table)
 
-write.csv(Output_table, file = here::here("output", "BA13_FCT_FAO_Tags.csv"),
+write.csv(Output_table, file = here::here("Output", "BA13_FCT_FAO_Tags.csv"),
           row.names = FALSE) #This writes the Output table to a csv in the projects "Output" subfolder
 
-#Run this to clean the environment - do so if running the script individually
+#Run this to clean the environment
 #rm(list = ls())

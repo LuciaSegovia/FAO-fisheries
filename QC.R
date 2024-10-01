@@ -1,5 +1,4 @@
 
-
 #QC 
 library(gt)
 library(tidyr)
@@ -7,9 +6,6 @@ library(ggplot2)
 #If data is not loaded 
 
 message("starting QC.R")
-
-source("merging_all.R") #original fct
-source("missing.R") #added missing
 
 ## Checking Ash by difference  ----
 
@@ -64,11 +60,11 @@ subset(datadf, SOP<95 |SOP>105)# %>%  View()
 #1) Checking the fisheries dataset 
 #TO-DO: Change to read the most updated version of the file
 
-fao_fish_fct <- readRDS(here::here("data", "FAO-fish-harmonised_nomissing_v1.1.0.RDS"))
+fao_fish_fct <- readRDS(here::here("inter-output", "FAO-fish-harmonised_nomissing_v1.1.0.RDS"))
 
 #adding in quality values, by finding the last created/edited file (file has consecutive date-based naming)
 
-fish_quality_files <- list.files("data/", pattern = "fish-NO21_*", recursive=TRUE, full.names=TRUE)
+fish_quality_files <- list.files("inter-output/", pattern = "fish-NO21_*", recursive=TRUE, full.names=TRUE)
 fish_quality_folders <- dirname(fish_quality_files)
 lastfile <- tapply(fish_quality_files, fish_quality_folders, function(v) v[which.max(file.mtime(v))])
 

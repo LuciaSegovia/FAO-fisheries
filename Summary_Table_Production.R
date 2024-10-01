@@ -27,6 +27,9 @@ if(!file.exists(supporting_datasets_savefilename)){ #Checks if the final file of
   source(here::here("supporting_datasets.R"))
 }
 
+
+source(here::here("merging_all.R")) #original fct
+source(here::here("missing.R")) #added missing
 source(here::here("QC.R"))
 source(here::here("functions.R"))
 
@@ -34,8 +37,8 @@ source(here::here("functions.R"))
 # source(here::here("Summarised_Row_Recalculator.R"))
 
 # Reading formatting R file (from "supporting_datasets.R”)
-ics <- readRDS(file = "data/fao-ics-desc.rds")
-edible_ics <- readRDS(file = "data/edible_coefficient.rds") # edible portion (lines 156-204)
+ics <- readRDS(file = "inter-output/fao-ics-desc.RDS")
+edible_ics <- readRDS(file = "inter-output/edible_coefficient.RDS") # edible portion (lines 156-204)
 fisheries <- read.csv(here::here("data", "FISHERIES-GlobalNCT_ForSharing_Feb2022.csv"), encoding = "UTF-8")
 
 dim(fao_fish_fct)
@@ -110,7 +113,7 @@ current_remove_list <- ideal_remove_list[ideal_remove_list %in% colnames(df1)]
   ) %>%
   relocate(c(n:(n + 4)), .after = "ics_faostat_sua_english_description") %>%
   relocate(current_relocate_list, .after = "ISSCAAP Group") %>%
-  select(-current_remove_list)
+  select(-all_of(current_remove_list))
 
 
 # Selecting variables that should be numeric
@@ -249,6 +252,16 @@ recalculated_results_table %>% group_by(ICS.FAOSTAT.SUA.Current.Code) %>%
   count(source_fct, fdc_id) %>% 
   filter(n>1) %>% 
   arrange(desc(n))
+
+recalculated_results_table <- recalculated_results_table %>% 
+  relocate(comments, .after = X3.alpha.code) %>%
+  relocate(nutrient_data_source, .after = fdc_id) %>%
+  relocate(ISSCAAP, .after = scientific_name) %>%
+  relocate(alpha_code, .after = X3.alpha.code) %>%
+  relocate(ICS_FAOSTAT_future, .after = alpha_code)
+  
+
+recalculated_results_table <- recalculated_results_table[,colSums(is.na(recalculated_results_table))<nrow(recalculated_results_table)]
 
 
 # writing the output table
