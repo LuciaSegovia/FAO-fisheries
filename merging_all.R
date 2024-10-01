@@ -395,4 +395,5 @@ subset(fao_fish_fct, !is.na(scientific_name)) %>%
 table(!is.na(fao_fish_fct$scientific_name), fao_fish_fct$source_fct)
 
 
+# Saving the standarised data library
 saveRDS(fao_fish_fct, here::here("inter-output", "FAO-fish-standardised-updated_v1.1.0.RDS"))
