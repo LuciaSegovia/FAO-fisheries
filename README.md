@@ -1,5 +1,6 @@
 # An open framework and tools to create reproducible food composition data for use in nutrition
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14265103.svg)](https://doi.org/10.5281/zenodo.14265103)
 
 This repository contains the scripts necessary to adopt and adapt the open framework and tools to compile transparent and reproducible Food Composition Tables and Databases (FCTs) and Nutrient Conversion Tables (NCTs). 
 
